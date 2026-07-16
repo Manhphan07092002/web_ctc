@@ -1,0 +1,171 @@
+﻿@{
+    ViewBag.Title = "Đơn vị";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style type="text/css">
+    .search-top {
+        padding-top: 5px;
+    }
+</style>
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-master list-panel" id="list-panel">
+            <form id="frmUnitSearch">
+                <div class="panel-heading list-panel-heading">
+                    <div class="col-md-4">
+                        <div class="input-group input-group-sm pull-right">
+                            <input type="text" class="form-control" id="Info" name="Info" placeholder="Tên đơn vị">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-success btn-flat" onclick="LoadTable()">
+                                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Tìm kiếm
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 pull-right search-top">
+                        <button type="button" class="btn btn-danger   btn-sm refresh-button" id="refresh-button" onclick="showUnitModal(0)">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Thêm mới
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <div class="panel-body">
+                <table id="tbUnit" class="table table-striped" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên Đơn Vị</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        LoadTable();
+
+    });
+    function LoadTable() {
+        $("#Info").val($.trim($("#Info").val()));
+        var table = $('#tbUnit').DataTable({
+            "bDestroy": true,
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "/Unit/GetListUnit",
+                "type": "POST",
+                "data": function (d) {
+                    return $.extend({}, d, {
+                        'Info': $('#Info').val()
+                    })
+                }
+            },
+            "columns": [
+                {
+                    "name": "ID",
+                    'width': '10%',
+                    "data": "ID"
+                },
+                        {
+                            "name": "Name",
+                            'width': '70%',
+                            "data": "Name"
+                        },
+                        {
+                            targets: 'no-sort',
+                            orderable: false,
+                            'class': 'text-center',
+                            'width': '20%',
+                            'render': function (data, type, full, meta) {
+                                var html = '<button type="button"  style="margin-right: 10px;" class="btn btn-warning btn-xs" title="Cập Nhật"  onclick="showUnitModal(' + full.ID + ')"><i class="glyphicon glyphicon-edit"></i></button>' +
+                                       '<button type="button" class="btn  btn-dark btn-xs" style="margin-right: 10px;" title="Xóa" onclick="Remove(this,\'' + full.ID + '\')"><i class="glyphicon glyphicon-trash"></i></button> ';
+                                return html;
+                            }
+                        }
+            ],
+            "scrollCollapse": true,
+            "scrollX": true,
+            "paging": true,
+            "lengthChange": true,
+            "searching": false,
+            "ordering": true,
+            "info": false,
+            "autoWidth": false,
+            "dom": '<"top"i>rt<"bottom"flp><"clear">'
+        });
+    }
+
+    function saveUnit() {
+        var fd = new FormData(document.getElementById("UnitForm"));
+        $.ajax({
+            url: "/Unit/UpdateUnit",
+            method: "POST",
+            beforeSend: function () {
+                showSpinLoading();
+            },
+            data: fd,
+            enctype: 'multipart/form-data',
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,   // tell jQuery not to set contentType
+            success: function (data) {
+                hideSpinLoading();
+                if (data.Code === 1) {
+                    $('#ModalUnit').modal('hide');
+                    LoadTable();
+                    showSuccess("Thành Công", data.message);
+                } else {
+                    showError('Lỗi', data.message);
+                }
+            }
+        });
+    }
+
+    function Remove(thiz, id) {
+
+        showConfirm("Thông Báo !", 'Bạn chắc chắn muốn xóa ?',
+        function () {
+            $.ajax({
+                type: "POST",
+                url: '/Unit/DeleteUnit',
+                data: { id: id },
+            }).success(function (data) {
+                if (data.Code === 1) {
+                    $('#tbUnit').DataTable().row($(thiz).parents('tr')).remove().draw();
+                    showSuccess("Thành Công", data.message);
+                } else {
+                    showError('Lỗi', data.message);
+                }
+            });
+        }
+        , NoCallAction())
+    }
+    function showUnitModal(id) {
+        $.ajax({
+            url: "/Unit/AddNewEdit",
+            method: "POST",
+            beforeSend: function () {
+                showSpinLoading();
+            },
+            data: {
+                id: id
+            },
+            success: function (data) {
+                hideSpinLoading();
+                $("#popupContainer1").html(data);
+                $("#ModalUnit").modal("show");
+            }
+        });
+    }
+    function ReloadTable() {
+        $("#Info").val($.trim($("#Info").val()));
+        var table = $('#tbUnit').DataTable();
+        table.ajax.reload();
+    }
+
+</script>

@@ -1,0 +1,118 @@
+﻿
+@{
+    Layout = null;
+
+    var cate = ViewData["obj"] as Cubetech.Website.Models.Category;
+}
+
+<div class="modal" id="modelCategory" role="dialog" data-easein="bounceIn">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">@ViewData["Title"]</h4>
+            </div>
+            <form id="CategoryForm" >
+
+                <div class="modal-body">
+                    <input type="hidden" name="mode" id="mode" value="@ViewData["Mode"]" />
+                    <input type="hidden" name="ID" id="ID" value="@cate.ID" />
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="FullName">Tên danh mục</label>
+                            <input type="text" class="form-control" required id="Name" name="Name" placeholder="Tên danh mục" tabindex="1" value="@cate.Name">
+                        </div>                
+                        <div class="form-group">
+                            <label for="FullName">Url</label>
+                            <input type="text" class="form-control" id="Url" name="Url" placeholder="Url" tabindex="3" value="@cate.Url" />
+                        </div>
+                        <div class="form-group">
+                            <label for="ParrentID">Danh mục cha</label>
+                            @{
+                                Cubetech.Website.DAO.CategoryDAO dao = new Cubetech.Website.DAO.CategoryDAO();
+                                var lstParent = dao.GetListCateGoryTree();
+                            }
+                            <select class="form-control" id="ParentID" name="ParentID">
+                                <option value="">--Tất Cả--</option>
+                                @foreach (var item in lstParent)
+                                {
+                                    var str = "";
+
+                                    for (var i = 0; i < item.Level; i++)
+                                    {
+                                        str += "&nbsp;&nbsp;";
+                                    }
+                                    str += "|-";
+
+                                    <option value="@item.ID" @if (item.ID == cate.ParentID) { ViewContext.Writer.Write("selected"); }>@Html.Raw(str)  @item.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="FullName">Thứ tự</label>
+                            <input type="number" class="form-control" id="Rank" name="Rank" placeholder="Thứ tự" tabindex="5" value="@cate.Rank">
+                        </div>
+                        <div class="form-group">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="flat" id="ckbIsActive" @if ((cate.IsActive == true)) { ViewContext.Writer.Write("checked"); } /> Hoạt động
+                                </label>
+                                <input type="hidden" name="IsActive" id="IsActive" value="@cate.IsActive.ToString()" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="FullName">SEO Title</label>
+                            <input type="text" class="form-control" name="SEOTitle" id="SEOTitle" placeholder="Tiêu đề" value="@cate.SEOTitle" />
+                        </div>
+                        <div class="form-group">
+                            <label for="FullName">SEOKeyword</label>
+                            <textarea class="form-control" rows="2" name="SEOKeywords" id="SEOKeywords" placeholder="Từ khóa tìm kiếm" style="resize:none">@cate.SEOKeywords</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="FullName">SEODescription</label>
+                            <textarea class="form-control" rows="2" name="SEODescriptions" id="SEODescriptions" placeholder="Mô tả tìm kiếm" style="resize:none">@cate.SEODescriptions</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="pwd">Hình Đại Diện:</label>
+
+                            <div class="fileupload-item">
+
+                                <img style="width:100%" id="imageDisplay" src="@cate.Image" />
+                                <button type="button" class="btn btn-dark pull-right btn-sm btn-flat" onclick="deleteImageDetail('imageDisplay', 'Image')"><i class="fa fa-trash-o" aria-hidden="true"></i></button><br /><br />
+                                <label class="btn btn-success pull-right btn-sm btn-flat" onclick="selectIMG('#Image', '#imageDisplay')">
+                                    <i class="fa fa-camera" aria-hidden="true"></i> Ảnh
+                                </label>
+                                <input type="hidden" name="Image" id="Image" value="@cate.Image" />
+                            </div><hr style="margin-top:36px" />
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="clearfix"></div>
+                <div class="modal-footer">
+                    
+                    <button type="button" class="btn btn-dark" data-dismiss="modal" tabindex="9">
+                        Hủy
+                    </button>
+                    <button type="button" class="btn btn-danger" tabindex="8" onclick="saveCategory();">Lưu</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+
+        setIcheck('#ckbIsActive', "[name=IsActive]", "true", "false", function (e) { });
+
+
+    });
+   
+
+</script>

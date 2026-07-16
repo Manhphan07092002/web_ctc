@@ -1,0 +1,113 @@
+﻿@{
+    ViewBag.Title = "Sản phẩm tiêu biểu";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-master list-panel" id="list-panel">
+            <form id="frmRecommendSearch">
+                <div class="panel-heading list-panel-heading">
+                    <div class="col-md-4">
+                        <div class="input-group input-group-sm pull-right">
+                            <input type="text" class="form-control" id="Info" name="Info" placeholder="Nội dung tìm kiếm">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-success btn-flat" onclick="loadTable()">
+                                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Tìm kiếm
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 pull-right search-top">
+                        <a href="/Admin/AddNewEditBlog/0" class="btn btn-danger btn-sm  refresh-button" id="refresh-button">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Thêm mới
+                        </a>
+                    </div>
+                </div>
+            </form>
+            <div class="panel-body">
+                <table id="tbRec" class="table table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Hình Ảnh</th>
+                            <th>Sản phẩm</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        loadTable();
+    });
+    // enterSearch("#Info", ReloadTable);
+    function loadTable() {
+        $("#Info").val($.trim($("#Info").val()));
+        var table = $('#tbRec').DataTable({
+            "bDestroy": true,
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "/Product/GetListRecommendProduct",
+                "type": "POST",
+                "data": function (d) {
+                    return $.extend({}, d, {
+                        'Info': $('#Info').val()
+                    })
+                }
+            },
+            "columns": [
+                  {
+                      targets: 'no-sort',
+                      orderable: false,
+                      "name": "RecID", "data": "RecID"
+                  },
+                 {
+                     targets: 'no-sort',
+                     orderable: false,
+                     "name": "Image",
+                     'render': function (data, type, full, meta) {
+                         var html = '<img src="' + full.Image + '" style="height:50px"/>'
+                         return html;
+                     }
+                 },
+                        {
+                            targets: 'no-sort',
+                            orderable: false,
+                            "name": "Name",
+                            "data": "Name"
+                        },
+
+                        {
+                            targets: 'no-sort',
+                            orderable: false,
+                            'class': 'text-center',
+                            'width': '10%',
+                            'render': function (data, type, full, meta) {
+                                var html = '<button type="button" class="btn  btn-dark btn-xs" style="margin-right: 10px;" title="Xóa" onclick="Remove(this,' + full.RecID + ')"><i class="glyphicon glyphicon-trash"></i></button> ';
+                                return html;
+                            }
+                        }
+            ],
+            "scrollCollapse": true,
+            "scrollX": true,
+            "paging": true,
+            "lengthChange": true,
+            "searching": false,
+            "ordering": true,
+            "info": false,
+            "autoWidth": false,
+            "dom": '<"top"i>rt<"bottom row"<"col-md-3"l><"col-md-9"<"pullright"p>>><"clear">'
+        });
+    }
+</script>

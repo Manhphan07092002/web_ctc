@@ -1,0 +1,181 @@
+﻿@* Nhúng file CSS *@
+<link href="@Url.Content("~/Content/css/Bao_moi.css")" rel="stylesheet" />
+
+@using System.ServiceModel.Syndication
+@using System.Xml
+@using System.Xml.Linq
+@using System.Text.RegularExpressions
+@using System.Web.Caching
+@using System.Globalization
+
+@{
+    System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls;
+
+    var errorMessages = new List<string>();
+    string cacheKey = "RssNews_HomePage_V5_18items";  // đổi version cacheKey
+    int cacheDurationInMinutes = 15;
+
+    var lst = HttpRuntime.Cache[cacheKey] as List<ExternalNewsArticle>;
+
+    if (lst == null)
+    {
+        var rssSources = new Dictionary<string, string>
+        {
+            { "VnExpress", "https://vnexpress.net/rss/tin-moi-nhat.rss" },
+            { "Thanh Niên", "https://thanhnien.vn/rss/home.rss" },
+            { "Tuổi Trẻ", "https://tuoitre.vn/rss/tin-moi-nhat.rss" },
+            { "Người Lao Động", "https://nld.com.vn/tin-moi-nhat.rss" },
+            { "Znews", "https://znews.vn/rss/tin-moi-nhat.rss" },
+            { "Báo Chính Phủ", "https://baochinhphu.vn/rss/home.rss" }
+        };
+
+        var allArticles = new List<ExternalNewsArticle>();
+
+        foreach (var source in rssSources)
+        {
+            try
+            {
+                var articlesFromSource = ParseRssFeedManually(source.Value, source.Key);
+                if (articlesFromSource != null)
+                {
+                    allArticles.AddRange(articlesFromSource);
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessages.Add(string.Format("KHÔNG THỂ LẤY TIN TỪ '{0}'. Lỗi: {1}", source.Key, ex.Message));
+            }
+        }
+
+        var freshNewsList = allArticles.OrderByDescending(a => a.PublishDate).Take(18).ToList();
+
+        if (freshNewsList.Any())
+        {
+            HttpRuntime.Cache.Insert(cacheKey, freshNewsList, null, DateTime.Now.AddMinutes(cacheDurationInMinutes), Cache.NoSlidingExpiration);
+        }
+
+        lst = freshNewsList;
+    }
+
+    if (lst == null)
+    {
+        lst = new List<ExternalNewsArticle>();
+    }
+}
+
+@functions {
+    public class ExternalNewsArticle { public string Title { get; set; } public string Link { get; set; } public string Description { get; set; } public string ImageUrl { get; set; } public DateTime PublishDate { get; set; } public string SourceName { get; set; } }
+    private static List<ExternalNewsArticle> ParseRssFeedManually(string feedUrl, string sourceName)
+    {
+        var articles = new List<ExternalNewsArticle>();
+        XDocument doc = XDocument.Load(feedUrl);
+        XNamespace media = "http://search.yahoo.com/mrss/";
+        var items = doc.Descendants("item");
+        foreach (var item in items)
+        {
+            try
+            {
+                var pubDateElement = item.Element("pubDate");
+                var titleElement = item.Element("title");
+                var linkElement = item.Element("link");
+                var descriptionElement = item.Element("description");
+                articles.Add(new ExternalNewsArticle
+                {
+                    SourceName = sourceName,
+                    Title = titleElement != null ? titleElement.Value : "Không có tiêu đề",
+                    Link = linkElement != null ? linkElement.Value : "#",
+                    Description = descriptionElement != null ? StripHtml(descriptionElement.Value) : "",
+                    PublishDate = pubDateElement != null ? ParseRssDate(pubDateElement.Value) : DateTime.Now,
+                    ImageUrl = ExtractImageUrlFromXElement(item, media)
+                });
+            }
+            catch { continue; }
+        }
+        return articles;
+    }
+
+    private static DateTime ParseRssDate(string dateString)
+    {
+        string[] formats = { "ddd, dd MMM dd yyyy HH:mm:ss Z", "ddd, dd MMM dd yyyy HH:mm:ss zzz", "ddd, dd MMM dd yyyy HH:mm:ss GMT", "yyyy-MM-ddTHH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss.fff'Z'", "dd/MM/yyyy HH:mm:ss" };
+        DateTime result;
+        if (DateTime.TryParseExact(dateString, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out result)) { return result; }
+        if (DateTime.TryParse(dateString, out result)) { return result; }
+        return DateTime.Now;
+    }
+
+    private static string ExtractImageUrlFromXElement(XElement item, XNamespace media)
+    {
+        var mediaElement = item.Element(media + "content") ?? item.Element(media + "thumbnail");
+        if (mediaElement != null && mediaElement.HasAttributes)
+        {
+            var urlAttribute = mediaElement.Attribute("url");
+            if (urlAttribute != null && !string.IsNullOrEmpty(urlAttribute.Value))
+            {
+                return urlAttribute.Value;
+            }
+        }
+        var descriptionElement = item.Element("description");
+        if (descriptionElement != null && !string.IsNullOrEmpty(descriptionElement.Value))
+        {
+            var match = Regex.Match(descriptionElement.Value, "<img.+?src=[\"'](.+?)[\"'].*?>", RegexOptions.IgnoreCase);
+            if (match.Success) { return match.Groups[1].Value; }
+        }
+        var enclosureElement = item.Element("enclosure");
+        if (enclosureElement != null)
+        {
+            var typeAttr = enclosureElement.Attribute("type");
+            var urlAttr = enclosureElement.Attribute("url");
+            if (typeAttr != null && urlAttr != null && typeAttr.Value.StartsWith("image/"))
+            {
+                return urlAttr.Value;
+            }
+        }
+        return "/Content/Image/noimage.png";
+    }
+
+    private static string StripHtml(string input) { if (string.IsNullOrEmpty(input)) return ""; return Regex.Replace(input, "<.*?>", String.Empty); }
+}
+
+<div class="container news-section">
+    <div class="row">
+        <!-- Cột hiển thị tin RSS -->
+        <div class="col-sm-9">
+            @if (!lst.Any() && !errorMessages.Any())
+            {
+                <div class="alert alert-warning">Không có tin tức nào để hiển thị. Vui lòng thử lại sau.</div>
+            }
+            else if (lst.Any())
+            {
+                <div class="page-header">
+                    <h3>TIN TỨC MỚI NHẤT <small>Cập nhật lúc: @DateTime.Now.ToString("HH:mm dd/MM/yyyy")</small></h3>
+                </div>
+
+                <div class="row">
+                    @foreach (var item in lst)
+                    {
+                        <div class="col-xs-12 col-sm-6 col-md-4 news-item" style="margin-bottom: 30px;">
+                            <div class="news-card">
+                                <div class="img-container">
+                                    <a href="@item.Link" target="_blank" rel="noopener noreferrer">
+                                        <img src="@item.ImageUrl" alt="@item.Title" onerror="this.onerror=null;this.src='/Content/Image/noimage.png';">
+                                    </a>
+                                </div>
+                                <div class="caption">
+                                    <p class="news-source">@item.SourceName</p>
+                                    <h4><a href="@item.Link" target="_blank" rel="noopener noreferrer" title="@item.Title">@item.Title</a></h4>
+                                    <p class="news-description">@(item.Description.Length > 120 ? item.Description.Substring(0, 120) + "..." : item.Description)</p>
+                                    <p><a href="@item.Link" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" role="button">Xem chi tiết</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Cột phải hiển thị Blog_Left -->
+        <div class="col-sm-3">
+            @Html.Partial("~/Views/WNews/_BlogLeft.cshtml")
+        </div>
+    </div>
+</div>

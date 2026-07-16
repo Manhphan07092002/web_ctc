@@ -1,0 +1,76 @@
+﻿
+@{
+    Layout = null;
+    Cubetech.Website.Models.PageInfo obj = ViewData["obj"] as Cubetech.Website.Models.PageInfo;
+
+}
+<script src="~/Scripts/common.js"></script>
+
+<div class="modal" id="ModalPageInfo" role="dialog" data-easein="bounceIn">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">@ViewData["Title"]</h4>
+            </div>
+            <form id="FormPageInfo">
+                <div class="modal-body">
+
+                    <input type="hidden" name="ID" id="ID" value="@obj.ID" />
+                    <input type="hidden" name="mode" id="mode" value="@ViewData["Mode"]" />
+
+                    <div class="form-group">
+                        <label for="ShopName">Tên</label>
+                        <input type="text" class="form-control" id="ShopName" name="ShopName" placeholder="Tên shop" tabindex="1" value="@obj.ShopName" autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="Email">Email</label>
+                        <input type="text" class="form-control" id="Email" name="Email" placeholder="Email" tabindex="1" value="@obj.Email" autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="Hotline">Hotline</label>
+                        <input type="text" class="form-control" id="Hotline" name="Hotline" placeholder="Hotline" tabindex="1" value="@obj.Hotline" autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="FanPage">FanPage</label>
+                        <input type="text" class="form-control" id="FanPage" name="FanPage" placeholder="FanPage" tabindex="1" value="@obj.FanPage" autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="SEOTitle">SEO Title</label>
+                        <input type="text" class="form-control" id="SEOTitle" name="SEOTitle" placeholder="SEOTitle" tabindex="1" value="@obj.SEOTitle" autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="SEOKeywords">SEO Keyword</label>
+                        <textarea class="form-control" name="SEOKeywords" id="SEOKeywords" rows="4" style="resize:none">@obj.SEOKeywords</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="SEODescriptions">SEO Description</label>
+                        <textarea class="form-control" name="SEODescriptions" id="SEODescriptions" rows="4" style="resize:none">@obj.SEODescriptions</textarea>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="pwd">Hình Ảnh SEO:</label>
+
+                        <div class="fileupload-item">
+
+                            <img width="100%" id="imageDisplay" src="@obj.SEOImage" />
+                            <button type="button" class="btn btn-dark pull-right btn-sm btn-flat" onclick="deleteImageDetail('imageDisplay', 'SEOImage')"><i class="fa fa-trash-o" aria-hidden="true"></i></button>
+                            <label class="btn btn-success pull-right btn-sm btn-flat" onclick="selectIMG('#SEOImage', '#imageDisplay')">
+                                <i class="fa fa-camera" aria-hidden="true"></i> Ảnh
+                            </label>
+                            <input type="hidden" name="SEOImage" id="SEOImage" value="@obj.SEOImage" />
+                        </div><hr style="margin-top:36px" />
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-dark" data-dismiss="modal" aria-hidden="true">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hủy
+                    </button>
+                    <button class="btn btn-danger" type="button" onclick="savePageInfo()"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

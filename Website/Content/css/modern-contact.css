@@ -1,0 +1,202 @@
+/* ========== Modern Contact Page Styles (CTC) ========== */
+/* Base */
+:root{
+  --bg: #0f1420;
+  --bg-2: #121a28;
+  --card: #151e2e;
+  --card-2:#101827;
+  --txt: #e7eefc;
+  --muted:#9fb0cf;
+  --primary:#3ea6ff;
+  --primary-2:#0ea5e9;
+  --accent:#22d3ee;
+  --warn:#f59e0b;
+  --success:#10b981;
+  --danger:#ef4444;
+  --border: rgba(255,255,255,.08);
+  --shadow: 0 10px 30px rgba(0,0,0,.25);
+  --radius: 16px;
+  --radius-sm: 12px;
+  --radius-xs: 10px;
+  --gap: 22px;
+  --trans: .24s cubic-bezier(.2,.6,.2,1);
+  --font: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; font-family:var(--font);
+  color:var(--txt); background: radial-gradient(1200px 600px at 70% -10%, rgba(62,166,255,.12), transparent 60%) , var(--bg);
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+a{color:var(--primary); text-decoration:none}
+a:hover{opacity:.9}
+.container-xxl{width:min(1200px, 92%); margin:0 auto}
+.m-t-32{margin-top:32px}
+
+/* Utilities */
+.text-gradient{
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.btn{display:inline-flex; align-items:center; gap:10px; padding:12px 18px; border-radius:12px; border:1px solid transparent; cursor:pointer; transition:var(--trans); font-weight:600}
+.btn i{font-size:14px}
+.btn-primary{background: linear-gradient(135deg, var(--primary), var(--accent)); color:#001022; box-shadow:0 8px 24px rgba(34,211,238,.28)}
+.btn-primary:hover{transform: translateY(-1px)}
+.btn-secondary{background:transparent; border-color:var(--border); color:var(--txt)}
+.btn-secondary:hover{background:rgba(255,255,255,.04)}
+.btn-ghost{background:transparent; color:var(--muted)}
+.alert{border-radius:12px; padding:12px 14px; border:1px solid var(--border); background:rgba(255,255,255,.03)}
+.alert-success{border-color:rgba(16,185,129,.3); background:rgba(16,185,129,.08)}
+.alert-danger{border-color:rgba(239,68,68,.3); background:rgba(239,68,68,.08)}
+
+/* Hero */
+.contact-hero{
+  position:relative; padding:72px 0 18px; overflow:hidden;
+  background: radial-gradient(800px 400px at 10% -10%, rgba(34,211,238,.15), transparent 60%);
+}
+.contact-hero.compact{padding:56px 0 10px}
+.hero-title{font-size: clamp(28px, 4vw, 40px); line-height:1.15; margin:0 0 8px; letter-spacing:.2px}
+.hero-subtitle{color:var(--muted); margin:10px 0 0; max-width:720px}
+
+/* Quick contact section */
+.contact-quick{padding:26px 0 6px}
+.contact-card{
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  border:1px solid var(--border); border-radius:var(--radius); box-shadow: var(--shadow);
+  padding:22px; height:100%; position:relative; overflow:hidden;
+}
+.contact-card:before{
+  content:""; position:absolute; inset:-1px -1px auto -1px; height:3px;
+  background:linear-gradient(90deg, transparent, var(--primary), var(--accent), transparent);
+  opacity:.7
+}
+.contact-card .card-head h3{
+  margin:0 0 6px; font-size: clamp(18px, 2.6vw, 20px);
+  display:flex; align-items:center; gap:10px
+}
+.contact-card .card-head h3 i{
+  color:var(--accent); background:rgba(34,211,238,.12);
+  border:1px solid rgba(34,211,238,.25); padding:8px; border-radius:12px
+}
+.contact-card .card-head p{color:var(--muted); margin:4px 0 12px}
+
+.contact-list{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px}
+.contact-list li{display:flex; align-items:center; gap:10px; color:#dbe9ff}
+.contact-list li i{
+  width:34px; height:34px; display:grid; place-items:center;
+  color:#9fdcff; background:rgba(62,166,255,.12); border:1px solid rgba(62,166,255,.25); border-radius:10px
+}
+.contact-list .phone{font-weight:700; color:#eaf4ff}
+.contact-list a:hover{filter:brightness(1.08)}
+
+/* Company info */
+.company-info-card{
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow)
+}
+.company-info-card h3{margin:0 0 12px; display:flex; align-items:center; gap:10px}
+.company-info-card h3 i{
+  color:#ffd166; background:rgba(255,209,102,.13); border:1px solid rgba(255,209,102,.35);
+  padding:8px; border-radius:12px
+}
+.info-list{list-style:none; padding:0; margin:0; display:grid; gap:10px}
+.info-list li{display:flex; gap:10px; color:#dbe9ff}
+.info-list li i{
+  color:#a7b8d8; width:22px; line-height:28px
+}
+.company-info-card .actions{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap}
+
+/* Map card */
+.map-card{
+  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); height:100%
+}
+.map-card h4{margin:0 0 12px; display:flex; align-items:center; gap:10px}
+.map-card h4 i{
+  color:#86efac; background:rgba(134,239,172,.12); border:1px solid rgba(134,239,172,.3); padding:8px; border-radius:12px
+}
+.map-embed{position:relative; width:100%; padding-top:56.25%; border-radius:12px; overflow:hidden; border:1px solid var(--border)}
+.map-embed iframe{position:absolute; inset:0; width:100%; height:100%; border:0}
+.map-help{display:block; color:var(--muted); margin-top:8px; font-size:13px}
+
+/* Quick form */
+.contact-form-lite{padding:18px 0 50px}
+.form-card{
+  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow)
+}
+.form-card h3{margin:0 0 14px; display:flex; align-items:center; gap:10px}
+.form-card h3 i{
+  color:#93c5fd; background:rgba(147,197,253,.12); border:1px solid rgba(147,197,253,.3); padding:8px; border-radius:12px
+}
+
+.modern-form .form-grid{
+  display:grid; gap:var(--gap);
+  grid-template-columns: repeat(2, 1fr);
+}
+.modern-form .form-control{
+  width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
+  background:var(--card-2); color:var(--txt); transition:var(--trans); outline:none
+}
+.modern-form .form-control::placeholder{color:#8fa0bf}
+.modern-form .form-control:focus{
+  border-color: rgba(62,166,255,.45); box-shadow:0 0 0 3px rgba(62,166,255,.18)
+}
+.modern-form textarea.form-control{resize:vertical; min-height:110px}
+.modern-form select.form-control{appearance:none; background-image:linear-gradient(45deg, transparent 50%, #7fbfff 50%), linear-gradient(135deg, #7fbfff 50%, transparent 50%); background-position:calc(100% - 18px) 55%, calc(100% - 12px) 55%; background-size:6px 6px, 6px 6px; background-repeat:no-repeat}
+.modern-form .full{grid-column:1 / -1}
+.form-actions{margin-top:6px; display:flex; gap:12px; flex-wrap:wrap}
+
+/* Global tiny helpers */
+.ratio-16x9{position:relative; width:100%; padding-top:56.25%}
+.ratio-16x9 > *{position:absolute; inset:0}
+
+/* Subtle animation helpers (optional if you already have) */
+.fade-in-up{animation:fadeInUp .6s ease both}
+.fade-in-right{animation:fadeInRight .6s ease both}
+.fade-in-left{animation:fadeInLeft .6s ease both}
+@keyframes fadeInUp{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+@keyframes fadeInRight{from{opacity:0; transform:translateX(14px)} to{opacity:1; transform:none}}
+@keyframes fadeInLeft{from{opacity:0; transform:translateX(-14px)} to{opacity:1; transform:none}}
+
+/* Global background particles (simple) */
+.global-background{position:fixed; inset:0; pointer-events:none; z-index:-1}
+.floating-particles{position:absolute; inset:0; overflow:hidden}
+.floating-particles .particle{
+  position:absolute; width:8px; height:8px; border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, #8bd5ff, transparent 70%);
+  opacity:.25; animation: floatY 12s ease-in-out infinite;
+}
+.particle-1{left:6%; top:18%; animation-delay:0s}
+.particle-2{left:22%; top:48%; animation-delay:1s}
+.particle-3{left:44%; top:28%; animation-delay:2s}
+.particle-4{left:66%; top:14%; animation-delay:1.5s}
+.particle-5{left:78%; top:52%; animation-delay:2.4s}
+.particle-6{left:12%; top:76%; animation-delay:1.8s}
+.particle-7{left:58%; top:78%; animation-delay:.8s}
+.particle-8{left:84%; top:34%; animation-delay:.2s}
+@keyframes floatY{0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)}}
+
+/* Responsive */
+@media (max-width: 992px){
+  .modern-form .form-grid{grid-template-columns:1fr}
+  .contact-card, .company-info-card, .map-card{padding:18px}
+}
+@media (max-width: 576px){
+  .hero-title{font-size:26px}
+  .btn{padding:11px 16px}
+}
+
+/* Optional dark/light tweak if site có toggle */
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#f7f9ff; --bg-2:#fff; --card:#ffffff; --card-2:#f9fbff;
+    --txt:#0b1220; --muted:#4e5d7a; --border:rgba(14,22,40,.08);
+    --shadow:0 10px 30px rgba(14,22,40,.08);
+  }
+  body{background:radial-gradient(1200px 600px at 70% -10%, rgba(62,166,255,.12), transparent 60%), var(--bg)}
+  .contact-list li{color:#12223c}
+  .info-list li{color:#12223c}
+  .map-embed{border-color:rgba(14,22,40,.08)}
+}

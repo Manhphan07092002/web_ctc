@@ -1,0 +1,46 @@
+﻿
+@{
+
+    Layout = null;
+    Cubetech.Website.DAO.BaseWebDAO dao = new Cubetech.Website.DAO.BaseWebDAO();
+    var lstStandard = dao.Model.ProductStandards.Where(f=>f.IsDelete==false).ToList();
+    var selected = ViewData["selected"].ToString();
+    var standardID = ViewData["standardID"] as string;
+    var array = selected.Split(',');
+    foreach (var item in array)
+    {
+        int i = 0;
+        if (int.TryParse(item, out i))
+        {
+            var a = lstStandard.FirstOrDefault(f => f.ID == i);
+            if (a != null)
+            {
+                lstStandard.Remove(a);
+            }
+
+        }
+    }
+
+
+    string id = "ssss" + (new Random().Next());
+}
+@if (lstStandard.Count > 0)
+{
+    <tr>
+        <td>
+            @Html.DropDownList(id, new SelectList(lstStandard, "ID", "Name", standardID), new { @class = "form-control minwidth-popup ckbStandard", @onchange = "standardChange(this)" })
+        </td>
+        <td class="val_container">
+            @{
+                Html.RenderAction("GetTokenField", new { id = lstStandard.FirstOrDefault().ID , val = ViewData["val"]});
+            }
+        </td>
+
+        <td>
+            <button type="button" class="btn  btn-dark btn-xs" title="Xóa" onclick="removeStandard(this)" style="margin-top: 5px;"><i class="glyphicon glyphicon-trash"></i></button>
+        </td>
+
+
+    </tr>
+                }
+

@@ -1,0 +1,675 @@
+@{
+    // Lấy dữ liệu dự án từ database
+    Cubetech.Website.DAO.BaseWebDAO dao = new Cubetech.Website.DAO.BaseWebDAO();
+    Cubetech.Website.Models.DTO.WpSearchViewDTO modelData = Model as Cubetech.Website.Models.DTO.WpSearchViewDTO;
+    Cubetech.Website.Models.Category cate = modelData.Cate;
+    string info = modelData.Info;
+    
+    // Lấy danh sách dự án từ database với phân trang và filter
+    var projects = new List<dynamic>();
+    var categories = new List<dynamic>();
+    
+    // Phân trang
+    int currentPage = 1;
+    int pageSize = 9; // 9 dự án mỗi trang (3x3 grid)
+    int totalProjects = 0;
+    int totalPages = 0;
+    
+    // Lấy filter category từ query string
+    string selectedCategory = Request.QueryString["category"] ?? "";
+    
+    // Lấy tham số page từ query string
+    if (!string.IsNullOrEmpty(Request.QueryString["page"]))
+    {
+        int.TryParse(Request.QueryString["page"], out currentPage);
+        if (currentPage < 1) 
+        {
+            currentPage = 1;
+        }
+    }
+    
+    try 
+    {
+        using (var connection = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+        {
+            connection.Open();
+            
+            // Lấy danh sách categories từ database với JOIN
+            string categoryQuery = "SELECT p.Category, " +
+                                  "ISNULL(pc.CategoryName, p.Category) as CategoryName, " +
+                                  "COUNT(*) as ProjectCount " +
+                                  "FROM Projects p " +
+                                  "LEFT JOIN ProjectCategories pc ON p.Category = pc.CategoryCode " +
+                                  "WHERE p.IsDeleted = 0 AND p.IsPublished = 1 " +
+                                  "GROUP BY p.Category, pc.CategoryName " +
+                                  "ORDER BY ISNULL(pc.CategoryName, p.Category)";
+            
+            using (var categoryCmd = new System.Data.SqlClient.SqlCommand(categoryQuery, connection))
+            {
+                using (var categoryReader = categoryCmd.ExecuteReader())
+                {
+                while (categoryReader.Read())
+                {
+                    categories.Add(new {
+                        code = categoryReader["Category"].ToString(),
+                        name = categoryReader["CategoryName"].ToString(),
+                        count = Convert.ToInt32(categoryReader["ProjectCount"])
+                    });
+                }
+                }
+            }
+            
+            // Tạo WHERE clause cho filter
+            string whereClause = "WHERE p.IsDeleted = 0 AND p.IsPublished = 1";
+            if (!string.IsNullOrEmpty(selectedCategory))
+            {
+                whereClause += " AND p.Category = @selectedCategory";
+            }
+            
+            // Đếm tổng số dự án (có filter)
+            var countQuery = "SELECT COUNT(*) FROM Projects p " + whereClause;
+            using (var countCmd = new System.Data.SqlClient.SqlCommand(countQuery, connection))
+            {
+                if (!string.IsNullOrEmpty(selectedCategory))
+                {
+                    countCmd.Parameters.AddWithValue("@selectedCategory", selectedCategory);
+                }
+                totalProjects = Convert.ToInt32(countCmd.ExecuteScalar());
+                totalPages = (int)Math.Ceiling((double)totalProjects / pageSize);
+            }
+            
+            // Lấy dữ liệu dự án với phân trang và filter
+            var offset = (currentPage - 1) * pageSize;
+            string query = "SELECT p.ProjectID, p.Title, p.Description, p.Category, p.Location, p.Client, " +
+                          "p.Contractor, p.ProjectValue, p.Currency, p.StartDate, p.EndDate, " +
+                          "p.CompletionDate, p.Status, p.Progress, p.ImageUrl, p.DocumentUrl, " +
+                          "p.Tags, p.ViewCount, p.LikeCount, " +
+                          "CASE " +
+                             "WHEN p.Status = 'completed' THEN N'Đã hoàn thành' " +
+                             "WHEN p.Status = 'in_progress' THEN N'Đang thực hiện' " +
+                             "WHEN p.Status = 'planning' THEN N'Lập kế hoạch' " +
+                             "WHEN p.Status = 'on_hold' THEN N'Tạm dừng' " +
+                             "ELSE N'Đã hoàn thành' " +
+                          "END as StatusDisplay, " +
+                          "ISNULL(pc.CategoryName, p.Category) as CategoryName " +
+                          "FROM Projects p " +
+                          "LEFT JOIN ProjectCategories pc ON p.Category = pc.CategoryCode " +
+                          whereClause + " " +
+                          "ORDER BY p.CreatedDate DESC " +
+                          "OFFSET " + offset + " ROWS " +
+                          "FETCH NEXT " + pageSize + " ROWS ONLY";
+            
+            using (var cmd = new System.Data.SqlClient.SqlCommand(query, connection))
+            {
+                if (!string.IsNullOrEmpty(selectedCategory))
+                {
+                    cmd.Parameters.AddWithValue("@selectedCategory", selectedCategory);
+                }
+                using (var reader = cmd.ExecuteReader())
+                {
+                while (reader.Read())
+                {
+                    // Xử lý multiple images - lấy ảnh đầu tiên
+                    string imageUrls = reader["ImageUrl"].ToString();
+                    string firstImage = "/Content/uploads/projects/images/nen_du_an.jpg"; // Default image
+                    
+                    if (!string.IsNullOrEmpty(imageUrls))
+                    {
+                        string[] images = imageUrls.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (images.Length > 0)
+                        {
+                            firstImage = images[0].Trim();
+                        }
+                    }
+                    
+                    projects.Add(new {
+                        id = Convert.ToInt32(reader["ProjectID"]),
+                        title = reader["Title"].ToString(),
+                        location = reader["Location"].ToString(),
+                        description = reader["Description"].ToString(),
+                        category = reader["CategoryName"].ToString(),
+                        status = reader["StatusDisplay"].ToString(),
+                        imageUrl = firstImage,
+                        client = reader["Client"].ToString(),
+                        contractor = reader["Contractor"].ToString(),
+                        projectValue = reader["ProjectValue"].ToString(),
+                        currency = reader["Currency"].ToString(),
+                        startDate = reader["StartDate"] != DBNull.Value ? Convert.ToDateTime(reader["StartDate"]).ToString("dd/MM/yyyy") : "",
+                        endDate = reader["EndDate"] != DBNull.Value ? Convert.ToDateTime(reader["EndDate"]).ToString("dd/MM/yyyy") : "",
+                        completionDate = reader["CompletionDate"] != DBNull.Value ? Convert.ToDateTime(reader["CompletionDate"]).ToString("dd/MM/yyyy") : "",
+                        progress = reader["Progress"].ToString(),
+                        documentUrl = reader["DocumentUrl"].ToString(),
+                        tags = reader["Tags"].ToString(),
+                        viewCount = reader["ViewCount"].ToString(),
+                        likeCount = reader["LikeCount"].ToString()
+                    });
+                }
+                }
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        // Fallback data nếu có lỗi database
+        projects.Add(new {
+            id = 1,
+            title = "Dự án mẫu",
+            location = "Đà Nẵng",
+            description = "Đây là dự án mẫu khi không thể kết nối database.",
+            category = "Hạ tầng Kỹ thuật",
+            status = "Đã hoàn thành",
+            imageUrl = "/Content/uploads/projects/images/nen_du_an.jpg"
+        });
+        categories.Add(new {
+            code = "infrastructure",
+            name = "Hạ tầng Kỹ thuật",
+            count = 1
+        });
+    }
+}
+
+<style>
+    body {
+        background-color: #ffffff;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    /* --- Cải tiến cho Row để các card có chiều cao bằng nhau --- */
+    #projects-grid.row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    /* --- Tiêu đề --- */
+    .service_title h2 {
+        font-size: 36px;
+        font-weight: bold;
+        color: #ffffff; /* Sửa lại màu chữ để thấy được trên nền trắng */
+        letter-spacing: -0.025em;
+    }
+
+    .service_title .lead {
+        font-size: 18px;
+        color: #ffffff; /* Sửa lại màu chữ */
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .service_title hr {
+        display: none;
+    }
+
+    .service_title .col-sm-12.text-center::after {
+        content: '';
+        display: block;
+        width: 80px;
+        height: 3px;
+        background-color: #3b82f6;
+        margin: 20px auto 0;
+        border-radius: 2px;
+    }
+
+    /* --- Thẻ dự án --- */
+    .project-card-wrapper {
+        padding-left: 15px;
+        padding-right: 15px;
+        margin-bottom: 30px;
+        display: flex;
+    }
+
+    .project-card {
+        background-color: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+        overflow: hidden;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    
+    .project-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    .project-card .image-container {
+        position: relative;
+    }
+
+    .project-card .category-tag {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background-color: rgba(30, 41, 59, 0.7);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .project-card img {
+        width: 100%;
+        height: 224px;
+        object-fit: cover;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .project-card .caption {
+        padding: 30px 24px 24px 24px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        justify-content: space-between;
+    }
+
+    .project-card .caption h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-top: 0;
+    }
+
+    .project-card .location {
+        display: flex;
+        align-items: center;
+        color: #64748b;
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    .project-card .location svg {
+        width: 1rem;
+        height: 1rem;
+        margin-right: 6px;
+        flex-shrink: 0; /* Thêm để icon không bị co lại */
+    }
+
+    .project-card .description {
+        margin-top: 12px;
+        color: #475569;
+        font-size: 14px;
+    }
+
+    .project-card .status-section {
+        border-top: 1px solid #e2e8f0;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .project-card .status-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+    }
+
+    .project-card .status-badge {
+        font-size: 14px;
+        font-weight: 500;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        background-color: #dcfce7;
+        color: #166534;
+    }
+
+    /* --- Phân trang --- */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 40px;
+        margin-bottom: 40px;
+        gap: 10px;
+    }
+
+    .pagination-info {
+        color: #64748b;
+        font-size: 14px;
+        margin-right: 20px;
+    }
+
+    .pagination {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .pagination a, .pagination span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+
+    .pagination a {
+        color: #475569;
+        background-color: #fff;
+    }
+
+    .pagination a:hover {
+        background-color: #f8fafc;
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+
+    .pagination .current {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+        color: #fff;
+    }
+
+    .pagination .disabled {
+        color: #cbd5e1;
+        background-color: #f8fafc;
+        border-color: #e2e8f0;
+        cursor: not-allowed;
+    }
+
+    .pagination .prev, .pagination .next {
+        font-weight: 600;
+    }
+
+    /* --- Filter Categories --- */
+    .category-filters {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 50px !important;
+        margin-bottom: 30px;
+        padding: 0 15px;
+    }
+
+    .category-filter {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        background-color: #fff;
+        color: #64748b;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .category-filter:hover {
+        border-color: #3b82f6;
+        color: #3b82f6;
+        background-color: #f8fafc;
+        text-decoration: none;
+    }
+
+    .category-filter.active {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+        color: #fff;
+    }
+
+    .category-filter .count {
+        margin-left: 6px;
+        font-size: 12px;
+        opacity: 0.8;
+        background-color: rgba(255, 255, 255, 0.2);
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    .category-filter:not(.active) .count {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+
+    /* --- Button Styles --- */
+    .popup-btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .popup-btn-primary {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .popup-btn-primary:hover {
+        background: #2563eb;
+        color: white;
+        text-decoration: none;
+    }
+
+    /*
+    ==============================================
+    CSS CHO RESPONSIVE
+    ==============================================
+    */
+
+    /* --- Áp dụng cho màn hình máy tính bảng trở xuống --- */
+    @@media (max-width: 991px) {
+        .service_title h2 {
+            font-size: 32px;
+        }
+    }
+
+    /* --- Áp dụng cho màn hình điện thoại --- */
+    @@media (max-width: 767px) {
+        .service_title h2 {
+            font-size: 28px;
+        }
+
+        .service_title .lead {
+            font-size: 16px;
+        }
+
+        .project-card .caption {
+            padding: 25px 20px 20px 20px;
+        }
+
+        .project-card .caption h3 {
+            font-size: 17px;
+        }
+
+        /* Phân trang responsive */
+        .pagination-container {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .pagination-info {
+            margin-right: 0;
+            text-align: center;
+        }
+
+        .pagination a, .pagination span {
+            min-width: 35px;
+            height: 35px;
+            font-size: 13px;
+        }
+
+        /* Filter responsive */
+        .category-filters {
+            gap: 6px;
+            padding: 0 10px;
+        }
+
+        .category-filter {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .category-filter .count {
+            font-size: 11px;
+            padding: 1px 4px;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="service_title">
+        <div class="col-sm-12 text-center">
+            <h2>Các Công Trình Tiêu Biểu</h2>
+            <p class="lead">
+                Danh sách các công trình và dự án tiêu biểu mà Công ty đã thực hiện, khẳng định năng lực và uy tín.
+            </p>
+            <hr />
+        </div>
+    </div>
+
+    <!-- Category Filters -->
+    <div class="category-filters">
+        @{
+            // Tính tổng số dự án cho "Tất cả"
+            int totalAllProjects = categories.Sum(c => c.count);
+        }
+        
+        <a href="/du_an" class="category-filter @(string.IsNullOrEmpty(selectedCategory) ? "active" : "")">
+            Tất cả
+            <span class="count">@totalAllProjects</span>
+        </a>
+        
+        @foreach (var category in categories)
+        {
+            string categoryUrl = "/du_an?category=" + category.code;
+            string activeClass = selectedCategory == category.code ? "active" : "";
+            
+            <a href="@categoryUrl" class="category-filter @activeClass">
+                @category.name
+                <span class="count">@category.count</span>
+            </a>
+        }
+    </div>
+
+    <div class="row" id="projects-grid">
+        @foreach (var project in projects)
+        {
+            <div class="col-md-4 col-sm-6 project-card-wrapper">
+                <div class="project-card">
+                    <div class="image-container">
+                        <img src="@project.imageUrl" alt="@project.title" 
+                             onerror="this.src='/Content/uploads/projects/images/nen_du_an.jpg'; console.log('Image failed to load: @project.imageUrl');">
+                        <div class="category-tag">@project.category</div>
+                    </div>
+                    <div class="caption">
+                        <div>
+                            <h3>@project.title</h3>
+                            @if (!string.IsNullOrEmpty(project.location))
+                            {
+                                <p class="location">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                                    </svg>
+                                    @project.location
+                                </p>
+                            }
+                        </div>
+                        <div class="status-section">
+                            <span class="status-label">Tình trạng</span>
+                            <span class="status-badge">@project.status</span>
+                        </div>
+                        <div class="card-actions" style="margin-top: 25px;">
+                            <a href="/du_an_chi_tiet?id=@project.id" class="popup-btn popup-btn-primary" style="width: 100%; text-align: center; display: block; text-decoration: none;">
+                                Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (totalPages > 1)
+    {
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Hiển thị @((currentPage - 1) * pageSize + 1) - @(Math.Min(currentPage * pageSize, totalProjects)) trong tổng số @totalProjects dự án
+            </div>
+            
+            <div class="pagination">
+                @{
+                    string categoryParam = !string.IsNullOrEmpty(selectedCategory) ? "&category=" + selectedCategory : "";
+                }
+                
+                @if (currentPage > 1)
+                {
+                    <a href="?page=@(currentPage - 1)@categoryParam" class="prev">‹ Trước</a>
+                }
+                else
+                {
+                    <span class="prev disabled">‹ Trước</span>
+                }
+
+                @{
+                    int startPage = Math.Max(1, currentPage - 2);
+                    int endPage = Math.Min(totalPages, currentPage + 2);
+                    
+                    // Hiển thị trang đầu nếu cần
+                    if (startPage > 1)
+                    {
+                        <a href="?page=1@categoryParam">1</a>
+                        if (startPage > 2)
+                        {
+                            <span class="disabled">...</span>
+                        }
+                    }
+                    
+                    // Hiển thị các trang xung quanh trang hiện tại
+                    for (int i = startPage; i <= endPage; i++)
+                    {
+                        if (i == currentPage)
+                        {
+                            <span class="current">@i</span>
+                        }
+                        else
+                        {
+                            <a href="?page=@i@categoryParam">@i</a>
+                        }
+                    }
+                    
+                    // Hiển thị trang cuối nếu cần
+                    if (endPage < totalPages)
+                    {
+                        if (endPage < totalPages - 1)
+                        {
+                            <span class="disabled">...</span>
+                        }
+                        <a href="?page=@totalPages@categoryParam">@totalPages</a>
+                    }
+                }
+
+                @if (currentPage < totalPages)
+                {
+                    <a href="?page=@(currentPage + 1)@categoryParam" class="next">Tiếp ›</a>
+                }
+                else
+                {
+                    <span class="next disabled">Tiếp ›</span>
+                }
+            </div>
+        </div>
+    }
+</div>
+

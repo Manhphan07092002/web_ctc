@@ -1,0 +1,572 @@
+@{
+    // Set current URL cookie for navigation tracking
+    var currentUrl = new HttpCookie("currenturl", Request.Url.PathAndQuery.ToString());
+    Response.Cookies.Add(currentUrl);
+}
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="vi" xml:lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <!-- Tắt các log debug trên console ở môi trường thật, giúp giảm rác console theo yêu cầu -->
+    <script>
+        if (typeof console !== "undefined") {
+            console.log = function() {};
+            console.info = function() {};
+            console.warn = function() {};
+        }
+    </script>
+    <meta name="robots" content="noindex">
+    <meta name="googlebot" content="noindex">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    
+    <!-- Performance optimization meta tags -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- Compression hints -->
+    <meta http-equiv="Accept-Encoding" content="gzip, deflate, br">
+    <title>@ViewBag.Title</title>
+    <meta name="description" content="@ViewBag.Description" />
+    <meta name="keywords" content="@ViewBag.Keywords" />
+    <meta name="author" content="@ViewBag.Author" />
+    <meta name="robots" content="@ViewBag.Robots" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#ffffff" />
+    
+    <!-- Favicon - Preload for faster display -->
+    <link rel="preload" href="@Url.Content("~/Image/logo_rm_bgr.png")" as="image" />
+    <link rel="icon" type="image/png" href="@Url.Content("~/Image/logo_rm_bgr.png")" />
+    <link rel="shortcut icon" type="image/png" href="@Url.Content("~/Image/logo_rm_bgr.png")" />
+    <link rel="apple-touch-icon" sizes="180x180" href="@Url.Content("~/Image/logo_rm_bgr.png")" />
+    <link rel="icon" type="image/png" sizes="32x32" href="@Url.Content("~/Image/logo_rm_bgr.png")" />
+    <link rel="icon" type="image/png" sizes="16x16" href="@Url.Content("~/Image/logo_rm_bgr.png")" />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="@ViewBag.Title" />
+    <meta property="og:description" content="@ViewBag.Description" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="@Request.Url.AbsoluteUri" />
+    <meta property="og:image" content="@Url.Content("~/Image/logo_rm_bgr.png")" />
+    <meta property="og:site_name" content="CÔNG TY CỔ PHẦN XÂY LẮP BƯU ĐIỆN MIỀN TRUNG" />
+    <meta property="og:locale" content="vi_VN" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@ViewBag.Title" />
+    <meta name="twitter:description" content="@ViewBag.Description" />
+    <meta name="twitter:image" content="@Url.Content("~/Image/logo_rm_bgr.png")" />
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "Organization",
+        "name": "CÔNG TY CỔ PHẦN XÂY LẮP BƯU ĐIỆN MIỀN TRUNG",
+        "url": "@Request.Url.GetLeftPart(UriPartial.Authority)",
+        "logo": "@Url.Content("~/Image/logo_rm_bgr.png")",
+        "description": "@ViewBag.Description",
+        "address": {
+            "@@type": "PostalAddress",
+            "addressCountry": "VN"
+        }
+    }
+    </script>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="~/Content/plugins/bootstrap/css/bootstrap.min.css" as="style" />
+    <link rel="preload" href="~/Content/css/common.css" as="style" />
+    <link rel="preload" href="~/Content/css/header-responsive.css" as="style" />
+    
+    <!-- Preconnect to external domains for faster resource loading -->
+    <link rel="preconnect" href="https://code.jquery.com" crossorigin>
+    <link rel="preconnect" href="https://connect.facebook.net" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    
+    <!-- Critical CSS - load immediately -->
+    <link href="~/Content/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/css/common.css" rel="stylesheet" />
+    <link href="~/Content/css/header-responsive.css" rel="stylesheet" />
+    
+    <!-- Non-critical CSS - load asynchronously -->
+    <link href="~/Content/css/home-style.css" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="~/Content/css/home-style.css" rel="stylesheet" /></noscript>
+    
+    <link href="~/Content/css/product.css" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="~/Content/css/product.css" rel="stylesheet" /></noscript>
+    
+    <link href="~/Content/css/blog.css" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="~/Content/css/blog.css" rel="stylesheet" /></noscript>
+    
+    <link href="~/Content/css/site.css" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="~/Content/css/site.css" rel="stylesheet" /></noscript>
+    
+    <link href="~/Content/css/language-switcher-optimized.css" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="~/Content/css/language-switcher-optimized.css" rel="stylesheet" /></noscript>
+    
+    <link href="~/Content/css/hide-google-translate.css" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="~/Content/css/hide-google-translate.css" rel="stylesheet" /></noscript>
+    
+    <!-- Google Fonts - optimized with display=swap for better performance -->
+    <!-- Preconnect already added above -->
+    
+    <!-- Performance optimization: Reduce layout shift and improve LCP -->
+    <style>
+        /* Prevent layout shift during font loading */
+        body {
+            font-display: swap;
+        }
+        
+        /* Optimize animations with GPU acceleration */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Reduce repaints for animated elements */
+        .hero-video-section,
+        .stats-column,
+        .feature-item,
+        .category-card {
+            contain: layout style paint;
+        }
+        
+        /* Improve LCP - prioritize hero section */
+        .hero-video-section {
+            content-visibility: auto;
+        }
+        
+        /* Optimize for slow connections */
+        @@media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+    
+    <!-- Icon Libraries - optimized loading -->
+    <link href="~/Content/plugins/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous" media="print" onload="this.media='all'" />
+    <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous" /></noscript>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" /></noscript>
+    
+    <!-- Icon Fix CSS -->
+    <style>
+        /* Fix icon conflicts and ensure visibility */
+        .fa, .fas, .far, .fal, .fab, .bi {
+            font-family: "Font Awesome 6 Free", "Font Awesome 4", "bootstrap-icons" !important;
+            font-weight: 900;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Ensure icons are visible */
+        .fa:before, .fas:before, .far:before, .fal:before, .fab:before, .bi:before {
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Fix missing icons with fallback - Enhanced */
+        .fa-phone-alt:before, .fas.fa-phone-alt:before { content: "\f879" !important; }
+        .fa-envelope:before, .fas.fa-envelope:before { content: "\f0e0" !important; }
+        .fa-map-marker-alt:before, .fas.fa-map-marker-alt:before { content: "\f3c5" !important; }
+        .fa-facebook-f:before, .fab.fa-facebook-f:before { content: "\f39e" !important; }
+        .fa-youtube:before, .fab.fa-youtube:before { content: "\f167" !important; }
+        .fa-linkedin-in:before, .fab.fa-linkedin-in:before { content: "\f0e1" !important; }
+        .fa-paper-plane:before, .fas.fa-paper-plane:before { content: "\f1d8" !important; }
+        .fa-times:before, .fas.fa-times:before { content: "\f00d" !important; }
+        .fa-caret-down:before, .fas.fa-caret-down:before { content: "\f0d7" !important; }
+        
+        /* Additional footer icons */
+        .fa-phone:before, .fas.fa-phone:before { content: "\f095" !important; }
+        .fa-location-dot:before, .fas.fa-location-dot:before { content: "\f3c5" !important; }
+        .fa-envelope-open:before, .fas.fa-envelope-open:before { content: "\f2b6" !important; }
+        
+        /* Force icon display for problematic icons */
+        i.fas:before, i.fab:before, i.fa:before {
+            font-family: "Font Awesome 6 Free", "Font Awesome 4", "FontAwesome" !important;
+            font-weight: 900 !important;
+            display: inline-block !important;
+            font-style: normal !important;
+            font-variant: normal !important;
+            text-rendering: auto !important;
+            line-height: 1 !important;
+            -webkit-font-smoothing: antialiased !important;
+            -moz-osx-font-smoothing: grayscale !important;
+        }
+        
+        /* Specific fixes for the 3 problematic icons */
+        .fas.fa-map-marker-alt:before { content: "\f3c5" !important; font-family: "Font Awesome 6 Free" !important; }
+        .fas.fa-phone-alt:before { content: "\f879" !important; font-family: "Font Awesome 6 Free" !important; }
+        .fas.fa-envelope:before { content: "\f0e0" !important; font-family: "Font Awesome 6 Free" !important; }
+        
+        /* Fix Bootstrap caret */
+        .caret {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            margin-left: 2px;
+            vertical-align: middle;
+            border-top: 4px solid;
+            border-right: 4px solid transparent;
+            border-left: 4px solid transparent;
+        }
+        
+        /* Fix navbar toggle icon bars */
+        .navbar-toggle .icon-bar {
+            display: block;
+            width: 22px;
+            height: 2px;
+            border-radius: 1px;
+            background-color: #fff;
+            margin: 4px 0;
+        }
+        
+        /* Footer icon fixes */
+        footer .fas, footer .fab, footer .fa {
+            font-family: "Font Awesome 6 Free", "Font Awesome 4" !important;
+            font-weight: 900 !important;
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            line-height: 1;
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+        }
+        
+        /* Social icons specific styling */
+          .social-icons .fab {
+             font-size: 16px;
+              line-height: 1;
+          }
+        
+        /* Contact info icons - Enhanced fix */
+        .contact-info .fas {
+            font-size: 14px;
+            color: #007bff;
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+            font-family: "Font Awesome 6 Free" !important;
+            font-weight: 900 !important;
+        }
+        
+        /* Ultimate fallback for the 3 specific icons */
+        .contact-info .fas.fa-map-marker-alt:before {
+            content: "\f3c5" !important;
+            font-family: "Font Awesome 6 Free" !important;
+            font-weight: 900 !important;
+            display: inline-block !important;
+        }
+        
+        .contact-info .fas.fa-phone-alt:before {
+            content: "\f879" !important;
+            font-family: "Font Awesome 6 Free" !important;
+            font-weight: 900 !important;
+            display: inline-block !important;
+        }
+        
+        .contact-info .fas.fa-envelope:before {
+            content: "\f0e0" !important;
+            font-family: "Font Awesome 6 Free" !important;
+            font-weight: 900 !important;
+            display: inline-block !important;
+        }
+        
+        /* Backup with Font Awesome 4 codes */
+        .contact-info .fa-map-marker-alt:before {
+            content: "\f041" !important; /* FA4 map-marker */
+        }
+        
+        .contact-info .fa-phone-alt:before {
+            content: "\f095" !important; /* FA4 phone */
+        }
+        
+        .contact-info .fa-envelope:before {
+            content: "\f0e0" !important; /* FA4 envelope */
+        }
+    </style>
+    
+    <!-- Essential JS - jQuery must load first, then other scripts can defer -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    
+    <!-- Icon Fix Script - Defer for better performance -->
+    <script defer>
+        // Force fix icons if CSS fails
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                // Check if icons are displaying correctly
+                var contactIcons = document.querySelectorAll('.contact-info .fas');
+                contactIcons.forEach(function(icon) {
+                    var computedStyle = window.getComputedStyle(icon, ':before');
+                    var content = computedStyle.getPropertyValue('content');
+                    
+                    // If icon is not displaying (showing X or empty)
+                    if (!content || content === 'none' || content === '""') {
+                        // Force add the correct unicode
+                        if (icon.classList.contains('fa-map-marker-alt')) {
+                            icon.innerHTML = '📍'; // Fallback emoji
+                        } else if (icon.classList.contains('fa-phone-alt')) {
+                            icon.innerHTML = '📞'; // Fallback emoji
+                        } else if (icon.classList.contains('fa-envelope')) {
+                            icon.innerHTML = '✉️'; // Fallback emoji
+                        }
+                        
+                        // Add inline style to ensure visibility
+                        icon.style.fontFamily = '"Font Awesome 6 Free", "Font Awesome 4", sans-serif';
+                        icon.style.fontWeight = '900';
+                        icon.style.display = 'inline-block';
+                    }
+                });
+            }, 1000);
+        });
+    </script>
+</head>
+<body>
+    <!-- Facebook SDK - Load asynchronously with connection awareness -->
+    <div id="fb-root"></div>
+    <script defer>
+        (function (d, s, id) {
+            // Check connection speed before loading Facebook SDK
+            if (navigator.connection) {
+                var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                // Delay loading on slow connections
+                if (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g' || connection.saveData) {
+                    setTimeout(function() {
+                        loadFacebookSDK();
+                    }, 3000);
+                    return;
+                }
+            }
+            loadFacebookSDK();
+            
+            function loadFacebookSDK() {
+                if (d.getElementById(id)) return;
+                var js, fjs = d.getElementsByTagName(s)[0];
+                js = d.createElement(s); js.id = id;
+                js.src = 'https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v2.11&appId=1107474626060509&autoLogAppEvents=1';
+                js.async = true;
+                js.defer = true;
+                fjs.parentNode.insertBefore(js, fjs);
+            }
+        }(document, 'script', 'facebook-jssdk'));
+    </script>
+    
+    <!-- Google Translate Element (Hidden) -->
+    <div id="google_translate_element" style="display: none;"></div>
+    
+    <!-- Header -->
+    @Html.Partial("~/Views/Home/_Header.cshtml")
+
+    <!-- Main Content -->
+    <div class="body-content" style="padding-top: 80px;">
+        @RenderBody()
+    </div>
+    
+    <!-- Footer -->
+    @Html.Partial("~/Views/Home/_Footer.cshtml")
+
+    <!-- Bootstrap JS - Required for button functions -->
+    <script src="~/Content/plugins/bootstrap/js/bootstrap.min.js" defer></script>
+    <!-- Fallback to CDN if local Bootstrap fails -->
+    <script defer>
+        (function() {
+            function checkBootstrap() {
+                if (typeof jQuery !== 'undefined' && (typeof jQuery().button === 'undefined')) {
+                    var script = document.createElement('script');
+                    script.src = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js';
+                    script.async = true;
+                    document.body.appendChild(script);
+                } else if (typeof jQuery === 'undefined') {
+                    setTimeout(checkBootstrap, 100);
+                }
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', checkBootstrap);
+            } else {
+                checkBootstrap();
+            }
+        })();
+    </script>
+    
+    <!-- Bootstrap Compatibility Fix -->
+    <script src="~/Scripts/bootstrap-compatibility-fix.js" defer></script>
+    
+    <!-- Header Responsive JavaScript -->
+    <!-- Removed conflicting header-responsive.js script -->
+
+    <!-- Google Analytics - Load asynchronously with connection awareness -->
+    <script defer>
+        (function() {
+            // Delay analytics on slow connections to prioritize content
+            function loadAnalytics() {
+                try {
+                    if (typeof ga !== 'undefined') {
+                        ga('create', 'UA-69727220-2', 'auto');
+                        ga('send', 'pageview');
+                    }
+                } catch (e) {
+                    // Analytics setup failed - silent fail
+                }
+            }
+            
+            if (navigator.connection) {
+                var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                if (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g' || connection.saveData) {
+                    // Delay analytics on slow connections
+                    setTimeout(loadAnalytics, 2000);
+                } else {
+                    setTimeout(loadAnalytics, 100);
+                }
+            } else {
+                setTimeout(loadAnalytics, 100);
+            }
+        })();
+    </script>
+
+    <!-- HIDE GOOGLE TRANSLATE UI -->
+    <script src="~/Scripts/hide-google-translate-ui.js" defer></script>
+    
+    <!-- GT TRANSLATE INTEGRATOR - LIVE TRANSLATION WITHOUT RELOAD -->
+    <script src="~/Scripts/gt-translate-integrator.js" defer></script>
+    
+    <!-- Performance monitoring and optimization -->
+    <script defer>
+        // Global image error handler - prevent 404 errors from cluttering console
+        (function() {
+            'use strict';
+            
+            // Handle broken images gracefully - prevent 404 errors
+            var defaultFallback = '@Url.Content("~/Content/Image/noimage.png")';
+            
+            document.addEventListener('error', function(e) {
+                if (e.target.tagName === 'IMG') {
+                    var img = e.target;
+                    var fallbackSrc = img.getAttribute('data-fallback') || defaultFallback;
+                    
+                    // Only replace if not already using fallback and not already handled
+                    if (!img.dataset.errorHandled && img.src !== fallbackSrc) {
+                        img.dataset.errorHandled = 'true';
+                        img.src = fallbackSrc;
+                        img.style.opacity = '0.7'; // Slightly fade broken images
+                    }
+                }
+            }, true); // Use capture phase
+            
+            // Also handle images that fail to load after page load
+            window.addEventListener('load', function() {
+                var images = document.querySelectorAll('img[data-fallback]');
+                images.forEach(function(img) {
+                    if (!img.complete || img.naturalHeight === 0) {
+                        var fallbackSrc = img.getAttribute('data-fallback') || defaultFallback;
+                        if (img.src !== fallbackSrc && !img.dataset.errorHandled) {
+                            img.dataset.errorHandled = 'true';
+                            img.src = fallbackSrc;
+                            img.style.opacity = '0.7';
+                        }
+                    }
+                });
+            });
+            
+            // Log performance metrics in development
+            if (window.performance && window.performance.timing) {
+                window.addEventListener('load', function() {
+                    setTimeout(function() {
+                        var perfData = window.performance.timing;
+                        var pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+                        var domReadyTime = perfData.domContentLoadedEventEnd - perfData.navigationStart;
+                        
+                        // Only log if load time is significant (helps identify issues)
+                        // Logging disabled for production - uncomment for debugging
+                        // if (pageLoadTime > 3000) {
+                        //     console.log('Page Load Time: ' + (pageLoadTime / 1000).toFixed(2) + 's');
+                        //     console.log('DOM Ready Time: ' + (domReadyTime / 1000).toFixed(2) + 's');
+                        // }
+                    }, 0);
+                });
+            }
+            
+            // Connection-aware resource loading
+            if (navigator.connection) {
+                var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                if (connection.saveData || connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g') {
+                    // Disable animations and reduce quality on slow connections
+                    document.documentElement.classList.add('slow-connection');
+                    
+                    // Reduce video quality
+                    var videos = document.querySelectorAll('video');
+                    videos.forEach(function(video) {
+                        video.preload = 'none';
+                    });
+                }
+            }
+            
+            // Optimize scroll performance with passive listeners
+            var ticking = false;
+            function optimizeScroll() {
+                if (!ticking) {
+                    window.requestAnimationFrame(function() {
+                        // Scroll optimizations
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }
+            
+            // Use passive event listeners for better scroll performance
+            window.addEventListener('scroll', optimizeScroll, { passive: true });
+            window.addEventListener('touchmove', optimizeScroll, { passive: true });
+            
+            // Optimize scroll performance
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(function() {
+                    // Defer non-critical operations
+                    var lazyElements = document.querySelectorAll('[data-lazy]');
+                    lazyElements.forEach(function(el) {
+                        // Process lazy elements when browser is idle
+                    });
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Additional CSS for slow connections -->
+    <style>
+        .slow-connection * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+        
+        .slow-connection video {
+            display: none;
+        }
+        
+        .slow-connection .hero-overlay {
+            background: linear-gradient(135deg, #2677f1 0%, #1565c0 50%, #0d47a1 100%) !important;
+            animation: none !important;
+        }
+    </style>
+
+</body>
+</html>

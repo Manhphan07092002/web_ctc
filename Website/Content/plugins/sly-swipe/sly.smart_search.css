@@ -1,0 +1,238 @@
+#search_pattern{overflow-x:hidden !important;text-align:center;margin:0 auto 5px;}
+#search_pattern ul{list-style:none;margin:0 auto;padding:0;height:100%;}
+#search_pattern ul li{float:left;width:69px;height:auto;text-align:center;cursor:pointer;position:relative;}
+#search_pattern ul li img{}
+#search_pattern ul li.active{}
+#search_pattern ul.pattern li.active label.lb_searchimg> input[type='checkbox']:checked +span{border:1px solid #ff4b5c;}
+#search_pattern ul li p{color:#838383;margin:4px 0;white-space:nowrap;text-align:center;font-size:13px;}
+.list-slide{position:relative;}
+#search_pattern .prevPage{position:absolute;top:25%;left:-2px;border:none;padding:0;background:transparent;}
+#search_pattern .nextPage{position:absolute;top:25%;right:-2px;border:none;padding:0;background:transparent;}
+#search_color{overflow-x:hidden !important;text-align:center;margin:0 auto 5px;}
+#search_color ul{list-style:none;margin:0 auto;padding:0;height:100%;}
+#search_color ul li{float:left;width:69px;height:auto;text-align:center;cursor:pointer;position:relative;}
+#search_color ul li img{}
+#search_color ul li.active{}
+#search_color ul.pattern li.active label.lb_searchimg> input[type='checkbox']:checked +span{border:1px solid #ff4b5c;}
+#search_color ul li p{color:#838383;margin:4px 0;white-space:nowrap;text-align:center;font-size:13px;}
+.list-slide{position:relative;}
+#search_color .prevPage{position:absolute;top:25%;left:-20px;border:none;padding:0;background:transparent;cursor: pointer;}
+#search_color .nextPage{position:absolute;top:25%;right:-20px;border:none;padding:0;background:transparent;cursor: pointer;}
+#search_color_big .prevColor{position:absolute;top:21px;left:-20px;border:none;padding:0;background:transparent;cursor: pointer;}
+#search_color_big .nextColor{position:absolute;top:21px;right:-20px;border:none;padding:0;background:transparent;cursor: pointer;}
+#search_pattern_big .prevPage{position:absolute;top:21px;left:-20px;border:none;padding:0;background:transparent;cursor: pointer;}
+#search_pattern_big .nextPage{position:absolute;top:21px;right:-20px;border:none;padding:0;background:transparent;cursor: pointer;}
+
+
+#search_pattern_sp{overflow-x:hidden !important;text-align:center;margin:0 auto 5px;}
+#search_pattern_sp ul{list-style:none;margin:0 auto;padding:0;height:100%;}
+#search_pattern_sp ul li{float:left;width:69px;height:auto;text-align:center;cursor:pointer;position:relative;}
+#search_pattern_sp ul li img{}
+#search_pattern_sp ul li.active{}
+#search_pattern_sp ul.pattern li.active label.lb_searchimg> input[type='checkbox']:checked +span{border:1px solid #ff4b5c;}
+#search_pattern_sp ul li p{color:#838383;margin:4px 0;white-space:nowrap;text-align:center;font-size:13px;}
+.list-slide{position:relative;}
+#search_pattern_sp .prevPage_sp{position:absolute;top:25%;left:-2px;border:none;padding:0;background:transparent;}
+#search_pattern_sp .nextPage_sp{position:absolute;top:25%;right:-2px;border:none;padding:0;background:transparent;}
+#search_color_sp{overflow-x:hidden !important;text-align:center;margin:0 auto 5px;}
+#search_color_sp ul{list-style:none;margin:0 auto;padding:0;height:100%;}
+#search_color_sp ul li{float:left;width:69px;height:auto;text-align:center;cursor:pointer;position:relative;}
+#search_color_sp ul li img{}
+#search_color_sp ul li.active{}
+#search_color_sp ul.pattern li.active label.lb_searchimg> input[type='checkbox']:checked +span{border:1px solid #ff4b5c;}
+#search_color_sp ul li p{color:#838383;margin:4px 0;white-space:nowrap;text-align:center;font-size:13px;}
+.list-slide{position:relative;}
+#search_color_sp .prevPage_sp{position:absolute;top:25%;left:-20px;border:none;padding:0;background:transparent;cursor: pointer;}
+#search_color_sp .nextPage_sp{position:absolute;top:25%;right:-20px;border:none;padding:0;background:transparent;cursor: pointer;}
+#search_color_big_sp .prevColor_sp{position:absolute;top:21px;left:-20px;border:none;padding:0;background:transparent;cursor: pointer;}
+#search_color_big_sp .nextColor_sp{position:absolute;top:21px;right:-20px;border:none;padding:0;background:transparent;cursor: pointer;}
+#search_pattern_big_sp .prevPage_sp{position:absolute;top:21px;left:-20px;border:none;padding:0;background:transparent;cursor: pointer;}
+#search_pattern_big_sp .nextPage_sp{position:absolute;top:21px;right:-20px;border:none;padding:0;background:transparent;cursor: pointer;}
+
+
+
+
+.pattern label {
+    width: auto;
+    text-align: center;
+    display: block;
+    float: left;
+    cursor: pointer;
+    position: relative;
+    font-size: 13px;
+    margin-right: 0;
+    margin-bottom: 0;
+    padding: 1px;
+}
+
+
+.pattern label > input[type='checkbox'] {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+    display: block;
+    height: 65px;
+    min-width: 65px;
+    line-height: 65px;
+    padding: 0 0px;
+}
+.pattern label.lb_searchimg > span {
+    display: block;
+    height: 67px;
+    line-height: 21px;
+    border: 1px solid #ccc;
+}
+.pattern label.lb_searchimg> input[type='checkbox']:checked +span {
+    border: 1px solid #c00;
+    padding: 0px;
+}
+.pattern label.lb_searchimg .ic-check {
+    width: 0;
+    height: 0;
+    display: none;
+    z-index: -1;
+}
+.color label {
+    width: auto;
+    text-align: center;
+    display: block;
+    float: left;
+    cursor: pointer;
+    position: relative;
+    font-size: 13px;
+    margin-right: 0;
+    margin-bottom: 0;
+    padding: 1px;
+}
+.color label > input[type='checkbox'] {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+    display: block;
+    height: 65px;
+    min-width: 65px;
+    line-height: 65px;
+    padding: 0 0px;
+    margin: 0;
+}
+.color label.lb_searchcolor > span {
+    display: block;
+    height: 67px;
+    line-height: 21px;
+    border: 1px solid #ccc;
+}
+.color label.lb_searchcolor> input[type='checkbox']:checked +span {
+    border: 1px solid #c00;
+    padding: 0px;
+}
+.color label.lb_searchcolor .ic-check {
+    width: 0;
+    height: 0;
+    display: none;
+    z-index: -1;
+}
+
+/*////////////*/
+
+.pattern_sp label {
+    width: auto;
+    text-align: center;
+    display: block;
+    float: left;
+    cursor: pointer;
+    position: relative;
+    font-size: 13px;
+    margin-right: 0;
+    margin-bottom: 0;
+    padding: 1px;
+}
+
+
+.pattern_sp label > input[type='checkbox'] {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+    display: block;
+    height: 65px;
+    min-width: 65px;
+    line-height: 65px;
+    padding: 0 0px;
+}
+.pattern_sp label.lb_searchimg > span {
+    display: block;
+    height: 67px;
+    line-height: 21px;
+    border: 1px solid #ccc;
+}
+.pattern_sp label.lb_searchimg> input[type='checkbox']:checked +span {
+    border: 1px solid #c00;
+    padding: 0px;
+}
+.pattern_sp label.lb_searchimg .ic-check {
+    width: 0;
+    height: 0;
+    display: none;
+    z-index: -1;
+}
+.color_sp label {
+    width: auto;
+    text-align: center;
+    display: block;
+    float: left;
+    cursor: pointer;
+    position: relative;
+    font-size: 13px;
+    margin-right: 0;
+    margin-bottom: 0;
+    padding: 1px;
+}
+.color_sp label > input[type='checkbox'] {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+    display: block;
+    height: 65px;
+    min-width: 65px;
+    line-height: 65px;
+    padding: 0 0px;
+    margin: 0;
+}
+.color_sp label.lb_searchcolor > span {
+    display: block;
+    height: 67px;
+    line-height: 21px;
+    border: 1px solid #ccc;
+}
+.color_sp label.lb_searchcolor> input[type='checkbox']:checked +span {
+    border: 1px solid #c00;
+    padding: 0px;
+}
+.color_sp label.lb_searchcolor .ic-check {
+    width: 0;
+    height: 0;
+    display: none;
+    z-index: -1;
+}
+/*//////////////*/
+
+@media (max-width:767px){
+     #search_pattern ul{list-style:none;margin:0 auto;padding:0;height:100%;width: 1800px;}
+    #search_color ul{list-style:none;margin:0 auto;padding:0;height:100%;width: 1800px;}
+    #search_pattern_sp ul {
+        list-style: none;
+        margin: 0 auto;
+        padding: 0;
+        height: 100%;
+        width: 1800px;
+        min-width: 360px;
+    }
+    #search_color_sp ul{list-style:none;margin:0 auto;padding:0;height:100%;width: 1800px;min-width: 360px;}
+}

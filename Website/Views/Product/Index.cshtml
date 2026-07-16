@@ -1,0 +1,403 @@
+﻿@{
+    ViewBag.Title = "Sản phẩm";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    Cubetech.Website.DAO.BaseWebDAO dao = new Cubetech.Website.DAO.BaseWebDAO();
+
+
+}
+<style>
+    .search-top {
+        padding-top: 5px;
+    }
+</style>
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-master list-panel" id="list-panel">
+            <form id="frmProductSearch">
+                <div class="panel-heading list-panel-heading">
+                    <div class="col-md-3 search-top">
+                        @{
+
+                            var lstCate = dao.Model.Categories.Where(f => f.IsDelete == false).ToList();
+                            lstCate.Insert(0, new Cubetech.Website.Models.Category() { ID = 0, Name = "Phân Loại" });
+                        }
+                        @Html.DropDownList("CategorySearch", new SelectList(lstCate, "ID", "Name"), new { @class = "form-control col-preorder-input", @onchange = "reloadSearchTable()" })
+                    </div>
+                    <div class="col-md-3 search-top">
+                        <div class="input-group input-group pull-right">
+                            <input type="text" class="form-control input-sm" id="InfoSearch" name="InfoSearch" placeholder="Mã, Tên Sản Phẩm" onkeyup="txtInfoKeyup(event)">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-success btn-sm" onclick="reloadSearchTable()">
+                                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Tìm kiếm
+                                </button>
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-3 pull-right search-top">
+                        <button type="button" class="btn btn-info  refresh-button btn-sm" id="refresh-button" onclick="showImportModal()">
+                            <i class="fa fa-file-excel-o" aria-hidden="true"></i> Import Excel
+                        </button>
+                        <a class="btn btn-danger refresh-button btn-sm" id="refresh-button" href="/Product/AddNewEdit/0" style="margin-right:10px">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Thêm mới
+                        </a>
+                    </div>
+                </div>
+            </form>
+            <div class="panel-body">
+                <table id="tbProduct" class="table table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+
+                            <th>Mã SP</th>
+                            <th style="padding-left:25px">Hình ảnh</th>
+                            <th>Tên Sản Phẩm</th>
+                            <th>Danh Mục</th>
+                            <th>Đơn Vị</th>
+                            <th>Giá Gốc</th>
+                            <th>Giá Bán</th>
+                            <th>Hoạt Động</th>
+                            <th>Hiển thị Website</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+
+    $(document).ready(function () {
+        LoadTable();
+    });
+
+
+    function format(d) {
+        return '<div id="DetailContent" class="DetailContent" style="padding: 11px;background:white"></div>';
+    }
+
+    var table = null;
+    function LoadTable() {
+
+        table = $('#tbProduct').DataTable({
+            "bDestroy": true,
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "/Product/GetListProduct",
+                "type": "POST",
+                "data": function (d) {
+                    var form = $("#frmProductSearch").serializeObject();
+                    var array = $.extend({}, d, form);
+                    return array;
+                }
+            },
+            "columns": [
+
+                 {
+                     "name": "ID", "data": "ID", 'width': '10%',
+                     'render': function (data, type, full, meta) {
+                         var html = '';
+                         html += '<label >' + full.ID + '</label><br/>';
+                         if (full.ChildCount != null) {
+                             html += '<a  class="details-control" style="font-style:italic;font-size:11px;cursor: pointer" onclick="getStandardDetail(this)">( ' + full.ChildCount + '</span>' + ' <span style="font-style:italic;font-size:11px"> sản phẩm cùng loại )</a>';
+                         }
+                         else {
+                             html += '<span  style="font-style:italic;font-size:11px;">( ' + 0 + '</span>' + ' <span style="font-style:italic;font-size:11px"> sản phẩm cùng loại )</span>';
+                         }
+
+                         return html;
+                     }
+
+                 },
+                  {
+
+                      "name": "Image", "data": "Image", 'width': '10%',
+                      'render': function (data, type, full, meta) {
+                          //debugger;
+                          var html = "";
+                          if (full.Image == null || full.Image == "") {
+                              html += '<span  style="padding-left:15px;"><img  style="border:1px solid #ccc;padding:1px;" width="50" src = "/Content/Image/noimage.png"" /></span>';
+
+                          }
+                          else {
+                              html += '<span  style="padding-left:15px;"><img  style="border:1px solid #ccc;padding:1px;" width="50" src = "' + full.Image + '" /></span>';
+
+                          }
+                          return html;
+                      }
+                  },
+
+
+                {
+                    "name": "Name", "data": "Name", 'width': '20%',
+                },
+                {
+                    "name": "CategoryName", "data": "CategoryName", "class": "cssCategory", 'width': '10%',
+                },
+                {
+                    "name": "UnitName", "data": "UnitName", "class": "cssUnit", 'width': '10%',
+                },
+
+                 {
+                     //"class": "tdright",
+                     "name": "PriceSale", "data": "PriceSale", "class": "cssPrice", 'width': '10%',
+                     'render': function (data, type, full, meta) {
+                         return formatNumber(full.PriceSale);
+                     }
+                 },
+
+                {
+                    //"class": "tdright",
+                    "name": "PriceSale2", "data": "PriceSale2", "class": "cssPrice", 'width': '10%',
+                    'render': function (data, type, full, meta) {
+                        return formatNumber(full.PriceSale2);
+                    }
+                },
+                  {
+                      //"class": "tdright",
+                      "name": "IsActive", "data": "IsActive", "class": "cssPrice", 'width': '5%',
+                      'render': function (data, type, full, meta) {
+                          var html = "";
+                          if (full.IsActive) {
+                              html += '<button type="button"  class="btn btn-success btn-xs" title="Cập Nhật"  onclick="updateIsActive(\'' + full.IDAndSize + '\')"><i class="fa fa-check" aria-hidden="true"></i></button>';
+                          }
+                          else {
+                              html += '<button type="button"  class="btn btn-danger btn-xs" title="Cập Nhật"  onclick="updateIsActive(\'' + full.IDAndSize + '\')"><i class="fa fa-times" aria-hidden="true"></i></button>';
+                          }
+                          return html;
+                      }
+                  },
+                  {
+                      //"class": "tdright",
+                      "name": "IsShowWeb", "data": "IsOverSales", "class": "cssPrice", 'width': '5%',
+                      'render': function (data, type, full, meta) {
+                          var html = "";
+                          if (full.IsShowWeb) {
+                              html += '<button type="button"  class="btn btn-success btn-xs" title="Cập Nhật"  onclick="updateIsShowWeb(\'' + full.IDAndSize + '\')"><i class="fa fa-check" aria-hidden="true"></i></button>';
+                          }
+                          else {
+                              html += '<button type="button"  class="btn btn-danger btn-xs" title="Cập Nhật"  onclick="updateIsShowWeb(\'' + full.IDAndSize + '\')"><i class="fa fa-times" aria-hidden="true"></i></button>';
+                          }
+                          return html;
+                      }
+                  },
+
+
+                {
+                    targets: 'no-sort',
+                    orderable: false,
+                    'class': 'text-center',
+                    'width': '10%',
+                    'render': function (data, type, full, meta) {
+                        var html = "";
+
+                        html += '<a href="/Product/AddNewEdit/' + full.IDAndSize + '"  style="margin-right: 10px;"  class="btn btn-warning btn-xs" title="Cập Nhật" ><i class="glyphicon glyphicon-edit"></i></a>' +
+
+                            '<button type="button" class="btn  btn-dark btn-xs" style="margin-right: 7px;" title="Xóa" onclick="Remove(this,\'' + full.IDAndSize + '\')"><i class="glyphicon glyphicon-trash"></i></button> ';
+                        if (full.WebUrl == "" || full.WebUrl == "/") {
+                            html += '<a href="/WProducts/Detail?id=' + full.ID + '"  style="margin-right: 10px;"  class="btn  btn-info btn-xs" title="Xem chi tiết" ><i class="fa fa-eye" aria-hidden="true"></i></a>';
+
+                        }
+                        else {
+                            html += '<a href="' + full.WebUrl + '"  style="margin-right: 10px;"  class="btn  btn-info btn-xs" title="Xem chi tiết" ><i class="fa fa-eye" aria-hidden="true"></i></a>';
+
+                        }
+
+                        return html;
+                    }
+                }
+            ],
+            "scrollX": true,
+            "paging": true,
+            "lengthChange": true,
+            "searching": false,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "dom": '<"top">rt<"bottom row"<"col-md-3"l><"col-md-3"i><"col-md-6"<"pullright"p>>><"clear">',
+            "createdRow": function (row, data, index) {
+                $(row).addClass('standardclass');
+
+            }
+        });
+
+
+    }
+    function getStandardDetail(thiz) {
+
+        $('.DetailContent').parent().parent().remove();
+        $('.row-noneborder-bottom').removeClass('row-noneborder-bottom');
+        var tr = $(thiz).parent().parent();
+        var row = table.row(tr);
+
+        $("#tbProduct  .standardclass").each(function (index) {
+            if ($(this).is(tr) == false) {
+                var row2 = table.row(this);
+                row2.child.hide();
+                $(this).removeClass('shown');
+                $(this).removeClass('row-noneborder-bottom');
+                $(this).removeClass('row-header');
+            }
+        });
+        if (row.child.isShown()) {
+            row.child.hide();
+            tr.removeClass('shown');
+            tr.removeClass('row-noneborder-bottom');
+            tr.removeClass('row-header');
+        }
+        else {
+            row.child(format(row.data())).show();
+            var data = table.row(tr).data();
+            if (data != undefined) {
+                showStadardDetail(data.ID);
+            }
+            var styleChild = $('#DetailContent').parent();
+            styleChild.addClass('row-noneborder-top');
+            tr.addClass('shown');
+            tr.addClass('row-noneborder-bottom');
+            tr.addClass('row-header');
+        }
+    }
+    function showStadardDetail(id) {
+        $.ajax({
+            type: "POST",
+            url: '/Product/GetListStandardDetail',
+            data: { id: id },
+        }).success(function (reponse) {
+            $('#DetailContent').html(reponse);
+        });
+    }
+
+    function reloadSearchTable() {
+        $("#InfoSearch").val($.trim($("#InfoSearch").val()));
+        table.ajax.reload();
+    }
+
+    function Remove(thiz, id) {
+        showConfirm("Xóa sản phẩm", "Bạn chắc chắn muốn xóa ?", function () {
+            $.ajax({
+                type: "POST",
+                url: '/Product/DeleteProduct',
+                data: {
+                    id: id
+                },
+
+            }).success(function (data) {
+                if (data.Code === 1) {
+                    $('#tbProduct').DataTable().row($(thiz).parents('tr')).remove().draw();
+                    showSuccess("Thành Công", data.message);
+                } else {
+                    showError('Lỗi', data.message);
+                }
+            });
+        },
+        function () { }
+        );
+
+
+    }
+
+
+
+    function resetForm() {
+
+    }
+
+
+
+    function showModalListStandard(id) {
+        $.ajax({
+            url: "/Product/AddEditStandard",
+            method: "POST",
+            success: function (data) {
+                $("#popupContainer3").html(data);
+                $("#ModalListStandard").modal("show");
+                $('#ProductId').val(id);
+
+
+            }
+        });
+    }
+
+    function txtInfoKeyup(e) {
+        if (e.keyCode == 13) {
+            reloadSearchTable();
+        }
+    }
+
+    function showImportModal() {
+        $.ajax({
+            url: "/Product/PopUpImportExcel",
+            method: "POST",
+            beforeSend: function () {
+                showSpinLoading();
+            },
+            data: {
+
+            },
+            success: function (data) {
+                hideSpinLoading();
+                $("#popupContainer3").html(data);
+                $("#popupImport").modal("show");
+            }
+        });
+    }
+    function updateIsActive(id) {
+        $.ajax({
+            url: "/Product/UpdateIsActive",
+            method: "POST",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                showSuccess("Thành Công", data.message);
+                reloadSearchTable();
+            }
+        });
+    }
+
+    function updateIsShowWeb(id) {
+        $.ajax({
+            url: "/Product/UpdateIsShowWeb",
+            method: "POST",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                showSuccess("Thành Công", data.message);
+                reloadSearchTable();
+            }
+        });
+    }
+
+
+    function Properties(id) {
+        $.ajax({
+            url: "/Product/ProductProperties",
+            method: "POST",
+            beforeSend: function () {
+                showSpinLoading();
+            },
+            data: {
+                id: id
+            },
+            success: function (data) {
+                hideSpinLoading();
+                $("#popupContainer4").html(data);
+                $("#popupProperties").modal("show");
+            }
+        });
+    }
+    function showAddEditStandardProduct(id) {
+        $('#ModalListStandard').modal('show');
+    }
+
+</script>

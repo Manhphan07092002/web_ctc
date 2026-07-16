@@ -1,0 +1,52 @@
+﻿@{
+    var lst = ViewData["ListBlog"] as List<Cubetech.Website.Models.Blog>;
+    var disableButton = Convert.ToBoolean(ViewData["DisableButton"]);
+}
+
+@if (lst.Count != 0)
+{
+    for (int i = 0; i < lst.Count; i++)
+    {
+        var item = lst[i];
+        <div class="newslist_page">
+            <div class="newslist_title">
+                <h3 class="blog_item_title">
+                    <a href="@Url.Content("/" + Cubetech.Website.Controllers.WNewsController.GetBlogUrl(item))">@item.Name</a>
+                </h3>
+                <div class="clearfix" style="clear:both;"></div>
+                <p class="icon_news">
+                    <span class="date">
+                        @item.CreateDate.ToString("dd.MM.yyyy")
+                    </span>
+                </p>
+            </div>
+            <div class="newslist_img">
+                <a href="@Url.Content("/" + Cubetech.Website.Controllers.WNewsController.GetBlogUrl(item))">
+                    @if (!string.IsNullOrEmpty(item.Image))
+                    {
+
+                        <img class="blog_img" width="100%" src="@item.Image" alt="@item.SEOTitle" title="@item.SEOTitle" />
+                    }
+                    else
+                    {
+                        <img class="blog_img" width="100%" src="~/Content/Image/WebImage/logogumac.jpg" alt="@item.SEOTitle" title="@item.SEOTitle" />
+                    }
+                </a>
+            </div>
+            <div class="blog_des">
+                @item.SEODescriptions
+            </div>
+        </div>
+    }
+
+    if (disableButton)
+    {
+        <script>
+            (function () {
+                $(".btnLoadMoreContainer").addClass("hidden");
+            })();
+        </script>
+    }
+}
+
+

@@ -1,0 +1,452 @@
+@* --- Khối khai báo và lấy dữ liệu --- *@
+@{
+    Cubetech.Website.DAO.WProductsDAO dao = new Cubetech.Website.DAO.WProductsDAO();
+    var lstMenu = dao.GetListMenuHeader(0, 1);
+}
+
+@* --- Liên kết đến file CSS riêng cho Header --- *@
+<link href="@Url.Content("~/Content/css/Header.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/header-language-switcher.css")" rel="stylesheet" type="text/css" />
+
+@* --- Modern Header Animations JavaScript --- *@
+<script src="@Url.Content("~/Content/js/modern-header-animations.js")" defer></script>
+
+@* --- Optimized Language Switcher Integration --- *@
+<script>
+    // Header-specific language switcher integration
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🎯 Header: Integrating with optimized language switcher...');
+        
+        // Setup dropdown toggle functionality
+        const languageSwitcher = document.querySelector('.language-switcher');
+        const dropdownToggle = languageSwitcher?.querySelector('.dropdown-toggle');
+        const dropdownMenu = languageSwitcher?.querySelector('.dropdown-menu');
+        
+        if (dropdownToggle && dropdownMenu) {
+            // Enhanced dropdown toggle with touch support
+            dropdownToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const isOpen = languageSwitcher.classList.contains('open');
+                
+                // Close all other dropdowns first
+                document.querySelectorAll('.language-switcher.open').forEach(switcher => {
+                    if (switcher !== languageSwitcher) {
+                        switcher.classList.remove('open');
+                    }
+                });
+                
+                // Toggle current dropdown
+                languageSwitcher.classList.toggle('open', !isOpen);
+                
+                // Update aria attributes for accessibility
+                dropdownToggle.setAttribute('aria-expanded', !isOpen);
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!languageSwitcher.contains(e.target)) {
+                    languageSwitcher.classList.remove('open');
+                    dropdownToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close dropdown on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && languageSwitcher.classList.contains('open')) {
+                    languageSwitcher.classList.remove('open');
+                    dropdownToggle.setAttribute('aria-expanded', 'false');
+                    dropdownToggle.focus();
+                }
+            });
+            
+            // Keyboard navigation for dropdown items
+            dropdownMenu.addEventListener('keydown', function(e) {
+                const items = dropdownMenu.querySelectorAll('a');
+                const currentIndex = Array.from(items).indexOf(document.activeElement);
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const nextIndex = (currentIndex + 1) % items.length;
+                    items[nextIndex].focus();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const prevIndex = (currentIndex - 1 + items.length) % items.length;
+                    items[prevIndex].focus();
+                }
+            });
+            
+            console.log('✅ Header: Language switcher dropdown enhanced');
+        }
+        
+        // Mobile menu integration
+        const mobileMenuToggle = document.getElementById('cb_menu');
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', function() {
+                // Close language dropdown when opening mobile menu
+                languageSwitcher?.classList.remove('open');
+                dropdownToggle?.setAttribute('aria-expanded', 'false');
+            });
+        }
+        
+        // Sync with optimized language switcher when it loads
+        const checkOptimizedSwitcher = setInterval(function() {
+            if (typeof window.testLanguageSwitcher === 'function') {
+                clearInterval(checkOptimizedSwitcher);
+                console.log('🔗 Header: Connected to optimized language switcher');
+                
+                // Sync initial state
+                try {
+                    const status = window.testLanguageSwitcher();
+                    if (status && status.currentLanguage) {
+                        console.log('🎯 Header: Synced with current language:', status.currentLanguage);
+                    }
+                } catch (e) {
+                    console.warn('Header: Could not sync with optimized switcher:', e);
+                }
+            }
+        }, 100);
+        
+        // Stop checking after 10 seconds
+        setTimeout(() => clearInterval(checkOptimizedSwitcher), 10000);
+        
+        // Advanced header features
+        initAdvancedHeaderFeatures();
+    });
+    
+    // Advanced header features
+    function initAdvancedHeaderFeatures() {
+        console.log('🚀 Initializing advanced header features...');
+        
+        // 1. Smart scroll behavior for header
+        initSmartScrollBehavior();
+        
+        // 2. Language switcher animations
+        initLanguageSwitcherAnimations();
+        
+        // 3. Performance monitoring
+        initHeaderPerformanceMonitoring();
+        
+        // 4. Accessibility enhancements
+        initAccessibilityEnhancements();
+        
+        // 5. Touch gesture support
+        initTouchGestureSupport();
+    }
+    
+    // Smart scroll behavior
+    function initSmartScrollBehavior() {
+        let lastScrollTop = 0;
+        let scrollTimeout;
+        const header = document.querySelector('.cb-header');
+        
+        if (!header) return;
+        
+        window.addEventListener('scroll', function() {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                // Add shadow when scrolled
+                if (scrollTop > 10) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+                
+                // Auto-hide on mobile when scrolling down
+                if (window.innerWidth <= 768) {
+                    if (scrollTop > lastScrollTop && scrollTop > 100) {
+                        header.classList.add('header-hidden');
+                    } else {
+                        header.classList.remove('header-hidden');
+                    }
+                }
+                
+                lastScrollTop = scrollTop;
+            }, 10); // Debounced scroll
+        }, { passive: true });
+        
+        console.log('✅ Smart scroll behavior initialized');
+    }
+    
+    // Language switcher animations
+    function initLanguageSwitcherAnimations() {
+        const languageSwitcher = document.querySelector('.language-switcher');
+        if (!languageSwitcher) return;
+        
+        // Hover effects with micro-interactions
+        const dropdownToggle = languageSwitcher.querySelector('.dropdown-toggle');
+        if (dropdownToggle) {
+            dropdownToggle.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-1px)';
+            });
+            
+            dropdownToggle.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        }
+        
+        // Stagger animation for dropdown items
+        const dropdownItems = languageSwitcher.querySelectorAll('.dropdown-menu a');
+        dropdownItems.forEach((item, index) => {
+            item.style.animationDelay = `${index * 50}ms`;
+        });
+        
+        console.log('✅ Language switcher animations initialized');
+    }
+    
+    // Performance monitoring
+    function initHeaderPerformanceMonitoring() {
+        if (!window.performance) return;
+        
+        // Monitor header render time
+        const observer = new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+                if (entry.name.includes('header') || entry.name.includes('language')) {
+                    console.log(`📊 Header performance: ${entry.name} - ${Math.round(entry.duration)}ms`);
+                }
+            }
+        });
+        
+        try {
+            observer.observe({ entryTypes: ['measure', 'navigation'] });
+        } catch (e) {
+            console.warn('Performance monitoring not supported');
+        }
+        
+        // Memory usage tracking (development only)
+        if (window.location.hostname === 'localhost' && console.memory) {
+            setInterval(() => {
+                const memory = console.memory;
+                const usedMB = Math.round(memory.usedJSHeapSize / 1024 / 1024);
+                
+                if (usedMB > 30) { // Alert if header uses > 30MB
+                    console.warn(`🚨 Header memory usage high: ${usedMB}MB`);
+                }
+            }, 30000);
+        }
+        
+        console.log('✅ Header performance monitoring initialized');
+    }
+    
+    // Accessibility enhancements
+    function initAccessibilityEnhancements() {
+        const languageSwitcher = document.querySelector('.language-switcher');
+        if (!languageSwitcher) return;
+        
+        // Enhanced focus management
+        const dropdownToggle = languageSwitcher.querySelector('.dropdown-toggle');
+        const dropdownMenu = languageSwitcher.querySelector('.dropdown-menu');
+        
+        if (dropdownToggle && dropdownMenu) {
+            // Focus trap in dropdown
+            dropdownMenu.addEventListener('keydown', function(e) {
+                const focusableElements = dropdownMenu.querySelectorAll('a[tabindex="0"]');
+                const firstElement = focusableElements[0];
+                const lastElement = focusableElements[focusableElements.length - 1];
+                
+                if (e.key === 'Tab') {
+                    if (e.shiftKey) {
+                        if (document.activeElement === firstElement) {
+                            e.preventDefault();
+                            lastElement.focus();
+                        }
+                    } else {
+                        if (document.activeElement === lastElement) {
+                            e.preventDefault();
+                            firstElement.focus();
+                        }
+                    }
+                }
+            });
+            
+            // Screen reader announcements
+            const announceLanguageChange = (language) => {
+                const announcement = document.createElement('div');
+                announcement.setAttribute('aria-live', 'polite');
+                announcement.setAttribute('aria-atomic', 'true');
+                announcement.className = 'sr-only';
+                announcement.textContent = `Ngôn ngữ đã được chuyển sang ${language}`;
+                
+                document.body.appendChild(announcement);
+                setTimeout(() => document.body.removeChild(announcement), 1000);
+            };
+            
+            // Listen for language changes
+            window.addEventListener('languageChanged', function(e) {
+                announceLanguageChange(e.detail.language);
+            });
+        }
+        
+        console.log('✅ Accessibility enhancements initialized');
+    }
+    
+    // Touch gesture support
+    function initTouchGestureSupport() {
+        if (!('ontouchstart' in window)) return;
+        
+        const languageSwitcher = document.querySelector('.language-switcher');
+        if (!languageSwitcher) return;
+        
+        let touchStartY = 0;
+        let touchStartTime = 0;
+        
+        languageSwitcher.addEventListener('touchstart', function(e) {
+            touchStartY = e.touches[0].clientY;
+            touchStartTime = Date.now();
+        }, { passive: true });
+        
+        languageSwitcher.addEventListener('touchend', function(e) {
+            const touchEndY = e.changedTouches[0].clientY;
+            const touchDuration = Date.now() - touchStartTime;
+            const touchDistance = Math.abs(touchEndY - touchStartY);
+            
+            // Quick tap detection (< 200ms, < 10px movement)
+            if (touchDuration < 200 && touchDistance < 10) {
+                // Prevent double-tap zoom
+                e.preventDefault();
+                
+                // Trigger click after small delay
+                setTimeout(() => {
+                    const dropdownToggle = languageSwitcher.querySelector('.dropdown-toggle');
+                    if (dropdownToggle) {
+                        dropdownToggle.click();
+                    }
+                }, 10);
+            }
+        });
+        
+        // Swipe gesture for language switching (experimental)
+        let swipeStartX = 0;
+        
+        languageSwitcher.addEventListener('touchstart', function(e) {
+            swipeStartX = e.touches[0].clientX;
+        }, { passive: true });
+        
+        languageSwitcher.addEventListener('touchend', function(e) {
+            const swipeEndX = e.changedTouches[0].clientX;
+            const swipeDistance = swipeEndX - swipeStartX;
+            
+            // Swipe left/right to change language (> 50px)
+            if (Math.abs(swipeDistance) > 50) {
+                if (typeof window.changeLanguage === 'function') {
+                    const currentLang = sessionStorage.getItem('cubetech_language') || 'vi';
+                    const newLang = swipeDistance > 0 ? 'vi' : 'en';
+                    
+                    if (newLang !== currentLang) {
+                        window.changeLanguage(newLang);
+                        
+                        // Haptic feedback if available
+                        if (navigator.vibrate) {
+                            navigator.vibrate(50);
+                        }
+                    }
+                }
+            }
+        });
+        
+        console.log('✅ Touch gesture support initialized');
+    }
+</script>
+
+
+<div class="navbar navbar-inverse navbar-fixed-top cb-header">
+    <div class="container">
+        <div class="navbar-header">
+            <button id="cb_menu" type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-nav" href="/">
+            <img class="logo-pc" src="@Url.Content("~/Content/Image/logoctc2.png")" alt="CÔNG TY CỔ PHẦN XÂY LẮP BƯU ĐIỆN MIỀN TRUNG" />
+
+            </a>
+        </div>
+
+        <div class="navbar-collapse collapse cb_collapse">
+            
+            <ul class="nav navbar-nav">
+                @foreach (var item in lstMenu)
+                {
+                    var menuUrl = (item.ID != 8) ? Url.Content("~/" + item.MenuURL) : item.MenuURL;
+                    
+                    <li>
+                        <a href="@menuUrl">
+                            <span>@item.MenuName</span>
+                            <span>
+                                <small>
+                                    @* @item.MenuEnglishName *@
+                                </small>
+                            </span>
+                        </a>
+                    </li>
+                }
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="tel:0915059666" title="Gọi Hotline">
+                        <div class="contact-info">
+                            <span class="contact-label">LIÊN HỆ NGAY</span>
+                            <div class="phone-info">
+                                 <img src="@Url.Content("~/Image/call.png")" alt="Call Icon" />
+                                 <span class="hotline-number">0915.059.666</span>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                
+                @* Optimized Language Switcher v2.0 *@
+                <li class="language-switcher" role="menuitem">
+                    <a href="#" class="dropdown-toggle" role="button" 
+                       aria-haspopup="true" aria-expanded="false" 
+                       aria-label="Chọn ngôn ngữ" title="Language Selector">
+                        <img id="current-flag" 
+                             src="@Url.Content("~/Image/flags/vn.png")" 
+                             alt="Tiếng Việt" 
+                             class="flag-icon" 
+                             loading="lazy" />
+                        <span id="current-lang" class="lang-text">VN</span>
+                        <span class="caret" aria-hidden="true"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu" aria-label="Danh sách ngôn ngữ">
+                        <li role="none">
+                            <a href="#" 
+                               role="menuitem" 
+                               tabindex="0"
+                               onclick="changeLanguage('vi'); return false;"
+                               onkeydown="if(event.key==='Enter'||event.key===' '){changeLanguage('vi'); return false;}"
+                               aria-label="Chuyển sang Tiếng Việt">
+                                <img src="@Url.Content("~/Image/flags/vn.png")" 
+                                     alt="" 
+                                     class="flag-icon" 
+                                     loading="lazy" 
+                                     aria-hidden="true" /> 
+                                Tiếng Việt
+                            </a>
+                        </li>
+                        <li role="none">
+                            <a href="#" 
+                               role="menuitem" 
+                               tabindex="0"
+                               onclick="changeLanguage('en'); return false;"
+                               onkeydown="if(event.key==='Enter'||event.key===' '){changeLanguage('en'); return false;}"
+                               aria-label="Switch to English">
+                                <img src="@Url.Content("~/Image/flags/us.png")" 
+                                     alt="" 
+                                     class="flag-icon" 
+                                     loading="lazy" 
+                                     aria-hidden="true" /> 
+                                English
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+</div>

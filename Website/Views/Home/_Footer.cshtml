@@ -1,0 +1,818 @@
+<footer>
+    <div class="footer-main">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 footer-widget">
+                    <div class="logo-area">
+                        <img src="@Url.Content("~/Image/logo_rm_bgr.png")" 
+                             alt="Logo Công Ty" 
+                             class="footer-logo"
+                             loading="lazy"
+                             decoding="async"
+                             width="120"
+                             height="120">
+                        <div class="logo-text">
+                            <span class="company-name-main">CÔNG TY CỔ PHẦN</span>
+                            <span class="company-name-sub">XÂY LẮP BƯU ĐIỆN MIỀN TRUNG</span>
+                        </div>
+                    </div>
+                    <p class="footer-description">
+                        Là nhà thầu uy tín trong lĩnh vực xây lắp và viễn thông, chúng tôi cam kết mang đến những công trình chất lượng và dịch vụ chuyên nghiệp.
+                    </p>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/ctcdn" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 footer-widget">
+                    <h5 class="widget-title">Dịch Vụ của chúng tôi</h5>
+                    <ul class="footer-links">
+                        <li><a href="https://ctcdn.vn/dich-vu">Hạ tầng Viễn thông</a></li>
+                        <li><a href="https://ctcdn.vn/dich-vu">Công trình Điện</a></li>
+                        <li><a href="https://ctcdn.vn/dich-vu">Xây dựng Dân dụng & Công nghiệp</a></li>
+                        <li><a href="https://ctcdn.vn/dich-vu">Hệ thống Cơ điện</a></li>
+                        <li><a href="https://ctcdn.vn/dich-vu">Năng lượng Tái tạo</a></li>
+                        <li><a href="https://ctcdn.vn/dich-vu">Vận hành & Bảo trì</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6 footer-widget">
+                    <h5 class="widget-title">Điều Khoản & Hỗ Trợ</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Công ty</a></li>
+                        <li><a href="#">Liên hệ</a></li>
+                        <li><a href="#">Chính sách vận chuyển</a></li>
+                        <li><a href="#">Chính sách đổi trả</a></li>
+                        <li><a href="#">Chính sách bảo hành</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6 footer-widget">
+                    <h5 class="widget-title">Thông Tin Liên Hệ</h5>
+                    <ul class="contact-info">
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>50B Nguyễn Du, P. Hải Châu, TP. Đà Nẵng</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone-alt"></i>
+                            <div>
+                                <a href="tel:0915059666">0915 059 666</a> (Mr. Đạt)<br>
+                                <a href="tel:0905167892">0905 167 892</a> (Mr. Toàn)
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <a href="mailto:contact@ctcdn.vn">contact@ctcdn.vn</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="container">
+            <p class="copyright-text">© @DateTime.Now.Year <strong>CÔNG TY CỔ PHẦN XÂY LẮP BƯU ĐIỆN MIỀN TRUNG</strong>. Tất cả quyền được bảo lưu.</p>
+        </div>
+    </div>
+
+    <div id="ai-chat-widget">
+        <div id="ai-chat-container" class="hidden">
+            <div class="ai-chat-header">
+                <span>Trợ lý AI - CTC</span>
+                <button id="close-ai-chat" aria-label="Đóng chat">&times;</button>
+            </div>
+            <div id="ai-chat-box">
+                </div>
+            <div class="ai-chat-input-area">
+                <input type="text" id="ai-chat-input" placeholder="Nhập câu hỏi của bạn...">
+                <button id="send-ai-chat" aria-label="Gửi"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <a href="javascript:void(0);" id="ai-chat-button">
+            <img src="@Url.Content("~/Image/tro_ly_ai.png")" alt="Chat AI">
+            <span>Chat với trợ lý AI</span>
+        </a>
+    </div>
+
+    <a href="https://zalo.me/0915059666" class="zalo-chat-button" target="_blank">
+        <img src="@Url.Content("~/Image/logo_zalo.png")" alt="Chat Zalo">
+        <span>Chat với chúng tôi</span>
+    </a>
+</footer>
+
+<style type="text/css">
+    :root {
+        --primary-color: #007bff;
+        --secondary-color: #0d6efd;
+        --text-color: #5a5a5a;
+        --heading-color: #212529;
+        --light-bg-color: #ffffff;
+        --lighter-bg-color: #f8f9fa;
+        --border-color: #e9ecef;
+        --footer-font: 'Roboto', sans-serif;
+    }
+
+    footer {
+        background-color: var(--light-bg-color);
+        color: var(--text-color);
+        font-family: var(--footer-font);
+        font-size: 15px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .footer-main {
+        padding: 60px 0 30px 0;
+    }
+
+    .footer-bottom {
+        background-color: var(--lighter-bg-color);
+        padding: 20px 0;
+        font-size: 14px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .footer-widget {
+        margin-bottom: 30px;
+    }
+
+    .footer-widget .widget-title {
+        color: var(--heading-color);
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        text-transform: uppercase;
+        position: relative;
+        padding-bottom: 0;
+    }
+
+    .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .footer-logo {
+        max-width: 80px;
+        height: auto;
+        flex-shrink: 0;
+    }
+
+    .logo-text {
+        line-height: 1.2;
+    }
+
+    .logo-text .company-name-main {
+        display: block;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--heading-color);
+        text-transform: uppercase;
+    }
+
+    .logo-text .company-name-sub {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--primary-color);
+        text-transform: uppercase;
+    }
+
+    .footer-description {
+        line-height: 1.7;
+        margin-bottom: 20px;
+    }
+
+    .social-icons a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #f1f1f1;
+        color: #333;
+        margin-right: 10px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .social-icons a:hover {
+        background-color: var(--primary-color);
+        color: var(--light-bg-color);
+        transform: translateY(-3px);
+    }
+
+    .footer-links,
+    .contact-info {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-links li {
+        margin-bottom: 12px;
+    }
+
+    .footer-links a,
+    .contact-info a {
+        color: var(--text-color);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .footer-links a:hover,
+    .contact-info a:hover {
+        color: var(--primary-color);
+    }
+
+    .contact-info li {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+
+    .contact-info i {
+        font-size: 16px;
+        color: var(--primary-color);
+        margin-right: 15px;
+        margin-top: 5px;
+    }
+
+    .footer-bottom .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .copyright-text {
+        flex: 1;
+    }
+
+    #ai-chat-button {
+        position: fixed;
+        bottom: 85px;
+        right: 20px;
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 25px;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        z-index: 1001;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+    }
+
+    #ai-chat-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    #ai-chat-button img {
+        width: 30px;
+        height: 30px;
+        margin-right: 8px;
+        border-radius: 50%;
+        background-color: white;
+    }
+
+    #ai-chat-container {
+        position: fixed;
+        bottom: 140px;
+        right: 20px;
+        width: 350px;
+        max-width: calc(100% - 40px);
+        height: 500px;
+        max-height: calc(100vh - 160px);
+        background-color: var(--light-bg-color);
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        z-index: 1000;
+        transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        transform-origin: bottom right;
+    }
+
+    #ai-chat-container.hidden {
+        transform: scale(0.8);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .ai-chat-header {
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 10px 15px;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+    }
+
+    #close-ai-chat {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        line-height: 1;
+    }
+
+    #ai-chat-box {
+        flex-grow: 1;
+        padding: 15px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .chat-message {
+        padding: 10px 15px;
+        border-radius: 20px;
+        max-width: 80%;
+        line-height: 1.5;
+        word-wrap: break-word;
+    }
+
+    .user-message {
+        background-color: var(--primary-color);
+        color: white;
+        border-bottom-right-radius: 5px;
+        align-self: flex-end;
+    }
+
+    .ai-message {
+        background-color: #e9ecef;
+        color: var(--heading-color);
+        border-bottom-left-radius: 5px;
+        align-self: flex-start;
+    }
+
+    .ai-message.loading {
+        font-style: italic;
+        color: var(--text-color);
+    }
+
+    #suggested-questions-container {
+        padding: 5px;
+        margin-bottom: 10px;
+    }
+
+    #suggested-questions-container .suggested-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--heading-color);
+        margin-bottom: 12px;
+    }
+
+    .suggested-question-btn {
+        width: 100%;
+        background-color: #f1f1f1;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        text-align: left;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: var(--footer-font);
+        color: var(--text-color);
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .suggested-question-btn:hover {
+        background-color: #e9ecef;
+        border-color: var(--primary-color);
+    }
+
+    .ai-chat-input-area {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    #ai-chat-input {
+        flex-grow: 1;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 8px 15px;
+        font-size: 15px;
+    }
+
+    #ai-chat-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    #send-ai-chat {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        margin-left: 10px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.2s;
+    }
+
+    #send-ai-chat:hover {
+        background-color: #0056b3;
+    }
+
+    @@keyframes pulse-shadow {
+        0% {
+            box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4);
+        }
+        70% {
+            box-shadow: 0 0 0 15px rgba(0, 123, 255, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+        }
+    }
+
+    .zalo-chat-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 25px;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        z-index: 1000;
+        transition: transform 0.3s ease;
+        animation: pulse-shadow 2s infinite;
+    }
+
+    .zalo-chat-button:hover {
+        animation-play-state: paused;
+        transform: scale(1.05);
+    }
+
+    .zalo-chat-button img {
+        width: 30px;
+        height: 30px;
+        margin-right: 8px;
+        border-radius: 50%;
+    }
+
+    @@media (max-width: 991.98px) {
+        .footer-main {
+            text-align: center;
+        }
+
+        .logo-area,
+        .contact-info li,
+        .social-icons {
+            justify-content: center;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        #ai-chat-button span,
+        .zalo-chat-button span {
+            display: none;
+        }
+
+        #ai-chat-button,
+        .zalo-chat-button {
+            width: 50px;
+            height: 50px;
+            padding: 0;
+            justify-content: center;
+        }
+
+        #ai-chat-button img,
+        .zalo-chat-button img {
+            margin-right: 0;
+        }
+
+        #ai-chat-container {
+            width: calc(100% - 20px);
+            height: calc(100% - 150px);
+            bottom: 80px;
+            right: 10px;
+        }
+
+        .footer-bottom .container {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .copyright-text,
+        .bottom-links {
+            text-align: center;
+            flex-basis: 100%;
+        }
+
+        .bottom-links a {
+            margin: 0 10px;
+        }
+    }
+</style>
+
+<script type="module">
+    // --- Configuration and DOM Elements ---
+    const API_KEY = "AIzaSyDwrFmFXcnBQq3vv-_trscmHMbGX96dAJc"; // Replace with your actual API key
+    const MODEL_NAME = "gemini-2.5-flash";
+
+    const aiChatContainer = document.getElementById('ai-chat-container');
+    const aiChatButton = document.getElementById('ai-chat-button');
+    const closeChatButton = document.getElementById('close-ai-chat');
+    const chatBox = document.getElementById('ai-chat-box');
+    const chatInput = document.getElementById('ai-chat-input');
+    const sendButton = document.getElementById('send-ai-chat');
+
+    const welcomeMessage = "CTC xin kính chào quý khách! Tôi có thể giúp gì cho bạn?";
+    let chatHistory = [];
+    let isChatInitialized = false;
+    let hasUserInteracted = false; // Biến để theo dõi tương tác
+
+    // ===================================================================
+    // KNOWLEDGE BASE FOR THE AI
+    // ===================================================================
+    const companyKnowledge = `
+    Bối cảnh: Bạn là trợ lý AI chính thức của CÔNG TY CỔ PHẦN XÂY LẮP BƯU ĐIỆN MIỀN TRUNG (CTC).
+    Nhiệm vụ: Trả lời khách hàng một cách lịch sự, chuyên nghiệp, rõ ràng, và chỉ dựa trên thông tin sau. Nếu không có thông tin, hãy nói: "Về vấn đề này, CTC sẽ kết nối quý khách đến bộ phận phụ trách để được hỗ trợ chi tiết hơn."
+
+    ---
+    Thông tin về công ty:
+    - Tên: CÔNG TY CỔ PHẦN XÂY LẮP BƯU ĐIỆN MIỀN TRUNG (CTC)
+    - Trụ sở: 50B Nguyễn Du, P. Hải Châu, TP. Đà Nẵng
+    - Thời gian làm việc: Thứ 2 – Thứ 7 (8:00 – 17:00), nghỉ Chủ nhật
+    - Hoạt động: Tổng thầu EPC chuyên về:
+      1. Hạ tầng Viễn thông (BTS, cột anten, cáp quang…)
+      2. Công trình Điện (trạm biến áp đến 110kV, điện công nghiệp, chiếu sáng…)
+      3. Xây dựng Dân dụng và Công nghiệp (nhà ở, nhà xưởng, kho, văn phòng…)
+      4. Hệ thống Cơ điện (M&E): điều hòa, PCCC, điện nhẹ, cấp-thoát nước…
+      5. Năng lượng Tái tạo (điện mặt trời áp mái và trang trại)
+      6. Vận hành và Bảo trì (sau thi công, bảo dưỡng, sửa chữa)
+    - Tầm nhìn: Trở thành tổng thầu EPC hàng đầu tại miền Trung, đồng hành cùng khách hàng với công trình chất lượng, an toàn, đúng tiến độ.
+
+    ---
+    Liên hệ:
+    - Kinh doanh: Mr. Đạt – 0915 059 666
+    - Kỹ thuật và bảo hành: Mr. Toàn – 0905 167 892
+    - Email: contact@ctcdn.vn
+    - Website: https://ctcdn.vn
+
+    ---
+    Thông tin dịch vụ và chuyên môn:
+    - Trạm BTS: CTC xây dựng, lắp đặt, bảo trì các trạm thu phát sóng.
+    - Điện công nghiệp: Thi công đường dây, trạm biến áp, chiếu sáng, điện nhà máy.
+    - Xây dựng: Từ nhà dân, nhà xưởng đến các công trình quy mô lớn.
+    - M&E: Lắp đặt điều hòa HVAC, hệ thống PCCC, điện nhẹ (ELV), cấp thoát nước.
+    - ELV: Bao gồm CCTV, mạng LAN, âm thanh, kiểm soát ra vào.
+    - Điện mặt trời: Tư vấn, thiết kế, thi công, miễn phí khảo sát, tuổi thọ pin trên 25 năm.
+    - Bảo trì: Định kỳ hoặc theo yêu cầu, có chi phí ưu đãi cho khách cũ.
+    - Tổng thầu EPC: CTC đủ năng lực làm chìa khóa trao tay từ thiết kế đến hoàn công.
+    - Làm việc với: Các nhà mạng lớn, doanh nghiệp, khách hàng cá nhân.
+
+    ---
+    Quy trình báo giá và hợp đồng:
+    - Miễn phí khảo sát và tư vấn ban đầu
+    - Quy trình: Tiếp nhận yêu cầu → Khảo sát → Lập phương án và báo giá → Gửi khách
+    - Thời gian báo giá: 3–5 ngày sau khảo sát
+    - Hợp đồng: Rõ ràng về phạm vi, chi phí, tiến độ, thanh toán, bảo hành
+    - Có thể thay đổi yêu cầu trong thi công (phụ lục hợp đồng)
+    - Thanh toán: Linh hoạt, chia theo giai đoạn thi công
+    - Có yêu cầu đặt cọc hoặc ứng trước
+
+    ---
+    Chính sách và cam kết:
+    - Cam kết chất lượng, an toàn, tiến độ, chuyên nghiệp
+    - Vật tư: Chính hãng, rõ nguồn gốc, có thể khách cung cấp hoặc CTC cung ứng
+    - Bảo hành: Theo đúng tiêu chuẩn ngành và hợp đồng
+    - Có bảo hiểm công trình theo quy định
+    - Có chính sách ưu đãi cho khách hàng lâu năm
+    - Không áp dụng đổi trả hàng vì không bán sản phẩm vật lý
+
+    ---
+    Thông tin kỹ thuật:
+    - Phần mềm thiết kế: AutoCAD, Revit, ETABS…
+    - Tiêu chuẩn PCCC: Theo TCVN hiện hành
+    - Giải pháp cho đất yếu: Cọc bê tông, cọc khoan nhồi
+    - Điện mặt trời: Hiệu suất inverter trên 95%, pin 20–22%, bảo hành dài hạn
+    - Có đội giám sát công trình riêng
+    - Có thể thuê ngoài nhân công có giám sát của CTC
+    - Có thể cung cấp dịch vụ smarthome
+    - CTC nhận cả dự án nhỏ lẻ nếu phù hợp
+
+    ---
+    Câu hỏi tình huống linh hoạt:
+    - So sánh điện mặt trời – điện lưới: Điện mặt trời giúp tiết kiệm, thân thiện môi trường; điện lưới ổn định. Giải pháp tốt nhất là kết hợp cả hai.
+    - CTC nhận thi công toàn miền Trung, có thể mở rộng toàn quốc
+    - Khách cá nhân vẫn có thể làm việc với CTC (nhà ở, điện mặt trời…)
+    - Có thể chỉ thuê nhân công hoặc chỉ thuê tư vấn thiết kế
+    - Dự án phức tạp: CTC sẽ khảo sát và đưa giải pháp phù hợp
+
+    ---
+    Giới hạn và từ chối trả lời:
+    - Không chia sẻ thông tin lãnh đạo, lương, dữ liệu nội bộ
+    - Không trả lời về thời tiết, kể chuyện cười, tư vấn ẩm thực…
+    - Với các câu hỏi ngoài chuyên môn: xin phép kết nối đến bộ phận liên quan
+
+    ---
+    Cách xưng hô khi trả lời:
+    Hãy trả lời trực tiếp vào vấn đề, giữ giọng văn chuyên nghiệp, lịch sự và xưng hô là "CTC" khi cần thiết để khẳng định thương hiệu.
+    `;
+
+    // === CẬP NHẬT: DANH SÁCH CÂU HỎI NGẮN GỌN HƠN ===
+    const allSuggestedQuestions = [
+        "Thi công nhà ở cá nhân?",
+        "Quy trình lắp điện mặt trời?",
+        "Bao lâu có báo giá?",
+        "Có bảo trì hệ thống điện không?",
+        "Phạm vi hoạt động ở đâu?",
+        "Chính sách bảo hành?",
+        "Liên hệ bộ phận kinh doanh?",
+        "Có nhận tổng thầu EPC không?",
+        "Chi phí khảo sát thế nào?",
+        "Thi công PCCC?"
+    ];
+    // ===================================================================
+
+    // Function to initialize the chat with the knowledge base
+    const initializeChat = () => {
+        chatHistory = []; // Clear old history
+        hasUserInteracted = false; // Reset tương tác
+        chatBox.innerHTML = ''; // Xóa sạch box chat
+        
+        // Add the knowledge base as the first "turn" in the conversation
+        chatHistory.push(
+            { role: "user", parts: [{ text: companyKnowledge }] },
+            { role: "model", parts: [{ text: "Đã hiểu. Tôi là trợ lý AI của CTC và sẵn sàng hỗ trợ." }] }
+        );
+        // Add the visible welcome message to history
+        chatHistory.push({ role: "model", parts: [{ text: welcomeMessage }] });
+        isChatInitialized = true;
+    };
+
+    // Hàm hiển thị câu hỏi gợi ý
+    const displaySuggestedQuestions = () => {
+        const existingSuggestions = document.getElementById('suggested-questions-container');
+        if (existingSuggestions) {
+            existingSuggestions.remove();
+        }
+
+        const container = document.createElement('div');
+        container.id = 'suggested-questions-container';
+        
+        const title = document.createElement('div');
+        title.className = 'suggested-title';
+        title.textContent = 'Gợi ý cho bạn:';
+        container.appendChild(title);
+
+        const shuffled = [...allSuggestedQuestions].sort(() => 0.5 - Math.random());
+        const selectedQuestions = shuffled.slice(0, 5);
+
+        selectedQuestions.forEach(questionText => {
+            const button = document.createElement('button');
+            button.className = 'suggested-question-btn';
+            button.textContent = questionText;
+            button.onclick = () => {
+                chatInput.value = questionText;
+                handleSendMessage();
+            };
+            container.appendChild(button);
+        });
+        
+        // Chèn container vào cuối box chat
+        chatBox.appendChild(container);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    };
+
+
+    // === CẬP NHẬT: HIỂN THỊ CHAT NGAY LẬP TỨC ===
+    const openChat = () => {
+        aiChatContainer.classList.remove('hidden');
+        aiChatButton.style.display = 'none';
+        
+        if (!isChatInitialized) {
+            initializeChat();
+            // Hiển thị lời chào và câu hỏi ngay lập tức
+            addMessageToBox(welcomeMessage, 'ai');
+            displaySuggestedQuestions();
+        } else if (!hasUserInteracted) {
+            // Nếu người dùng mở lại chat mà chưa tương tác, hiển thị lại câu hỏi gợi ý
+            const existingMessage = chatBox.querySelector('.ai-message');
+            const existingSuggestions = chatBox.querySelector('#suggested-questions-container');
+            if(existingMessage && !existingSuggestions){
+                 displaySuggestedQuestions();
+            }
+        }
+        
+        chatInput.focus();
+    };
+
+    // Function to close the chat window
+    const closeChat = () => {
+        aiChatContainer.classList.add('hidden');
+        aiChatButton.style.display = 'flex';
+    };
+
+    // Function to add a message to the chat box UI
+    const addMessageToBox = (text, sender, isLoading = false) => {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('chat-message', `${sender}-message`);
+        if (isLoading) {
+            messageElement.classList.add('loading');
+            messageElement.textContent = 'AI đang trả lời...';
+        } else {
+            messageElement.innerHTML = text.replace(/\n/g, '<br>');
+        }
+        
+        // Chèn tin nhắn vào trước khu vực câu hỏi gợi ý (nếu có)
+        const suggestedContainer = document.getElementById('suggested-questions-container');
+        if (suggestedContainer) {
+            chatBox.insertBefore(messageElement, suggestedContainer);
+        } else {
+            chatBox.appendChild(messageElement);
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return messageElement;
+    };
+
+    // Function to handle sending a message
+    const handleSendMessage = async () => {
+        const userText = chatInput.value.trim();
+        if (!userText || !isChatInitialized) return;
+
+        // Đánh dấu đã tương tác và xóa các câu hỏi gợi ý
+        hasUserInteracted = true;
+        const suggestedContainer = document.getElementById('suggested-questions-container');
+        if (suggestedContainer) {
+            suggestedContainer.remove();
+        }
+
+        addMessageToBox(userText, 'user');
+        chatInput.value = '';
+        const loadingElement = addMessageToBox('', 'ai', true);
+
+        chatHistory.push({ role: "user", parts: [{ text: userText }] });
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: chatHistory })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`API call failed with status: ${response.status}. Details: ${JSON.stringify(errorData)}`);
+            }
+
+            const data = await response.json();
+            
+            if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
+                 const aiText = data.candidates[0].content.parts[0].text;
+                 loadingElement.innerHTML = aiText.replace(/\n/g, '<br>');
+                 loadingElement.classList.remove('loading');
+                 chatHistory.push({ role: "model", parts: [{ text: aiText }] });
+            } else {
+                 let errorMessage = "CTC đã nhận được câu hỏi, tuy nhiên có lỗi xảy ra trong quá trình xử lý. Quý khách vui lòng thử lại hoặc liên hệ trực tiếp.";
+                 if(data.promptFeedback && data.promptFeedback.blockReason){
+                   errorMessage = `Yêu cầu của bạn không thể được xử lý do: ${data.promptFeedback.blockReason}. Vui lòng diễn đạt lại câu hỏi.`;
+                 }
+                 loadingElement.textContent = errorMessage;
+                 loadingElement.classList.remove('loading');
+                 // Invalid response structure from API - handled gracefully
+            }
+        } catch (error) {
+            // Gemini API Error - handled gracefully
+            loadingElement.textContent = "Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.";
+            loadingElement.classList.remove('loading');
+        }
+    };
+
+    // --- Event Listeners ---
+    aiChatButton.addEventListener('click', openChat);
+    closeChatButton.addEventListener('click', closeChat);
+    sendButton.addEventListener('click', handleSendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
+        }
+    });
+</script>

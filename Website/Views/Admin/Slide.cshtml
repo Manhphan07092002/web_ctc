@@ -1,0 +1,187 @@
+﻿@{
+    ViewBag.Title = "Thiết lập Slide";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-master list-panel" id="list-panel">
+
+            <div class="panel-heading list-panel-heading">
+                <div class="col-md-3">
+                    @{
+                        var lstTypeSearch = new List<object>();
+                        lstTypeSearch.Add(new { ID = "", Name = "---Tất Cả---" });
+                        lstTypeSearch.Add(new { ID = "SLIDE", Name = "SLIDE" });
+                        lstTypeSearch.Add(new { ID = "BANNER", Name = "BANNER" });
+                        lstTypeSearch.Add(new { ID = "SLIDELIST", Name = "SLIDELIST" });
+                        lstTypeSearch.Add(new { ID = "BANNERLIST", Name = "BANNERLIST" });
+
+                    }
+                    @Html.DropDownList("TypeSearch", new SelectList(lstTypeSearch, "ID", "Name"), new { @class = "form-control input-sm", @onchange = "ReloadTable()" })
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group  pull-right">
+                        <input type="text" class="form-control" id="Info" name="Info" placeholder="Tên slide">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-success btn-flat" onclick="loadTable()">
+                                <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Tìm kiếm
+                            </button>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-md-2 pull-right search-top">
+                    <button type="button" class="btn btn-danger btn-sm  refresh-button" id="refresh-button" onclick="UpdateSlide(0)">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Thêm mới
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <table id="tbSlide" class="table table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Tên</th>
+                            <th>Hình Ảnh</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#modalSlide').on('hidden.bs.modal', function () {
+            $(this).find('form')[0].reset();
+        });
+        loadTable();
+
+        setIcheck("#cbkIsVideo", "[name=IsVideo]", "true", "false", function (e) { });
+    });
+    enterSearch("#Info", ReloadTable);
+    function loadTable() {
+        $("#Info").val($.trim($("#Info").val()));
+        var table = $('#tbSlide').DataTable({
+            "bDestroy": true,
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "/Admin/GetListSlide",
+                "type": "POST",
+                "data": function (d) {
+                    return $.extend({}, d, {
+                        'Info': $('#Info').val(),
+                        'TypeSearch': $('#TypeSearch').val()
+                    })
+                }
+            },
+            "columns": [
+                        { "name": "Name", "data": "Name", 'width': '25%', },
+                          {
+                              "name": "Image",
+                              'width': '15%',
+                              'render': function (data, type, full, meta) {
+                                  var html = '<img src="' + full.Image + '" style="height:100px"/>'
+                                  return html;
+                              }
+                          },
+                        {
+                            targets: 'no-sort',
+                            orderable: false,
+                            'class': 'text-center',
+                            'width': '10%',
+                            'render': function (data, type, full, meta) {
+                                var html = '<button type="button" data-toggle="modal" data-target="#modalSlide" style="margin-right: 10px;" class="btn btn-warning btn-xs" title="Cập Nhật"  onclick="UpdateSlide(' + full.ID + ')"><i class="glyphicon glyphicon-edit"></i></button>' +
+                                            '<button type="button" class="btn  btn-dark btn-xs" style="margin-right: 10px;" title="Xóa" onclick="Remove(' + full.ID + ')"><i class="glyphicon glyphicon-trash"></i></button> ';
+                                return html;
+                            }
+                        }
+            ],
+            "scrollCollapse": true,
+            "scrollX": true,
+            "paging": true,
+            "lengthChange": true,
+            "searching": false,
+            "ordering": true,
+            "info": false,
+            "autoWidth": false,
+            "dom": '<"top"i>rt<"bottom row"<"col-md-3"l><"col-md-9"<"pullright"p>>><"clear">'
+        });
+    }
+    function UpdateSlide(id) {
+        $.ajax({
+            url: "/Admin/EditSlide",
+            method: "POST",
+            beforeSend: function () {
+                showSpinLoading();
+            },
+            data: {
+                id: id
+            },
+            success: function (data) {
+                hideSpinLoading();
+                $("#popupContainer1").html(data);
+                $("#modalSlide").modal("show");
+            }
+        });
+    }
+    function fnSaveSlide() {
+        var fd = new FormData(document.getElementById("SlideForm"));
+        $.ajax({
+            url: "/Admin/UpdateSlide",
+            method: "POST",
+            beforeSend: function () {
+                showSpinLoading();
+            },
+            data: fd,
+            enctype: 'multipart/form-data',
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,   // tell jQuery not to set contentType
+            success: function (data) {
+                if (data.Code === 1) {
+                    $('#modalSlide').modal('hide');
+                    showSuccess('Thành Công', data.message);
+                    ReloadTable();
+
+                } else {
+                    showError('Lỗi', data.message);
+                }
+            }
+        });
+    }
+    function ReloadTable() {
+        $("#Info").val($.trim($("#Info").val()));
+        var table = $('#tbSlide').DataTable();
+        table.ajax.reload();
+    }
+    function Remove(id) {
+        showConfirm("", "Bạn có chắc chắn muốn xóa slide ?",
+            function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Admin/DeleteSlide',
+                    data: { id: id },
+
+                }).success(function (data) {
+                    if (data.Code === 1) {
+                        showSuccess('Thông báo', data.message);
+                        ReloadTable();
+                    } else {
+                        showError('Lỗi', data.message);
+                    }
+                });
+
+            }, function () { }
+);
+    }
+
+</script>
+
+

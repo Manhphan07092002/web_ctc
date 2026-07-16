@@ -1,0 +1,135 @@
+﻿
+.cb-header {
+    background: rgba(241,242,242,73); 
+    color: #414042;
+    border: none;
+    
+}
+
+.logo-pc {
+    max-width: 180px;
+    padding: 5px 0;
+}
+
+.cb-header.navbar-inverse .navbar-nav > li > a {
+    color: #414143;
+}
+
+    .cb-header.navbar-inverse .navbar-nav > li > a span {
+        display: block;
+        font-size: 15px;
+    }
+
+        .cb-header.navbar-inverse .navbar-nav > li > a span small {
+            font-size: 12px;
+        }
+
+
+footer {
+    background: #fbfbfb;
+    font-size: 15px;
+}
+
+.footer_top {
+    border-bottom: 1px solid #969598;
+    padding: 20px 0;
+}
+
+ul.footer_link {
+    -webkit-padding-start: 0px;
+}
+
+.footer_link li {
+    font-size: 18px;
+    color: #58595b;
+}
+
+    .footer_link li a {
+        color: #58595b;
+        font-weight: bold;
+        font-size: 15px;
+    }
+
+        .footer_link li a:hover {
+            text-decoration: none;
+        }
+
+.footer_title {
+    color: #58595b;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+    .footer_title span {
+        color: #123960;
+        font-size: 20px;
+    }
+
+.footer_bottom {
+    color: #414142;
+    padding: 30px 0 50px;
+}
+
+.footer_img {
+    text-align: right;
+}
+
+    .footer_img .develop_by {
+        padding: 20px 0;
+    }
+
+        .footer_img .develop_by img {
+            width: 170px;
+        }
+
+    .footer_img .indus_notify img {
+        width: 200px;
+        margin: 0 0 0 10px;
+    }
+
+.social_img img {
+    width: 35px;
+}
+
+.cb_collapse {
+    float: right;
+}
+
+@media (max-width:767px) {
+    .cb-header {
+        background: rgba(241,242,242,.93);
+    }
+
+    #cb_menu {
+        float: left;
+        margin: 18px 8px;
+    }
+
+    .cb-header .navbar-header {
+        text-align: center;
+        position: relative;
+    }
+
+        .cb-header .navbar-header .navbar-nav {
+            margin: 0 auto;
+        }
+
+    .cb_collapse {
+        float: none;
+    }
+
+    .navbar-inverse #cb_menu.navbar-toggle {
+        border-color: transparent;
+    }
+
+        .navbar-inverse #cb_menu.navbar-toggle .icon-bar {
+            background-color: #133a61;
+        }
+        .navbar-inverse #cb_menu.navbar-toggle:focus, .navbar-inverse #cb_menu.navbar-toggle:hover{
+            background-color: transparent;
+        }
+
+    .footer_img {
+        text-align: left;
+    }
+}

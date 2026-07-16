@@ -1,0 +1,581 @@
+/**
+ * Header Language Switcher Optimized Styles
+ * Integrates with optimized language switcher v2.0
+ * Author: AI Assistant
+ * Date: 2025-10-03
+ */
+
+/* Header-specific language switcher styles */
+.cb-header .language-switcher {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown toggle in header */
+.cb-header .language-switcher .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 15px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.cb-header .language-switcher .dropdown-toggle:hover,
+.cb-header .language-switcher .dropdown-toggle:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.cb-header .language-switcher .dropdown-toggle:focus-visible {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}
+
+/* Flag icon in header */
+.cb-header .language-switcher .flag-icon {
+    width: 20px;
+    height: 15px;
+    border-radius: 2px;
+    object-fit: cover;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    will-change: transform;
+}
+
+.cb-header .language-switcher .dropdown-toggle:hover .flag-icon {
+    transform: scale(1.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Language text in header */
+.cb-header .language-switcher .lang-text {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Caret in header */
+.cb-header .language-switcher .caret {
+    border-top: 4px solid currentColor;
+    border-right: 4px solid transparent;
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.cb-header .language-switcher.open .caret {
+    transform: rotate(180deg);
+    opacity: 1;
+}
+
+/* Dropdown menu in header - Updated for 5 languages */
+.cb-header .language-switcher .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 9999;
+    display: none;
+    min-width: 220px; /* Increased for longer language names */
+    max-height: 300px; /* Prevent overflow on small screens */
+    overflow-y: auto; /* Scroll if needed */
+    padding: 8px 0;
+    margin: 8px 0 0;
+    background: #fff;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    list-style: none;
+    animation: fadeInDown 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    backdrop-filter: blur(20px);
+    will-change: opacity, transform;
+}
+
+.cb-header .language-switcher.open .dropdown-menu {
+    display: block;
+}
+
+/* Dropdown menu items in header */
+.cb-header .language-switcher .dropdown-menu li {
+    list-style: none;
+    margin: 0;
+}
+
+.cb-header .language-switcher .dropdown-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    margin: 2px 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.cb-header .language-switcher .dropdown-menu li a:hover,
+.cb-header .language-switcher .dropdown-menu li a:focus {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: #fff;
+    text-decoration: none;
+    transform: translateX(3px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.cb-header .language-switcher .dropdown-menu li a:focus-visible {
+    outline: 2px solid #3498db;
+    outline-offset: -2px;
+}
+
+.cb-header .language-switcher .dropdown-menu li a.active {
+    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+    color: #fff;
+}
+
+.cb-header .language-switcher .dropdown-menu .flag-icon {
+    width: 18px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+/* Loading state */
+.cb-header .language-switcher.loading .dropdown-toggle {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.cb-header .language-switcher.loading .flag-icon {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Mobile responsive adjustments - Updated for 5 languages */
+@media (max-width: 768px) {
+    .navbar-collapse .language-switcher {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        margin-top: 15px;
+        padding-top: 15px;
+    }
+    
+    .navbar-collapse .language-switcher .dropdown-toggle {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        margin: 0 15px;
+        justify-content: center;
+        min-height: 44px; /* iOS touch target */
+    }
+    
+    .navbar-collapse .language-switcher .dropdown-menu {
+        position: static;
+        display: block !important;
+        float: none;
+        width: auto;
+        margin: 10px 15px 0;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: none;
+        backdrop-filter: blur(10px);
+    }
+    
+    .navbar-collapse .language-switcher.open .dropdown-menu {
+        display: block !important;
+    }
+    
+    .navbar-collapse .language-switcher .dropdown-menu li a {
+        color: #fff;
+        padding: 14px 20px;
+        margin: 2px 8px;
+        min-height: 44px;
+        font-size: 16px; /* Prevent zoom on iOS */
+        line-height: 1.4; /* Better for Asian characters */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 250px; /* Prevent overflow on small screens */
+    }
+    
+    .navbar-collapse .language-switcher .dropdown-menu li a:hover,
+    .navbar-collapse .language-switcher .dropdown-menu li a:focus {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateX(5px);
+    }
+}
+
+@media (max-width: 480px) {
+    .cb-header .language-switcher .dropdown-toggle {
+        padding: 6px 10px;
+    }
+    
+    .cb-header .language-switcher .flag-icon {
+        width: 16px;
+        height: 12px;
+    }
+    
+    .cb-header .language-switcher .lang-text {
+        font-size: 11px;
+    }
+    
+    .cb-header .language-switcher .dropdown-menu {
+        min-width: 160px;
+        right: -10px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .cb-header .language-switcher .dropdown-menu {
+        background: #2d3748;
+        border: 1px solid #4a5568;
+    }
+    
+    .cb-header .language-switcher .dropdown-menu li a {
+        color: #e2e8f0;
+    }
+    
+    .cb-header .language-switcher .dropdown-menu li a:hover,
+    .cb-header .language-switcher .dropdown-menu li a:focus {
+        background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        color: #fff;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .cb-header .language-switcher .dropdown-toggle {
+        border: 2px solid currentColor;
+    }
+    
+    .cb-header .language-switcher .dropdown-menu {
+        border: 2px solid #333;
+    }
+    
+    .cb-header .language-switcher .dropdown-menu li a:hover,
+    .cb-header .language-switcher .dropdown-menu li a:focus {
+        background: #000;
+        color: #fff;
+        border: 2px solid #fff;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .cb-header .language-switcher .dropdown-toggle,
+    .cb-header .language-switcher .flag-icon,
+    .cb-header .language-switcher .caret,
+    .cb-header .language-switcher .dropdown-menu,
+    .cb-header .language-switcher .dropdown-menu li a {
+        transition: none;
+        animation: none;
+        transform: none;
+    }
+    
+    .cb-header .language-switcher .dropdown-menu {
+        animation: none;
+    }
+}
+
+/* Print styles */
+@media print {
+    .cb-header .language-switcher {
+        display: none !important;
+    }
+}
+
+/* Performance optimizations */
+.cb-header .language-switcher * {
+    box-sizing: border-box;
+}
+
+/* GPU acceleration for smooth animations */
+.cb-header .language-switcher .dropdown-menu,
+.cb-header .language-switcher .dropdown-toggle {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}
+
+/* Integration with existing header styles */
+.cb-header .navbar-nav > li > .language-switcher {
+    display: block;
+}
+
+/* Ensure proper z-index stacking */
+.cb-header {
+    z-index: 1030;
+}
+
+.cb-header .language-switcher .dropdown-menu {
+    z-index: 1031;
+}
+
+/* Focus management for accessibility */
+.cb-header .language-switcher .dropdown-toggle:focus {
+    z-index: 1032;
+}
+
+/* Smooth scrolling for mobile dropdown */
+.navbar-collapse .language-switcher .dropdown-menu {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+    max-height: 60vh;
+}
+
+/* Advanced Header Features */
+
+/* Smart scroll behavior */
+.cb-header {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, box-shadow;
+}
+
+.cb-header.scrolled {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(20px);
+}
+
+.cb-header.header-hidden {
+    transform: translateY(-100%);
+}
+
+/* Stagger animations for dropdown items */
+.cb-header .language-switcher.open .dropdown-menu li a {
+    animation: slideInStagger 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.cb-header .language-switcher.open .dropdown-menu li:nth-child(1) a {
+    animation-delay: 0ms;
+}
+
+.cb-header .language-switcher.open .dropdown-menu li:nth-child(2) a {
+    animation-delay: 50ms;
+}
+
+/* Micro-interactions */
+.cb-header .language-switcher .dropdown-toggle {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cb-header .language-switcher .dropdown-toggle:active {
+    transform: translateY(1px) scale(0.98);
+}
+
+/* Touch gesture indicators */
+.cb-header .language-switcher.touch-device::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 6px;
+    height: 6px;
+    background: #3498db;
+    border-radius: 50%;
+    opacity: 0.7;
+    animation: pulse 2s infinite;
+}
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* Focus indicators for better accessibility */
+.cb-header .language-switcher .dropdown-toggle:focus-visible {
+    outline: 3px solid #3498db;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px rgba(52, 152, 219, 0.2);
+}
+
+.cb-header .language-switcher .dropdown-menu a:focus-visible {
+    outline: 2px solid #3498db;
+    outline-offset: -2px;
+    box-shadow: inset 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Loading states */
+.cb-header .language-switcher.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: inherit;
+    animation: shimmer 1.5s infinite;
+}
+
+/* Performance optimizations */
+.cb-header .language-switcher,
+.cb-header .language-switcher * {
+    will-change: auto;
+}
+
+.cb-header .language-switcher.animating,
+.cb-header .language-switcher.animating * {
+    will-change: transform, opacity;
+}
+
+/* Hover state optimizations */
+@media (hover: hover) {
+    .cb-header .language-switcher .dropdown-toggle:hover {
+        transform: translateY(-1px);
+    }
+    
+    .cb-header .language-switcher .dropdown-menu li a:hover {
+        transform: translateX(3px);
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+    .cb-header .language-switcher .dropdown-toggle:hover {
+        transform: none;
+    }
+    
+    .cb-header .language-switcher .dropdown-menu li a:hover {
+        transform: none;
+    }
+    
+    /* Larger touch targets on touch devices */
+    .cb-header .language-switcher .dropdown-toggle {
+        min-height: 48px;
+        padding: 12px 16px;
+    }
+    
+    .cb-header .language-switcher .dropdown-menu li a {
+        min-height: 48px;
+        padding: 14px 20px;
+    }
+}
+
+/* Advanced animations */
+@keyframes slideInStagger {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+/* High performance mode for older devices */
+@media (max-resolution: 1dppx) {
+    .cb-header .language-switcher .dropdown-toggle,
+    .cb-header .language-switcher .dropdown-menu,
+    .cb-header .language-switcher .dropdown-menu li a {
+        transition: none;
+        animation: none;
+        transform: none;
+    }
+}
+
+/* Prefers reduced motion - respect user preferences */
+@media (prefers-reduced-motion: reduce) {
+    .cb-header.scrolled {
+        transition: box-shadow 0.1s ease;
+    }
+    
+    .cb-header.header-hidden {
+        transition: transform 0.1s ease;
+    }
+    
+    .cb-header .language-switcher.open .dropdown-menu li a {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+    .cb-header.scrolled {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    .cb-header .language-switcher .dropdown-toggle:focus-visible {
+        box-shadow: 0 0 0 6px rgba(100, 181, 246, 0.3);
+    }
+}
+
+/* Print optimizations */
+@media print {
+    .cb-header .language-switcher {
+        display: none !important;
+    }
+    
+    .cb-header.scrolled,
+    .cb-header.header-hidden {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+}
+
+/* Container queries support (future-proofing) */
+@supports (container-type: inline-size) {
+    .cb-header {
+        container-type: inline-size;
+    }
+    
+    @container (max-width: 768px) {
+        .cb-header .language-switcher .dropdown-toggle {
+            font-size: 0.9em;
+        }
+    }
+}

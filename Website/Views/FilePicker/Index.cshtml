@@ -1,0 +1,1581 @@
+@{
+    Layout = null;
+    string callBack = Request["callback"];
+    string tinymceMode = Request["tinymce"];
+    
+    // Security: Validate callback parameter
+    if (!string.IsNullOrEmpty(callBack))
+    {
+        // Only allow alphanumeric characters and underscores for callback function names
+        if (!System.Text.RegularExpressions.Regex.IsMatch(callBack, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
+        {
+            callBack = "defaultCallback"; // Fallback to safe default
+        }
+    }
+    else
+    {
+        callBack = "defaultCallback";
+    }
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="robots" content="noindex">
+    <meta name="googlebot" content="noindex">
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <!-- FilePicker v2025.11.08.10.08 - Delete functions re-enabled -->
+
+
+    <link rel="shortcut icon" href="@Url.Content("/Content/Image")/favicon.png" />
+    <link rel="icon" type="image/vnd.microsoft.icon" href="@Url.Content("/Content/Image")/favicon.ico" />
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>
+
+    <link href="@Url.Content("/Content/")plugins/select2/select2.css" rel="stylesheet" />
+    <script src="@Url.Content("/Content/")plugins/select2/select2.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link href="~/Content/css/common.css" rel="stylesheet" />
+    <script src="~/Scripts/common.js"></script>
+
+
+    <!-- Bootstrap -->
+    <link href="@Url.Content("~/Content/")plugins/gentelella-master/vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="@Url.Content("~/Content/")plugins/gentelella-master/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <!-- iCheck -->
+    <link href="@Url.Content("~/Content/")plugins/gentelella-master/vendors/iCheck/skins/flat/green.css" rel="stylesheet">
+    <!-- Custom Theme Style -->
+    <link href="@Url.Content("~/Content/")plugins/gentelella-master/build/css/custom.min.css" rel="stylesheet">
+
+
+    <!-- jQuery (already loaded above) -->
+    <!-- Bootstrap -->
+    <script src="@Url.Content("~/Content/")plugins/gentelella-master/vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- iCheck -->
+    <script src="@Url.Content("~/Content/")plugins/gentelella-master/vendors/iCheck/icheck.min.js"></script>
+
+    <style>
+        #popupSelectImage body {
+            background: #fff !important;
+            color: #333 !important;
+        }
+        
+        /* FilePicker Custom Styles */
+        .file-item:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .folder-item:hover {
+            background: #e3f2fd !important;
+            border-color: #2196f3 !important;
+        }
+        
+        .progress {
+            height: 20px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            transition: width 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .breadcrumb {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+        }
+        
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #6c757d;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+        }
+        
+        .file-item img {
+            transition: transform 0.3s ease;
+        }
+        
+        .file-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        /* Loading animation */
+        .fa-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Loading skeleton styles */
+        .loading-skeleton {
+            opacity: 0.7;
+        }
+        
+        .skeleton-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            height: 200px;
+        }
+        
+        .skeleton-image {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .skeleton-text {
+            width: 80%;
+            height: 12px;
+            background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 4px;
+            margin: 0 auto;
+        }
+        
+        @@keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Enhanced progress bar */
+        #progressText {
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+        }
+        
+        /* Button state transitions */
+        .btn {
+            transition: all 0.2s ease;
+        }
+        
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Mobile responsive */
+        @@media (max-width: 768px) {
+            .file-item {
+                height: 180px !important;
+            }
+            
+            .col-xs-6 {
+                width: 50%;
+                float: left;
+            }
+            
+            .skeleton-item {
+                height: 160px;
+            }
+            
+            .skeleton-image {
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body style="background: #fff !important; color: #333 !important;">
+    <div class="modal-body content_body">
+        <div>
+
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="input-group input-group">
+                            <input id="folderName" class="form-control" placeholder="Tạo thư mục mới" name="data" type="text" 
+                                   maxlength="100" aria-label="Tên thư mục mới" />
+                            <span class="input-group-btn">
+                                <button type="button" style="min-width: 100px;" class="btn btn-danger btn-flat" 
+                                        onclick="createFolder()" id="btnCreateDirectory" 
+                                        data-loading-text="Đang tạo thư mục" aria-label="Tạo thư mục mới">
+                                    <i class="fa fa-folder-plus"></i> Tạo thư mục
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="input-group input-group">
+                            <input id="txtSearch" class="form-control" placeholder="Nhập từ khóa tìm kiếm" name="data" type="text" 
+                                   aria-label="Từ khóa tìm kiếm" />
+                            <span class="input-group-btn">
+                                <button type="button" style="min-width: 100px;" class="btn btn-success btn-flat" 
+                                        onclick="search()" id="btnSearch" data-loading-text="Đang tìm kiếm..." 
+                                        aria-label="Tìm kiếm file">
+                                    <i class="fa fa-search"></i> Tìm Kiếm
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <form id="frmUpLoadImage" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div class="input-group input-group">
+                        <span class="input-group-addon">
+                            <input type="checkbox" checked id="rdAutoRename" aria-label="Tự động đổi tên file">
+                            <label for="rdAutoRename" style="margin-left: 5px;">Auto rename</label>
+                        </span>
+                        <input class="form-control" placeholder="Chọn file để upload" name="uploadFiles" type="file" 
+                               multiple accept=".jpg,.jpeg,.png,.gif,.webp,.bmp,.svg,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                               aria-label="Chọn file để upload" />
+                        <span class="input-group-btn">
+                            <button type="button" style="min-width: 100px;" class="btn btn-info btn-flat" 
+                                    id="btnUpload" data-loading-text="Đang upload..."
+                                    aria-label="Upload file">
+                                <i class="fa fa-upload"></i> Upload
+                            </button>
+                        </span>
+                    </div>
+                    <div id="uploadProgress" style="display: none; margin-top: 10px;">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped active" role="progressbar" 
+                                 style="width: 0%" id="progressBar">
+                                <span id="progressText">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        @if (ViewBag.TestMessage != null)
+        {
+            <div class="alert alert-success">
+                <strong>✅ @ViewBag.TestMessage</strong>
+            </div>
+        }
+        
+        <div id="divContainer">
+
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+<script>
+    // Global variables - OPTIMIZED
+    var currentPath = "";
+    var tinymceMode = '@Html.Raw(tinymceMode)';
+    var callbackFunction = '@Html.Raw(callBack)';
+    var pathHistory = [];
+    var isLoading = false;
+    
+    // Performance optimization variables
+    var directoryCache = new Map();
+    var searchDebounceTimer = null;
+    var lastSearchTerm = "";
+    var requestQueue = [];
+
+    // Upload files function - MOVED UP for proper hoisting
+    function uploadFiles() {
+        var fileInput = $('input[name="uploadFiles"]')[0];
+        var files = fileInput.files;
+        
+        if (!files || files.length === 0) {
+            // Removed warning toast - silent validation
+            return;
+        }
+
+        // Validate files
+        var validationResult = validateFiles(files);
+        if (!validationResult.isValid) {
+            // Removed validation error toast - silent validation
+            return;
+        }
+
+        var autoRename = $("#rdAutoRename").is(":checked");
+        var formData = new FormData();
+        
+        // Add files to FormData
+        for (var i = 0; i < files.length; i++) {
+            formData.append('uploadFiles', files[i]);
+        }
+        
+        formData.append('path', currentPath);
+        formData.append('rename', autoRename);
+        
+        // Add anti-forgery token if available
+        var token = $('input[name="__RequestVerificationToken"]').val();
+        if (token) {
+            formData.append('__RequestVerificationToken', token);
+        }
+
+        // Show progress
+        showUploadProgress();
+        setButtonLoading('#btnUpload', true);
+
+        // Use XMLHttpRequest for progress tracking - OPTIMIZED
+        var xhr = new XMLHttpRequest();
+        var startTime = Date.now();
+        
+        xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable) {
+                var percentComplete = Math.round((e.loaded / e.total) * 100);
+                var elapsed = Date.now() - startTime;
+                var speed = e.loaded / (elapsed / 1000); // bytes per second
+                
+                updateUploadProgressOptimized(percentComplete, speed, e.loaded, e.total);
+            }
+        });
+
+        xhr.addEventListener('load', function() {
+            try {
+                var response = JSON.parse(xhr.responseText);
+                
+                // Handle both response formats: {success: true} and {Code: 1}
+                var isSuccess = response.success === true || response.Code === 1;
+                var message = response.message || response.Message || 'Upload completed';
+                
+                if (isSuccess) {
+                    // Removed toast notification - silent success
+                    if (response.errors && response.errors.length > 0) {
+                        console.warn('Upload warnings:', response.errors);
+                    }
+                    
+                    // Add uploaded files to current view without reload
+                    if (response.uploadedFiles && response.uploadedFiles.length > 0) {
+                        addFilesToCurrentView(response.uploadedFiles);
+                    } else {
+                        // Fallback: smooth refresh if no file info returned
+                        setTimeout(function() {
+                            refreshCurrentDirectory();
+                        }, 500);
+                    }
+                    
+                    $("#frmUpLoadImage")[0].reset();
+                    
+                    // Reset file input visual state
+                    $('#btnUpload').removeClass('btn-success').addClass('btn-info');
+                    $('#btnUpload').find('i').removeClass('fa-check').addClass('fa-upload');
+                } else {
+                    console.error('Upload failed:', message);
+                    // Removed error toast - silent fail
+                }
+            } catch (error) {
+                console.error('Error parsing upload response:', error);
+                showMessage('Lỗi khi xử lý phản hồi từ server: ' + xhr.responseText.substring(0, 100), 'error');
+            }
+            hideUploadProgress();
+            setButtonLoading('#btnUpload', false);
+        });
+
+        xhr.addEventListener('error', function() {
+            // Removed error toast - silent fail
+            hideUploadProgress();
+            setButtonLoading('#btnUpload', false);
+        });
+
+        xhr.open('POST', '/filepicker/UploadImage');
+        xhr.send(formData);
+    }
+
+    // Make functions globally accessible for onclick calls from List.cshtml
+    window.uploadFiles = uploadFiles;
+    window.removeFile = removeFile;
+    window.removeFolder = removeFolder;
+    window.onFileSelect = onFileSelect;
+    window.loadPicker = loadPicker;
+
+    // Initialize on document ready - v2025.11.08.10.08
+    $(document).ready(function() {
+        
+        // Add event listeners
+        setupEventListeners();
+        
+        // Load initial directory on page ready with fallback
+        try {
+            loadPicker('');
+        } catch (loadError) {
+            console.error('🔴 Initial load error:', loadError);
+            
+            // Fallback: show basic file browser
+            $("#divContainer").html(
+                '<div class="alert alert-warning" style="margin: 20px;">' +
+                '<h4>⚠️ Chế độ cơ bản</h4>' +
+                '<p>Đang chạy ở chế độ cơ bản do lỗi tải giao diện.</p>' +
+                '<p>Chức năng upload vẫn hoạt động bình thường.</p>' +
+                '</div>'
+            );
+        }
+    });
+
+    // Setup event listeners - OPTIMIZED
+    function setupEventListeners() {
+        // Optimized search with debouncing and instant clear
+        $('#txtSearch').on('input', function(e) {
+            var searchText = $(this).val().trim();
+            if (searchText === '') {
+                instantSearch(); // Instant clear
+            } else {
+                search(); // Debounced search
+            }
+        });
+        
+        // Search on Enter key (immediate)
+        $('#txtSearch').on('keydown', function(e) {
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                if (searchDebounceTimer) {
+                    clearTimeout(searchDebounceTimer);
+                }
+                var searchText = $(this).val().trim();
+                lastSearchTerm = searchText;
+                setButtonLoading('#btnSearch', true);
+                loadPickerOptimized(currentPath, searchText);
+            }
+        });
+
+        // Upload button click - optimized
+        $('#btnUpload').on('click', function(e) {
+            e.preventDefault();
+            if ($(this).prop('disabled')) return; // Prevent double-clicks
+            
+            var fileCount = $('input[name="uploadFiles"]')[0].files.length;
+            
+            if (fileCount > 0) {
+                uploadFiles();
+            } else {
+                // Removed warning toast - silent validation
+            }
+        });
+
+        // Prevent form submission
+        $('#frmUpLoadImage').on('submit', function(e) {
+            e.preventDefault();
+            uploadFiles();
+        });
+        
+        // File input change event for instant feedback
+        $('input[name="uploadFiles"]').on('change', function() {
+            var fileCount = this.files.length;
+            if (fileCount > 0) {
+                $('#btnUpload').removeClass('btn-info').addClass('btn-success');
+                $('#btnUpload').find('i').removeClass('fa-upload').addClass('fa-check');
+            } else {
+                $('#btnUpload').removeClass('btn-success').addClass('btn-info');
+                $('#btnUpload').find('i').removeClass('fa-check').addClass('fa-upload');
+            }
+        });
+    }
+
+    // File selection callback - FIXED XSS vulnerability
+    function onFileSelect(file) {
+        try {
+            if (typeof parent[callbackFunction] === 'function') {
+                parent[callbackFunction](file);
+            } else if (typeof parent.defaultCallback === 'function') {
+                parent.defaultCallback(file);
+            } else {
+                console.warn('Callback function not found:', callbackFunction);
+            }
+
+            // Close TinyMCE dialog if applicable
+            if (tinymceMode === "1" && parent.tinymce && parent.tinymce.activeEditor) {
+                parent.tinymce.activeEditor.windowManager.close();
+            }
+        } catch (error) {
+            // Removed file selection error toast - silent fail
+        }
+    }
+
+    // Search function - OPTIMIZED with debouncing
+    function search() {
+        var searchText = $('#txtSearch').val().trim();
+        
+        // Clear previous timer
+        if (searchDebounceTimer) {
+            clearTimeout(searchDebounceTimer);
+        }
+        
+        // Debounce search requests
+        searchDebounceTimer = setTimeout(function() {
+            if (searchText === lastSearchTerm) return; // Avoid duplicate searches
+            
+            lastSearchTerm = searchText;
+            setButtonLoading('#btnSearch', true);
+            loadPickerOptimized(currentPath, searchText);
+        }, 300); // 300ms debounce
+    }
+    
+    // Instant search for empty queries
+    function instantSearch() {
+        var searchText = $('#txtSearch').val().trim();
+        if (searchText === '') {
+            lastSearchTerm = '';
+            loadPickerOptimized(currentPath, '');
+        }
+    }
+
+    // Load directory contents - OPTIMIZED with caching
+    function loadPickerOptimized(path, searchText) {
+        if (isLoading) return;
+        
+        path = path || "";
+        searchText = searchText || $("#txtSearch").val().trim();
+        
+        // Create cache key
+        var cacheKey = path + '|' + searchText;
+        
+        // Check cache first (only for non-search queries to avoid stale results)
+        if (!searchText && directoryCache.has(cacheKey)) {
+            var cachedData = directoryCache.get(cacheKey);
+            var cacheAge = Date.now() - cachedData.timestamp;
+            
+            // Use cache if less than 30 seconds old
+            if (cacheAge < 30000) {
+                $("#divContainer").html(cachedData.html);
+                currentPath = path;
+                updateHistory(path);
+                setButtonLoading('#btnSearch', false);
+                return;
+            }
+        }
+        
+        isLoading = true;
+        currentPath = path;
+        updateHistory(path);
+        
+        // Show loading skeleton
+        showLoadingSkeleton();
+
+        $.ajax({
+            url: "/filepicker/List",
+            method: "POST",
+            data: { 
+                path: currentPath, 
+                text: searchText,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            },
+            timeout: 15000, // Reduced timeout for faster feedback
+            success: function(html) {
+                // Cache the result (only for directory listings, not searches)
+                if (!searchText) {
+                    directoryCache.set(cacheKey, {
+                        html: html,
+                        timestamp: Date.now()
+                    });
+                    
+                    // Limit cache size to prevent memory issues
+                    if (directoryCache.size > 20) {
+                        var firstKey = directoryCache.keys().next().value;
+                        directoryCache.delete(firstKey);
+                    }
+                }
+                
+                // Smooth transition
+                $("#divContainer").fadeOut(100, function() {
+                    $(this).html(html).fadeIn(200);
+                });
+                
+                setButtonLoading('#btnSearch', false);
+            },
+            error: function(xhr, status, error) {
+                console.error('🔴 Directory loading error:', {
+                    status: xhr.status,
+                    statusText: xhr.statusText,
+                    responseText: xhr.responseText,
+                    error: error
+                });
+                
+                // Show error details in console for debugging
+                if (xhr.responseText) {
+                    console.error('🔴 Server response:', xhr.responseText.substring(0, 500));
+                }
+                
+                // Try to show a simple error message in container with retry
+                $("#divContainer").html(
+                    '<div class="alert alert-danger" style="margin: 20px;">' +
+                    '<h4>❌ Lỗi tải danh sách file</h4>' +
+                    '<p>Status: ' + xhr.status + ' - ' + xhr.statusText + '</p>' +
+                    '<p>Vui lòng kiểm tra console để biết thêm chi tiết.</p>' +
+                    '<button class="btn btn-primary" onclick="location.reload()">🔄 Tải lại trang</button>' +
+                    '</div>'
+                );
+                
+                setButtonLoading('#btnSearch', false);
+                hideLoadingSkeleton();
+            },
+            complete: function() {
+                isLoading = false;
+            }
+        });
+    }
+    
+    // Legacy function for backward compatibility
+    function loadPicker(path) {
+        loadPickerOptimized(path, "");
+    }
+    
+    // Update history helper
+    function updateHistory(path) {
+        if (pathHistory.length === 0 || pathHistory[pathHistory.length - 1] !== path) {
+            pathHistory.push(path);
+        }
+    }
+    
+    // Add uploaded files directly to current view - NO RELOAD
+    function addFilesToCurrentView(uploadedFiles) {
+        var container = $("#divContainer .row");
+        if (container.length === 0) {
+            // If no row container, fallback to refresh
+            setTimeout(function() {
+                refreshCurrentDirectory();
+            }, 500);
+            return;
+        }
+        
+        // Create file cards for each uploaded file
+        uploadedFiles.forEach(function(fileInfo, index) {
+            setTimeout(function() {
+                var fileCard = createFileCard(fileInfo);
+                
+                // Add with animation
+                fileCard.css({
+                    'opacity': '0',
+                    'transform': 'scale(0.8)'
+                });
+                
+                // Insert at the beginning (newest first)
+                container.prepend(fileCard);
+                
+                // Animate in
+                fileCard.animate({
+                    'opacity': 1
+                }, 300).css({
+                    'transform': 'scale(1)',
+                    'transition': 'transform 0.3s ease'
+                });
+                
+            }, index * 100); // Stagger animation
+        });
+        
+        // Clear cache to ensure fresh data on next load
+        var searchText = $("#txtSearch").val().trim();
+        var cacheKey = currentPath + '|' + searchText;
+        directoryCache.delete(cacheKey);
+    }
+    
+    // Create file card HTML
+    function createFileCard(fileInfo) {
+        var fileName = fileInfo.name || fileInfo.fileName || 'Unknown';
+        var filePath = fileInfo.path || fileInfo.webPath || (currentPath + '/' + fileName);
+        var fileSize = fileInfo.size || fileInfo.fileSize || 0;
+        var isImage = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(fileName);
+        
+        var sizeText = formatBytes(fileSize);
+        var iconClass = isImage ? 'fa-file-image-o' : 'fa-file-o';
+        var timeText = 'Vừa tải lên'; // Default for new uploads 
+        var displayName = getDisplayName(fileName); // Pretty name
+        
+        var cardHtml = '<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">' +
+                       '<div class="file-item" style="position: relative; border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 15px; height: 200px; cursor: pointer; background: #fff;">' +
+                       '<div style="position: relative; height: 120px; overflow: hidden; border-radius: 4px; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">';
+        
+        if (isImage) {
+            cardHtml += '<img src="' + filePath + '" style="max-width: 100%; max-height: 100%; object-fit: cover;" ' +
+                       'onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'flex\';" />' +
+                       '<div style="display: none; flex-direction: column; align-items: center; color: #6c757d;">' +
+                       '<i class="fa fa-file-image-o" style="font-size: 32px; margin-bottom: 5px;"></i>' +
+                       '<small>Image</small></div>';
+        } else {
+            cardHtml += '<div style="display: flex; flex-direction: column; align-items: center; color: #6c757d;">' +
+                       '<i class="fa ' + iconClass + '" style="font-size: 32px; margin-bottom: 5px;"></i>' +
+                       '<small>File</small></div>';
+        }
+        
+        cardHtml += '</div>' +
+                   '<div style="margin-top: 8px; text-align: center;">' +
+                   '<div style="font-size: 12px; font-weight: bold; color: #333; word-break: break-word; height: 24px; overflow: hidden; line-height: 12px;" title="' + fileName + '">' +
+                   displayName + '</div>' +
+                   '<div style="font-size: 10px; color: #6c757d; margin-top: 2px;">' + sizeText + '</div>' +
+                   '<div style="font-size: 9px; color: #28a745; margin-top: 2px; font-weight: bold;">' + timeText + '</div>' +
+                   '</div>' +
+                   
+                   // Action buttons
+                   '<button type="button" class="btn btn-sm btn-primary" ' +
+                   'style="position: absolute; top: 5px; left: 5px; z-index: 10; opacity: 0.8;" ' +
+                   'onclick="onFileSelect(\'' + filePath + '\')" title="Chọn file ' + fileName + '">' +
+                   '<i class="fa fa-check"></i></button>' +
+                   
+                   '<button type="button" class="btn btn-sm btn-danger" ' +
+                   'style="position: absolute; top: 5px; right: 5px; z-index: 10; opacity: 0.8;" ' +
+                   'onclick="removeFile(\'' + filePath + '\')" title="Xóa file ' + fileName + '">' +
+                   '<i class="fa fa-trash"></i></button>' +
+                   
+                   '</div></div>';
+        
+        return $(cardHtml);
+    }
+    
+    // Remove file from current view - NO RELOAD
+    function removeFileFromCurrentView(filePath) {
+        // Find the file card to remove
+        var fileName = filePath.split('/').pop();
+        var fileCards = $("#divContainer .file-item");
+        
+        fileCards.each(function() {
+            var $card = $(this);
+            var $cardParent = $card.parent(); // col-* wrapper
+            
+            // Check if this card contains the deleted file
+            var deleteButton = $card.find('button[onclick*="removeFile"]');
+            if (deleteButton.length > 0) {
+                var buttonOnclick = deleteButton.attr('onclick');
+                if (buttonOnclick && buttonOnclick.includes(filePath)) {
+                    // Animate out and remove
+                    $card.animate({
+                        'opacity': 0,
+                        'transform': 'scale(0.8)'
+                    }, 300, function() {
+                        $cardParent.remove(); // Remove the entire column
+                    });
+                    
+                    // Clear cache to ensure fresh data on next load
+                    var searchText = $("#txtSearch").val().trim();
+                    var cacheKey = currentPath + '|' + searchText;
+                    directoryCache.delete(cacheKey);
+                    
+                    return false; // Break the loop
+                }
+            }
+        });
+    }
+    
+    // Add new folder to current view - NO RELOAD
+    function addFolderToCurrentView(folderName) {
+        var container = $("#divContainer .row");
+        if (container.length === 0) {
+            // If no row container, fallback to refresh
+            setTimeout(function() {
+                refreshCurrentDirectory();
+            }, 500);
+            return;
+        }
+        
+        var folderPath = currentPath ? (currentPath + '/' + folderName) : folderName;
+        
+        var folderCard = $('<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">' +
+                          '<div class="folder-item" style="position: relative; border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 15px; height: 200px; cursor: pointer; background: #fff;">' +
+                          '<div style="position: relative; height: 120px; overflow: hidden; border-radius: 4px; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">' +
+                          '<div style="display: flex; flex-direction: column; align-items: center; color: #ffc107;">' +
+                          '<i class="fa fa-folder" style="font-size: 48px; margin-bottom: 5px;"></i>' +
+                          '<small>Folder</small></div>' +
+                          '</div>' +
+                          '<div style="margin-top: 8px; text-align: center;">' +
+                          '<div style="font-size: 12px; font-weight: bold; color: #333; word-break: break-word; height: 24px; overflow: hidden; line-height: 12px;" title="' + folderName + '">' +
+                          getDisplayName(folderName) + '</div>' +
+                          '<div style="font-size: 10px; color: #6c757d; margin-top: 2px;">Thư mục</div>' +
+                          '<div style="font-size: 9px; color: #28a745; margin-top: 2px; font-weight: bold;">Vừa tạo</div>' +
+                          '</div>' +
+                          
+                          // Action buttons
+                          '<button type="button" class="btn btn-sm btn-primary" ' +
+                          'style="position: absolute; top: 5px; left: 5px; z-index: 10; opacity: 0.8;" ' +
+                          'onclick="loadPicker(\'' + folderPath + '\')" title="Mở thư mục ' + folderName + '">' +
+                          '<i class="fa fa-folder-open"></i></button>' +
+                          
+                          '<button type="button" class="btn btn-sm btn-danger" ' +
+                          'style="position: absolute; top: 5px; right: 5px; z-index: 10; opacity: 0.8;" ' +
+                          'onclick="removeFolder(\'' + folderPath + '\')" title="Xóa thư mục ' + folderName + '">' +
+                          '<i class="fa fa-trash"></i></button>' +
+                          
+                          '</div></div>');
+        
+        // Add with animation
+        folderCard.css({
+            'opacity': '0',
+            'transform': 'scale(0.8)'
+        });
+        
+        // Insert at the beginning (folders first)
+        container.prepend(folderCard);
+        
+        // Animate in
+        folderCard.animate({
+            'opacity': 1
+        }, 300).css({
+            'transform': 'scale(1)',
+            'transition': 'transform 0.3s ease'
+        });
+        
+        // Clear cache to ensure fresh data on next load
+        var searchText = $("#txtSearch").val().trim();
+        var cacheKey = currentPath + '|' + searchText;
+        directoryCache.delete(cacheKey);
+    }
+
+    // Smooth refresh current directory without losing view
+    function refreshCurrentDirectory() {
+        // Clear cache for current directory to get fresh data
+        var searchText = $("#txtSearch").val().trim();
+        var cacheKey = currentPath + '|' + searchText;
+        directoryCache.delete(cacheKey);
+        
+        // Add subtle loading indicator
+        var container = $("#divContainer");
+        container.css('opacity', '0.7');
+        
+        $.ajax({
+            url: "/filepicker/List",
+            method: "POST",
+            data: { 
+                path: currentPath, 
+                text: searchText,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            },
+            timeout: 10000,
+            success: function(html) {
+                // Cache the fresh result
+                if (!searchText) {
+                    directoryCache.set(cacheKey, {
+                        html: html,
+                        timestamp: Date.now()
+                    });
+                }
+                
+                // Smooth update without flicker
+                container.html(html).animate({opacity: 1}, 300);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error refreshing directory:', error);
+                // Removed refresh error toast - silent fail
+                container.css('opacity', '1'); // Restore opacity on error
+            }
+        });
+    }
+
+    // Create folder - ENHANCED with validation
+    function createFolder() {
+        var folderName = $("#folderName").val().trim();
+        
+        // Validation
+        if (!folderName) {
+            // Removed folder name validation toast - silent validation
+            return;
+        }
+
+        if (folderName.length > 100) {
+            // Removed folder length validation toast - silent validation
+            return;
+        }
+
+        // Check for invalid characters
+        var invalidChars = /[<>:"/\\|?*]/;
+        if (invalidChars.test(folderName)) {
+            // Removed folder character validation toast - silent validation
+            return;
+        }
+
+        setButtonLoading('#btnCreateDirectory', true);
+
+        $.ajax({
+            url: "/filepicker/createfolder",
+            method: "POST",
+            data: { 
+                path: currentPath, 
+                folderName: folderName,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            },
+            timeout: 15000,
+            success: function(response) {
+                if (response.success) {
+                    // Removed folder creation success toast - silent success
+                    var folderName = $("#folderName").val().trim();
+                    $("#folderName").val('');
+                    
+                    // Add new folder to current view without reload
+                    addFolderToCurrentView(folderName);
+                } else {
+                    // Removed folder creation error toast - silent fail
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error creating folder:', error);
+                // Removed folder creation error toast - silent fail
+            },
+            complete: function() {
+                setButtonLoading('#btnCreateDirectory', false);
+            }
+        });
+    }
+
+    // Go back function - FIXED logic error
+    function goBack() {
+        if (pathHistory.length > 1) {
+            pathHistory.pop(); // Remove current path
+            var previousPath = pathHistory[pathHistory.length - 1];
+            loadPicker(previousPath);
+        } else if (currentPath) {
+            var index = currentPath.lastIndexOf("/");
+            if (index > 0) {
+                var parentPath = currentPath.substring(0, index);
+                loadPicker(parentPath);
+            } else {
+                loadPicker("");
+            }
+        }
+    }
+
+
+    // File validation
+    function validateFiles(files) {
+        var maxSize = 10 * 1024 * 1024; // 10MB
+        var allowedTypes = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx'];
+        
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+            
+            // Check file size
+            if (file.size > maxSize) {
+                return {
+                    isValid: false,
+                    message: 'File "' + file.name + '" vượt quá kích thước cho phép (10MB)'
+                };
+            }
+            
+            // Check file type
+            var extension = '.' + file.name.split('.').pop().toLowerCase();
+            if (allowedTypes.indexOf(extension) === -1) {
+                return {
+                    isValid: false,
+                    message: 'File "' + file.name + '" có định dạng không được hỗ trợ'
+                };
+            }
+        }
+        
+        return { isValid: true };
+    }
+
+    // Remove folder with modern confirmation
+    function removeFolder(folderPath) {
+        Swal.fire({
+            title: 'Xóa thư mục',
+            text: 'Bạn có chắc chắn muốn xóa thư mục này? Tất cả file trong thư mục sẽ bị xóa.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                deleteFolder(folderPath);
+            }
+        });
+    }
+
+    // Delete folder - COMPLETELY DISABLED due to server permissions - v2025.11.08.10.00
+    function deleteFolder(folderPath) {
+        console.log('Delete folder requested (DISABLED):', folderPath);
+        var folderName = folderPath.split('/').pop() || folderPath;
+        
+        Swal.fire({
+            title: 'Chức năng tạm thời không khả dụng',
+            html: '<p>Chức năng xóa thư mục hiện tại bị vô hiệu hóa do vấn đề permissions trên server.</p>' +
+                  '<p><strong>Thư mục:</strong> ' + folderName + '</p>' +
+                  '<p>Vui lòng liên hệ quản trị viên để xóa thư mục này.</p>',
+            icon: 'warning',
+            confirmButtonText: 'Đã hiểu',
+            confirmButtonColor: '#3085d6'
+        });
+        
+        // Prevent any server calls
+        return false;
+    }
+
+
+
+
+    // Remove file with modern confirmation
+    function removeFile(filePath) {
+        // Get file name for display
+        var fileName = filePath.split('/').pop() || filePath;
+        
+        // Instant visual feedback - dim the file card
+        dimFileCard(filePath);
+        
+        // Beautiful custom confirmation dialog
+        showDeleteConfirmation(fileName, function() {
+            // User confirmed - proceed with deletion
+            removeFileFromCurrentView(filePath);
+            deleteFileActual(filePath);
+        }, function() {
+            // User cancelled - restore visual state
+            restoreFileVisualState(filePath);
+        });
+    }
+    
+    // Dim file card for instant feedback
+    function dimFileCard(filePath) {
+        var fileCards = $("#divContainer .file-item");
+        fileCards.each(function() {
+            var $card = $(this);
+            var deleteButton = $card.find('button[onclick*="removeFile"]');
+            if (deleteButton.length > 0) {
+                var buttonOnclick = deleteButton.attr('onclick');
+                if (buttonOnclick && buttonOnclick.includes(filePath)) {
+                    $card.css({
+                        'opacity': '0.5',
+                        'filter': 'grayscale(50%)',
+                        'pointer-events': 'none'
+                    });
+                    return false; // Break loop
+                }
+            }
+        });
+    }
+    
+    // Restore file visual state if delete cancelled
+    function restoreFileVisualState(filePath) {
+        var fileCards = $("#divContainer .file-item");
+        fileCards.each(function() {
+            var $card = $(this);
+            var deleteButton = $card.find('button[onclick*="removeFile"]');
+            if (deleteButton.length > 0) {
+                var buttonOnclick = deleteButton.attr('onclick');
+                if (buttonOnclick && buttonOnclick.includes(filePath)) {
+                    $card.css({
+                        'opacity': '1',
+                        'filter': 'none',
+                        'pointer-events': 'auto'
+                    });
+                    return false; // Break loop
+                }
+            }
+        });
+    }
+
+    // Delete file - RE-ENABLED with enhanced error handling - v2025.11.08.10.04
+    function deleteFileActual(filePath) {
+        
+        $.ajax({
+            url: "/filepicker/RemoveFile",
+            method: "POST",
+            data: { 
+                fullPath: filePath,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() || ''
+            },
+            timeout: 8000, // Reduced timeout for faster feedback
+            cache: false,
+            success: function(response) {
+                // Handle both response formats: {success: true} and {Code: 1}
+                var isSuccess = response.success === true || response.Code === 1;
+                var message = response.message || response.Message || 'Delete completed';
+                
+                if (isSuccess) {
+                    // File already removed optimistically - success confirmed
+                    // Show brief success animation
+                    showDeleteSuccess();
+                } else {
+                    console.error('Delete failed:', message);
+                    // Restore file since server delete failed
+                    restoreDeletedFile(filePath);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Delete error - Status:', xhr.status);
+                console.error('Delete error - Response:', xhr.responseText);
+                
+                var fileName = filePath.split('/').pop();
+                
+                if (xhr.status === 500 && xhr.responseText.includes('Access to the path')) {
+                    // Show specific permissions error with helpful instructions
+                    Swal.fire({
+                        title: 'Lỗi Permissions - Không thể xóa file',
+                        html: '<div style="text-align: left;">' +
+                              '<p><strong>File:</strong> ' + fileName + '</p>' +
+                              '<p><strong>Lỗi:</strong> Server không có quyền xóa file này.</p>' +
+                              '<hr>' +
+                              '<p><strong>🔧 Giải pháp cho Admin:</strong></p>' +
+                              '<ol>' +
+                              '<li><strong>Cấp quyền folder:</strong><br>' +
+                              '<code style="background: #f5f5f5; padding: 2px 4px; font-size: 12px;">icacls "C:\\Website_final2\\Website\\Image" /grant "IIS_IUSRS:(OI)(CI)F" /T</code></li>' +
+                              '<li><strong>Restart IIS Application Pool</strong></li>' +
+                              '<li><strong>Hoặc xóa file thủ công</strong> qua FTP/File Manager</li>' +
+                              '</ol>' +
+                              '<hr>' +
+                              '<p><strong>💡 Lưu ý:</strong> Upload và browse files vẫn hoạt động bình thường.</p>' +
+                              '</div>',
+                        icon: 'warning',
+                        confirmButtonText: 'Đã hiểu',
+                        confirmButtonColor: '#3085d6',
+                        width: '600px'
+                    });
+                } else {
+                    // Generic error - restore file and log
+                    console.error('Generic delete error:', fileName, error);
+                    restoreDeletedFile(filePath);
+                }
+            }
+        });
+    }
+    
+    // Restore deleted file if server delete failed
+    function restoreDeletedFile(filePath) {
+        // Force refresh directory to restore file
+        setTimeout(function() {
+            refreshCurrentDirectory();
+        }, 100);
+    }
+
+    // Utility functions
+    function setButtonLoading(selector, loading) {
+        var btn = $(selector);
+        if (loading) {
+            btn.prop('disabled', true);
+            var loadingText = btn.data('loading-text') || 'Loading...';
+            btn.data('original-text', btn.html());
+            btn.html('<i class="fa fa-spinner fa-spin"></i> ' + loadingText);
+        } else {
+            btn.prop('disabled', false);
+            var originalText = btn.data('original-text');
+            if (originalText) {
+                btn.html(originalText);
+            }
+        }
+    }
+
+    function showUploadProgress() {
+        $('#uploadProgress').show();
+        updateUploadProgress(0);
+    }
+
+    // Enhanced progress functions - OPTIMIZED
+    function updateUploadProgressOptimized(percent, speed, loaded, total) {
+        $('#progressBar').css('width', percent + '%');
+        
+        // Format speed and size
+        var speedText = formatBytes(speed) + '/s';
+        var sizeText = formatBytes(loaded) + ' / ' + formatBytes(total);
+        
+        $('#progressText').html(percent + '% - ' + speedText + '<br><small>' + sizeText + '</small>');
+    }
+    
+    function updateUploadProgress(percent) {
+        $('#progressBar').css('width', percent + '%');
+        $('#progressText').text(percent + '%');
+    }
+
+    function hideUploadProgress() {
+        $('#uploadProgress').hide();
+    }
+    
+    // Loading skeleton for better UX
+    function showLoadingSkeleton() {
+        var skeleton = '<div class="loading-skeleton">' +
+                      '<div class="row">' +
+                      Array(8).fill(0).map(function() {
+                          return '<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">' +
+                                 '<div class="skeleton-item">' +
+                                 '<div class="skeleton-image"></div>' +
+                                 '<div class="skeleton-text"></div>' +
+                                 '</div></div>';
+                      }).join('') +
+                      '</div></div>';
+        $('#divContainer').html(skeleton);
+    }
+    
+    function hideLoadingSkeleton() {
+        $('.loading-skeleton').remove();
+    }
+    
+    // Format bytes helper
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        var k = 1024;
+        var sizes = ['B', 'KB', 'MB', 'GB'];
+        var i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+    
+    // Get display name for prettier file names
+    function getDisplayName(fileName) {
+        if (!fileName) return 'Unknown';
+        
+        var nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+        var extension = fileName.substring(fileName.lastIndexOf('.')) || '';
+        
+        // If filename is very long hash-like string, create a prettier name
+        if (nameWithoutExt.length > 30 && isHashLike(nameWithoutExt)) {
+            var fileType = getFileTypeFromExtension(extension);
+            var now = new Date();
+            var timestamp = now.getHours().toString().padStart(2, '0') + ':' + 
+                           now.getMinutes().toString().padStart(2, '0');
+            return fileType + '_' + timestamp + extension;
+        }
+        
+        // If filename is too long, truncate it nicely
+        if (nameWithoutExt.length > 20) {
+            return nameWithoutExt.substring(0, 15) + '...' + extension;
+        }
+        
+        return fileName;
+    }
+    
+    // Check if string looks like a hash
+    function isHashLike(text) {
+        if (text.length < 20) return false;
+        
+        var alphanumericCount = 0;
+        for (var i = 0; i < text.length; i++) {
+            var c = text.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
+                alphanumericCount++;
+            }
+        }
+        
+        // If more than 80% is alphanumeric, consider it hash-like
+        return (alphanumericCount / text.length) > 0.8;
+    }
+    
+    // Get file type from extension
+    function getFileTypeFromExtension(extension) {
+        switch (extension.toLowerCase()) {
+            case '.jpg':
+            case '.jpeg':
+            case '.png':
+            case '.gif':
+            case '.webp':
+                return 'Hình ảnh';
+            case '.pdf':
+                return 'PDF';
+            case '.doc':
+            case '.docx':
+                return 'Word';
+            case '.xls':
+            case '.xlsx':
+                return 'Excel';
+            case '.ppt':
+            case '.pptx':
+                return 'PowerPoint';
+            default:
+                return 'File';
+        }
+    }
+    
+    // Beautiful delete confirmation dialog
+    function showDeleteConfirmation(fileName, onConfirm, onCancel) {
+        // Remove any existing dialog
+        $('.delete-confirmation-overlay').remove();
+        
+        var displayName = getDisplayName(fileName);
+        var fileIcon = getFileIcon(fileName);
+        
+        var dialogHtml = 
+            '<div class="delete-confirmation-overlay" style="' +
+                'position: fixed; top: 0; left: 0; right: 0; bottom: 0; ' +
+                'background: rgba(0,0,0,0.5); z-index: 10000; ' +
+                'display: flex; align-items: center; justify-content: center; ' +
+                'animation: fadeIn 0.2s ease;' +
+            '">' +
+                '<div class="delete-confirmation-dialog" style="' +
+                    'background: white; border-radius: 12px; padding: 0; ' +
+                    'box-shadow: 0 20px 60px rgba(0,0,0,0.3); ' +
+                    'max-width: 400px; width: 90%; ' +
+                    'animation: slideIn 0.3s ease; ' +
+                    'overflow: hidden;' +
+                '">' +
+                    // Header
+                    '<div style="' +
+                        'background: linear-gradient(135deg, #ff6b6b, #ee5a52); ' +
+                        'color: white; padding: 20px; text-align: center;' +
+                    '">' +
+                        '<i class="fa fa-trash-o" style="font-size: 32px; margin-bottom: 8px;"></i>' +
+                        '<h4 style="margin: 0; font-weight: 600;">Xác nhận xóa file</h4>' +
+                    '</div>' +
+                    
+                    // Content
+                    '<div style="padding: 24px; text-align: center;">' +
+                        '<div style="' +
+                            'background: #f8f9fa; border-radius: 8px; ' +
+                            'padding: 16px; margin-bottom: 20px; ' +
+                            'display: flex; align-items: center; gap: 12px;' +
+                        '">' +
+                            '<i class="fa ' + fileIcon + '" style="font-size: 24px; color: #6c757d;"></i>' +
+                            '<div style="text-align: left; flex: 1;">' +
+                                '<div style="font-weight: 600; color: #333; font-size: 14px;" title="' + fileName + '">' + displayName + '</div>' +
+                                '<div style="font-size: 12px; color: #6c757d;">File sẽ bị xóa vĩnh viễn</div>' +
+                            '</div>' +
+                        '</div>' +
+                        
+                        '<p style="color: #666; margin: 0 0 24px 0; font-size: 14px;">' +
+                            'Bạn có chắc chắn muốn xóa file này không?' +
+                        '</p>' +
+                        
+                        // Buttons
+                        '<div style="display: flex; gap: 12px;">' +
+                            '<button class="delete-cancel-btn" style="' +
+                                'flex: 1; padding: 12px; border: 2px solid #dee2e6; ' +
+                                'background: white; color: #6c757d; border-radius: 8px; ' +
+                                'font-weight: 500; cursor: pointer; transition: all 0.2s;' +
+                            '" onmouseover="this.style.background=\'#f8f9fa\'" onmouseout="this.style.background=\'white\'">' +
+                                '<i class="fa fa-times"></i> Hủy' +
+                            '</button>' +
+                            '<button class="delete-confirm-btn" style="' +
+                                'flex: 1; padding: 12px; border: none; ' +
+                                'background: linear-gradient(135deg, #ff6b6b, #ee5a52); ' +
+                                'color: white; border-radius: 8px; font-weight: 500; ' +
+                                'cursor: pointer; transition: all 0.2s;' +
+                            '" onmouseover="this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.transform=\'translateY(0)\'">' +
+                                '<i class="fa fa-trash"></i> Xóa' +
+                            '</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        
+        // Add CSS animations
+        var style = $('<style>').text(`
+            @@keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @@keyframes slideIn {
+                from { transform: translateY(-20px) scale(0.95); opacity: 0; }
+                to { transform: translateY(0) scale(1); opacity: 1; }
+            }
+        `);
+        $('head').append(style);
+        
+        // Add dialog to page
+        $('body').append(dialogHtml);
+        
+        // Event handlers
+        $('.delete-cancel-btn').click(function() {
+            closeDeleteDialog();
+            if (onCancel) onCancel();
+        });
+        
+        $('.delete-confirm-btn').click(function() {
+            // Show loading state
+            $(this).html('<i class="fa fa-spinner fa-spin"></i> Đang xóa...').prop('disabled', true);
+            $('.delete-cancel-btn').prop('disabled', true).css('opacity', '0.5');
+            
+            // Close dialog after short delay to show loading
+            setTimeout(function() {
+                closeDeleteDialog();
+                if (onConfirm) onConfirm();
+            }, 300);
+        });
+        
+        // Close on overlay click
+        $('.delete-confirmation-overlay').click(function(e) {
+            if (e.target === this) {
+                closeDeleteDialog();
+                if (onCancel) onCancel();
+            }
+        });
+        
+        // Close on ESC key
+        $(document).on('keydown.deleteDialog', function(e) {
+            if (e.keyCode === 27) { // ESC
+                closeDeleteDialog();
+                if (onCancel) onCancel();
+            }
+        });
+    }
+    
+    // Close delete confirmation dialog
+    function closeDeleteDialog() {
+        $('.delete-confirmation-overlay').fadeOut(200, function() {
+            $(this).remove();
+        });
+        $(document).off('keydown.deleteDialog');
+    }
+    
+    // Get file icon based on extension
+    function getFileIcon(fileName) {
+        var ext = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
+        switch (ext) {
+            case '.jpg':
+            case '.jpeg':
+            case '.png':
+            case '.gif':
+            case '.webp':
+                return 'fa-file-image-o';
+            case '.pdf':
+                return 'fa-file-pdf-o';
+            case '.doc':
+            case '.docx':
+                return 'fa-file-word-o';
+            case '.xls':
+            case '.xlsx':
+                return 'fa-file-excel-o';
+            case '.ppt':
+            case '.pptx':
+                return 'fa-file-powerpoint-o';
+            default:
+                return 'fa-file-o';
+        }
+    }
+    
+    // Show delete success animation
+    function showDeleteSuccess() {
+        var successHtml = 
+            '<div class="delete-success-notification" style="' +
+                'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); ' +
+                'background: linear-gradient(135deg, #28a745, #20c997); ' +
+                'color: white; padding: 20px 30px; border-radius: 50px; ' +
+                'box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3); ' +
+                'z-index: 10001; font-weight: 500; ' +
+                'animation: successPulse 0.6s ease;' +
+            '">' +
+                '<i class="fa fa-check-circle" style="font-size: 18px; margin-right: 8px;"></i>' +
+                'File đã được xóa!' +
+            '</div>';
+        
+        // Add success animation CSS
+        var successStyle = $('<style>').text(`
+            @@keyframes successPulse {
+                0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+                50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+                100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            }
+        `);
+        $('head').append(successStyle);
+        
+        $('body').append(successHtml);
+        
+        // Auto remove after 1.5 seconds
+        setTimeout(function() {
+            $('.delete-success-notification').fadeOut(300, function() {
+                $(this).remove();
+            });
+        }, 1500);
+    }
+
+    // Simple toast notification - NO POPUP, just 3s message
+    function showToast(message, type) {
+        // Remove existing toasts
+        $('.toast-notification').remove();
+        
+        var bgColor = type === 'success' ? '#28a745' : 
+                     type === 'warning' ? '#ffc107' : '#dc3545';
+        var textColor = type === 'warning' ? '#000' : '#fff';
+        
+        var toast = $('<div class="toast-notification">')
+            .css({
+                'position': 'fixed',
+                'top': '20px',
+                'right': '20px',
+                'background': bgColor,
+                'color': textColor,
+                'padding': '12px 20px',
+                'border-radius': '6px',
+                'font-size': '14px',
+                'font-weight': '500',
+                'box-shadow': '0 4px 12px rgba(0,0,0,0.15)',
+                'z-index': '9999',
+                'max-width': '350px',
+                'word-wrap': 'break-word',
+                'opacity': '0',
+                'transform': 'translateX(100%)',
+                'transition': 'all 0.3s ease'
+            })
+            .text(message);
+        
+        $('body').append(toast);
+        
+        // Animate in
+        setTimeout(function() {
+            toast.css({
+                'opacity': '1',
+                'transform': 'translateX(0)'
+            });
+        }, 10);
+        
+        // Auto remove after 3 seconds
+        setTimeout(function() {
+            toast.css({
+                'opacity': '0',
+                'transform': 'translateX(100%)'
+            });
+            setTimeout(function() {
+                toast.remove();
+            }, 300);
+        }, 3000);
+    }
+    
+    // Keep old function for complex error dialogs
+    function showMessage(message, type) {
+        var icon = type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'error';
+        Swal.fire({
+            title: type === 'success' ? 'Thành công' : type === 'warning' ? 'Cảnh báo' : 'Lỗi',
+            text: message,
+            icon: icon,
+            timer: 3000,
+            showConfirmButton: false
+        });
+    }
+
+    // Legacy function support (for backward compatibility)
+    function NoCallAction() {
+        // Empty function for legacy support
+    }
+
+    // Default callback function
+    function defaultCallback(file) {
+        console.log('File selected:', file);
+    }
+
+    // Error suppression for browser extensions
+    window.addEventListener('error', function(event) {
+        if (event.filename && (
+            event.filename.includes('extension://') || 
+            event.filename.includes('document_start.js') || 
+            event.filename.includes('document_end.js')
+        )) {
+            event.preventDefault();
+            return true;
+        }
+    });
+
+    window.addEventListener('unhandledrejection', function(event) {
+        if (event.reason && event.reason.stack && 
+            event.reason.stack.includes('document_start.js')) {
+            event.preventDefault();
+            return true;
+        }
+    });
+
+</script>
+</body>
+</html>

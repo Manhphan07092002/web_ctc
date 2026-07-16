@@ -1,0 +1,541 @@
+@{
+    ViewBag.Title = "Quản lý Hoạt động";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    
+    // Load activities data from database
+    var activitiesData = new List<System.Data.DataRow>();
+    var totalActivities = 0;
+    var totalEvents = 0;
+    var totalTraining = 0;
+    var totalNews = 0;
+    var totalMeetings = 0;
+    var errorMessage = "";
+    
+    try 
+    {
+        var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+        using (var conn = new System.Data.SqlClient.SqlConnection(connectionString))
+        {
+            conn.Open();
+            
+            // Get all activities for admin
+            var query = @"SELECT 
+                ActivityID, Title, Description, ActivityType, Location, ImageUrl,
+                CreatedDate, ViewCount, IsPublished, IsFeatured, StartDate
+                FROM Activities 
+                ORDER BY CreatedDate DESC";
+                
+            using (var cmd = new System.Data.SqlClient.SqlCommand(query, conn))
+            {
+                using (var adapter = new System.Data.SqlClient.SqlDataAdapter(cmd))
+                {
+                    var dt = new System.Data.DataTable();
+                    adapter.Fill(dt);
+                    
+                    foreach (System.Data.DataRow row in dt.Rows)
+                    {
+                        activitiesData.Add(row);
+                    }
+                }
+            }
+            
+            // Get statistics
+            var statsQuery = @"
+                SELECT 
+                    COUNT(*) as TotalActivities,
+                    SUM(CASE WHEN ActivityType = 'events' THEN 1 ELSE 0 END) as EventsCount,
+                    SUM(CASE WHEN ActivityType = 'training' THEN 1 ELSE 0 END) as TrainingCount,
+                    SUM(CASE WHEN ActivityType = 'news' THEN 1 ELSE 0 END) as NewsCount,
+                    SUM(CASE WHEN ActivityType = 'meetings' THEN 1 ELSE 0 END) as MeetingsCount
+                FROM Activities";
+
+            using (var statsCmd = new System.Data.SqlClient.SqlCommand(statsQuery, conn))
+            {
+                using (var reader = statsCmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        totalActivities = reader["TotalActivities"] != DBNull.Value ? Convert.ToInt32(reader["TotalActivities"]) : 0;
+                        totalEvents = reader["EventsCount"] != DBNull.Value ? Convert.ToInt32(reader["EventsCount"]) : 0;
+                        totalTraining = reader["TrainingCount"] != DBNull.Value ? Convert.ToInt32(reader["TrainingCount"]) : 0;
+                        totalNews = reader["NewsCount"] != DBNull.Value ? Convert.ToInt32(reader["NewsCount"]) : 0;
+                        totalMeetings = reader["MeetingsCount"] != DBNull.Value ? Convert.ToInt32(reader["MeetingsCount"]) : 0;
+                    }
+                }
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        errorMessage = ex.Message;
+    }
+}
+
+<div class="right_col" role="main">
+    <div class="">
+        <div class="page-title">
+            <div class="title_left">
+                <h3>Quản lý Hoạt động <small>Thêm, sửa, xóa các hoạt động</small></h3>
+            </div>
+        </div>
+
+        <div class="clearfix"></div>
+
+        <!-- Statistics Cards -->
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Thống kê tổng quan</h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <div class="row">
+                            <div class="col-md-2 col-sm-4 col-xs-6">
+                                <div class="tile-stats">
+                                    <div class="icon"><i class="fa fa-calendar"></i></div>
+                                    <div class="count">@totalActivities</div>
+                                    <h3>Tổng hoạt động</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-4 col-xs-6">
+                                <div class="tile-stats">
+                                    <div class="icon"><i class="fa fa-calendar-alt"></i></div>
+                                    <div class="count">@totalEvents</div>
+                                    <h3>Sự kiện</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-4 col-xs-6">
+                                <div class="tile-stats">
+                                    <div class="icon"><i class="fa fa-graduation-cap"></i></div>
+                                    <div class="count">@totalTraining</div>
+                                    <h3>Đào tạo</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-4 col-xs-6">
+                                <div class="tile-stats">
+                                    <div class="icon"><i class="fa fa-newspaper-o"></i></div>
+                                    <div class="count">@totalNews</div>
+                                    <h3>Tin tức</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-4 col-xs-6">
+                                <div class="tile-stats">
+                                    <div class="icon"><i class="fa fa-users"></i></div>
+                                    <div class="count">@totalMeetings</div>
+                                    <h3>Cuộc họp</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Danh sách hoạt động</h2>
+                        <div class="pull-right">
+                            <button type="button" class="btn btn-success" onclick="showAddModal()">
+                                <i class="fa fa-plus"></i> Thêm hoạt động mới
+                            </button>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger">
+                                <strong>Lỗi:</strong> @errorMessage
+                            </div>
+                        }
+
+                        <table id="activitiesTable" class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tiêu đề</th>
+                                    <th>Loại</th>
+                                    <th>Địa điểm</th>
+                                    <th>Lượt xem</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (activitiesData != null && activitiesData.Count > 0)
+                                {
+                                    foreach (var row in activitiesData)
+                                    {
+                                        var isPublished = row["IsPublished"] != DBNull.Value ? Convert.ToBoolean(row["IsPublished"]) : false;
+                                        var isFeatured = row["IsFeatured"] != DBNull.Value ? Convert.ToBoolean(row["IsFeatured"]) : false;
+                                        var createdDate = Convert.ToDateTime(row["CreatedDate"]).ToString("dd/MM/yyyy HH:mm");
+                                        
+                                        <tr>
+                                            <td>@row["ActivityID"]</td>
+                                            <td>
+                                                <strong>@row["Title"]</strong>
+                                                @if (isFeatured)
+                                                {
+                                                    <span class="label label-warning">Nổi bật</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="label label-info">@row["ActivityType"]</span>
+                                            </td>
+                                            <td>@(row["Location"] ?? "—")</td>
+                                            <td>@(row["ViewCount"] ?? 0)</td>
+                                            <td>
+                                                @if (isPublished)
+                                                {
+                                                    <span class="label label-success">Đã xuất bản</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="label label-default">Nháp</span>
+                                                }
+                                            </td>
+                                            <td>@createdDate</td>
+                                            <td>
+                                                <button type="button" class="btn btn-primary btn-xs" onclick="showEditModal('@row["ActivityID"]')">
+                                                    <i class="fa fa-edit"></i> Sửa
+                                                </button>
+                                                <button type="button" class="btn btn-danger btn-xs" onclick="deleteActivity('@row["ActivityID"]', '@Html.Raw(Html.Encode(row["Title"]))')">
+                                                    <i class="fa fa-trash"></i> Xóa
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal fade" id="activityModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title" id="modalTitle">Thêm hoạt động mới</h4>
+            </div>
+            <form id="activityForm">
+                <div class="modal-body">
+                    <input type="hidden" id="activityId" name="ActivityID">
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>Tiêu đề <span class="required">*</span></label>
+                                <input type="text" class="form-control" id="title" name="Title" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Loại hoạt động <span class="required">*</span></label>
+                                <select class="form-control" id="activityType" name="ActivityType" required>
+                                    <option value="">Chọn loại</option>
+                                    <option value="events">Sự kiện</option>
+                                    <option value="training">Đào tạo</option>
+                                    <option value="news">Tin tức</option>
+                                    <option value="meetings">Cuộc họp</option>
+                                    <option value="projects">Dự án</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Địa điểm</label>
+                                <input type="text" class="form-control" id="location" name="Location">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Ngày bắt đầu</label>
+                                <input type="datetime-local" class="form-control" id="startDate" name="StartDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <textarea class="form-control" id="description" name="Description" rows="4"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Hình ảnh</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="imageUrl" name="ImageUrl" placeholder="URL hình ảnh">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" onclick="selectIMG('#imageUrl', '#imagePreview')">
+                                    <i class="fa fa-image"></i> Chọn ảnh
+                                </button>
+                            </span>
+                        </div>
+                        <div class="mt-2">
+                            <img id="imagePreview" src="" style="max-width: 200px; max-height: 150px; display: none;" class="img-thumbnail">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="isPublished" name="IsPublished"> Xuất bản ngay
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="isFeatured" name="IsFeatured"> Đánh dấu nổi bật
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save"></i> Lưu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.tile-stats {
+    background: #fff;
+    border: 1px solid #E4E4E4;
+    border-radius: 5px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.tile-stats .icon {
+    font-size: 40px;
+    color: #26B99A;
+    margin-bottom: 10px;
+}
+
+.tile-stats .count {
+    font-size: 30px;
+    font-weight: bold;
+    color: #26B99A;
+}
+
+.tile-stats h3 {
+    font-size: 14px;
+    margin: 5px 0 0 0;
+    color: #666;
+}
+
+.required {
+    color: red;
+}
+
+.mt-2 {
+    margin-top: 10px;
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    // Initialize DataTable
+    $('#activitiesTable').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+        },
+        "order": [[ 6, "desc" ]], // Sort by created date
+        "pageLength": 25
+    });
+
+    // Form submission
+    $('#activityForm').on('submit', function(e) {
+        e.preventDefault();
+        saveActivity();
+    });
+
+    // Image URL change handler
+    $('#imageUrl').on('input', function() {
+        var url = $(this).val();
+        var preview = $('#imagePreview');
+        if (url) {
+            preview.attr('src', url).show();
+        } else {
+            preview.hide();
+        }
+    });
+});
+
+function showAddModal() {
+    $('#modalTitle').text('Thêm hoạt động mới');
+    $('#activityForm')[0].reset();
+    $('#activityId').val('');
+    $('#imagePreview').hide();
+    $('#activityModal').modal('show');
+}
+
+function showEditModal(activityId) {
+    $('#modalTitle').text('Chỉnh sửa hoạt động');
+    
+    // Find activity data from table
+    var row = $(`#activitiesTable tbody tr`).filter(function() {
+        return $(this).find('td:first').text() === activityId;
+    });
+    
+    if (row.length > 0) {
+        // Load basic data from table
+        $('#activityId').val(activityId);
+        $('#title').val(row.find('td:nth-child(2) strong').text());
+        $('#activityType').val(row.find('td:nth-child(3) .label').text());
+        $('#location').val(row.find('td:nth-child(4)').text() === '—' ? '' : row.find('td:nth-child(4)').text());
+        
+        // Load full data via AJAX
+        loadActivityDetails(activityId);
+    }
+    
+    $('#activityModal').modal('show');
+}
+
+function loadActivityDetails(activityId) {
+    $.ajax({
+        url: '/admin/api/hoat-dong/' + activityId,
+        type: 'GET',
+        data: { id: activityId },
+        success: function(data) {
+            if (data.success) {
+                var activity = data.activity;
+                $('#description').val(activity.Description || '');
+                $('#imageUrl').val(activity.ImageUrl || '');
+                $('#startDate').val(activity.StartDate ? new Date(activity.StartDate).toISOString().slice(0, 16) : '');
+                $('#isPublished').prop('checked', activity.IsPublished || false);
+                $('#isFeatured').prop('checked', activity.IsFeatured || false);
+                
+                if (activity.ImageUrl) {
+                    $('#imagePreview').attr('src', activity.ImageUrl).show();
+                }
+            }
+        },
+        error: function() {
+            console.log('Could not load activity details');
+        }
+    });
+}
+
+function saveActivity() {
+    var formData = {
+        ActivityID: $('#activityId').val(),
+        Title: $('#title').val(),
+        Description: $('#description').val(),
+        ActivityType: $('#activityType').val(),
+        Location: $('#location').val(),
+        ImageUrl: $('#imageUrl').val(),
+        StartDate: $('#startDate').val(),
+        IsPublished: $('#isPublished').is(':checked'),
+        IsFeatured: $('#isFeatured').is(':checked')
+    };
+
+    var url = formData.ActivityID ? '/admin/hoat-dong/chinh-sua/' + formData.ActivityID : '/admin/hoat-dong/tao-moi';
+    
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: formData,
+        success: function(response) {
+            if (response.success) {
+                Swal.fire({
+                    title: 'Thành công!',
+                    text: response.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(function() {
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    title: 'Lỗi!',
+                    text: response.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        },
+        error: function() {
+            Swal.fire({
+                title: 'Lỗi!',
+                text: 'Có lỗi xảy ra khi lưu dữ liệu',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+}
+
+function deleteActivity(activityId, title) {
+    Swal.fire({
+        title: 'Xác nhận xóa',
+        text: `Bạn có chắc chắn muốn xóa hoạt động "${title}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Xóa',
+        cancelButtonText: 'Hủy'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '/admin/hoat-dong/xoa/' + activityId,
+                type: 'POST',
+                data: { id: activityId },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Đã xóa!',
+                            text: response.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(function() {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Lỗi!',
+                            text: response.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        title: 'Lỗi!',
+                        text: 'Có lỗi xảy ra khi xóa dữ liệu',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        }
+    });
+}
+</script>

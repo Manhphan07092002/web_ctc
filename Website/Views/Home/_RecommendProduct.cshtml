@@ -1,0 +1,692 @@
+@* =============================================================== *@
+@* == THÊM MỚI: Liên kết tới file CSS riêng cho module này == *@
+@* =============================================================== *@
+<link href="@Url.Content("~/Content/css/RecommendProduct.css")" rel="stylesheet" type="text/css" />
+
+
+@*
+    Tệp hoàn chỉnh cho Module "Sản phẩm nổi bật"
+    - PHIÊN BẢN: DÙNG CAROUSEL CÓ SẴN CỦA BOOTSTRAP 3
+    - CẬP NHẬT: Đã tách CSS ra file RecommendProduct.css
+*@
+
+@{
+    // --- PHẦN LOGIC LẤY SẢN PHẨM - OPTIMIZED ---
+    try
+    {
+        Cubetech.Website.DAO.WProductsDAO productDao = new Cubetech.Website.DAO.WProductsDAO();
+        // Optimized: Limit to 8 products, filter early, order efficiently
+        var lstFeaturedProducts = productDao.Model.Products
+            .Where(p => p.IsDelete == false && p.IsActive == true)
+            .OrderByDescending(p => p.ID)
+            .Take(8)
+            .ToList();
+
+        // --- BẮT ĐẦU PHẦN GIAO DIỆN ---
+        <div class="widget-product-grid highline-new clearfix">
+            <div class="box-heading-new">
+                <h2>SẢN PHẨM NỔI BẬT</h2>
+                <div class="empty"></div>
+            </div>
+
+            @if (lstFeaturedProducts != null && lstFeaturedProducts.Any())
+            {
+                <div id="featured-product-carousel" class="carousel slide" data-ride="carousel">
+                    <ol class="carousel-indicators">
+                        @for (int i = 0; i < (Math.Ceiling(lstFeaturedProducts.Count / 4.0)); i++)
+                        {
+                            <li data-target="#featured-product-carousel" data-slide-to="@i" class="@(i == 0 ? "active" : "")"></li>
+                        }
+                    </ol>
+
+                    <div class="carousel-inner" role="listbox">
+                        @for (int i = 0; i < lstFeaturedProducts.Count; i++)
+                        {
+                            var product = lstFeaturedProducts[i];
+
+                            // Bắt đầu một slide mới sau mỗi 4 sản phẩm
+                            if (i % 4 == 0)
+                            {
+                                @:<div class="item @(i == 0 ? "active" : "")">
+                                @:<div class="row">
+                            }
+
+                            // --- Hiển thị từng sản phẩm trong cột - RESPONSIVE GRID ---
+                            <div class="col-xs-6 col-sm-4 col-md-3 product-grid-item">
+                                <div class="product-card fixed-size-card">
+                                    <div class="product-image-container">
+                                        <a href="@Url.Action("Detail", "WProducts", new { id = product.ID })" class="product-image-link" title="@product.Name">
+                                            @{
+                                                string productImageUrl;
+                                                if (string.IsNullOrEmpty(product.Image1))
+                                                {
+                                                    productImageUrl = Url.Content("~/Content/Image/noimage.png");
+                                                }
+                                                else
+                                                {
+                                                    productImageUrl = product.Image1.StartsWith("~") 
+                                                        ? Url.Content(product.Image1)
+                                                        : (product.Image1.StartsWith("/") 
+                                                            ? Url.Content("~" + product.Image1)
+                                                            : (product.Image1.StartsWith("Content/") || product.Image1.StartsWith("Image/")
+                                                                ? Url.Content("~/" + product.Image1)
+                                                                : Url.Content("~/Image/" + product.Image1)));
+                                                }
+                                            }
+                                            <img src="@productImageUrl" 
+                                                 alt="@product.Name" 
+                                                 class="product-image"
+                                                 loading="@(i < 4 ? "eager" : "lazy")"
+                                                 decoding="async"
+                                                 width="300"
+                                                 height="300"
+                                                 data-fallback="@Url.Content("~/Content/Image/noimage.png")"
+                                                 onerror="if(this.src!==this.getAttribute('data-fallback')){this.src=this.getAttribute('data-fallback');}else{this.style.display='none';}">
+                                        </a>
+                                    </div>
+                                    <div class="product-info">
+                                        <h3 class="product-name">
+                                            <a href="@Url.Action("Detail", "WProducts", new { id = product.ID })" title="@product.Name">@product.Name</a>
+                                        </h3>
+                                        <div class="product-price">
+                                            @{
+                                                string priceDisplayText;
+                                                if (product.PriceSale2 > 0) { priceDisplayText = string.Format("{0:N0} ₫", product.PriceSale2); }
+                                                else if (product.PriceSale > 0) { priceDisplayText = string.Format("{0:N0} ₫", product.PriceSale); }
+                                                else if (product.Price > 0) { priceDisplayText = string.Format("{0:N0} ₫", product.Price); }
+                                                else { priceDisplayText = "Liên hệ"; }
+                                            }
+                                            <span>@priceDisplayText</span>
+                                        </div>
+                                    </div>
+                                    <a class="product-cart-icon" onclick="cart.add('@product.ID', 1, 'quick_buy');" title="Thêm vào giỏ hàng">
+                                        <i class="fa fa-shopping-cart"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            // Đóng một slide sau mỗi 4 sản phẩm hoặc khi hết danh sách
+                            if ((i + 1) % 4 == 0 || (i + 1) == lstFeaturedProducts.Count)
+                            {
+                                @:</div>
+                                @:</div>
+                            }
+                        }
+                    </div>
+
+                    <a class="left carousel-control" href="#featured-product-carousel" role="button" data-slide="prev">
+                        <span class="fa fa-angle-left" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="right carousel-control" href="#featured-product-carousel" role="button" data-slide="next">
+                        <span class="fa fa-angle-right" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div style="padding: 20px; text-align: center;">
+                    <p>Chưa có sản phẩm nổi bật nào.</p>
+                </div>
+            }
+        </div>
+    }
+    catch (Exception ex)
+    {
+        <div class="alert alert-danger">Đã có lỗi xảy ra khi tải sản phẩm. @ex.Message</div>
+    }
+}
+
+@* MOBILE-FIRST RESPONSIVE CSS *@
+<style>
+    /* --- MOBILE-FIRST CSS VARIABLES --- */
+    :root {
+        /* Mobile-first spacing */
+        --card-padding: 8px;
+        --card-height: 280px;
+        --image-height: 160px;
+        --card-radius: 8px;
+        --shadow-light: 0 2px 8px rgba(0,0,0,0.1);
+        --shadow-hover: 0 4px 15px rgba(0,0,0,0.15);
+        
+        /* Mobile-first typography */
+        --title-size: 13px;
+        --price-size: 14px;
+        --icon-size: 30px;
+    }
+    
+    /* Tablet and up */
+    @@media (min-width: 768px) {
+        :root {
+            --card-padding: 10px;
+            --card-height: 320px;
+            --image-height: 180px;
+            --card-radius: 10px;
+            --shadow-light: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-hover: 0 6px 20px rgba(0,0,0,0.15);
+            --title-size: 14px;
+            --price-size: 15px;
+            --icon-size: 32px;
+        }
+    }
+    
+    /* Desktop and up */
+    @@media (min-width: 1024px) {
+        :root {
+            --card-padding: 12px;
+            --card-height: 350px;
+            --image-height: 200px;
+            --card-radius: 12px;
+            --shadow-hover: 0 8px 25px rgba(0,0,0,0.15);
+            --title-size: 15px;
+            --price-size: 16px;
+            --icon-size: 35px;
+        }
+    }
+
+    /* --- MOBILE-FIRST PRODUCT CARDS --- */
+    .fixed-size-card {
+        height: var(--card-height) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        border: 1px solid #e0e0e0;
+        border-radius: var(--card-radius);
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
+        box-shadow: var(--shadow-light);
+        position: relative;
+    }
+
+    /* --- MOBILE-FIRST HOVER EFFECTS --- */
+    .fixed-size-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+    }
+    
+    /* Tablet and up */
+    @@media (min-width: 768px) {
+        .fixed-size-card:hover {
+            transform: translateY(-3px);
+        }
+    }
+    
+    /* Desktop and up */
+    @@media (min-width: 1024px) {
+        .fixed-size-card:hover {
+            transform: translateY(-5px);
+        }
+    }
+
+    /* --- MOBILE-FIRST IMAGE CONTAINER --- */
+    .product-image-container {
+        height: var(--image-height) !important;
+        width: 100%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        position: relative;
+    }
+
+    .product-image {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* --- MOBILE-FIRST IMAGE HOVER --- */
+    .fixed-size-card:hover .product-image {
+        transform: scale(1.02);
+    }
+    
+    /* Tablet and up */
+    @@media (min-width: 768px) {
+        .fixed-size-card:hover .product-image {
+            transform: scale(1.03);
+        }
+    }
+    
+    /* Desktop and up */
+    @@media (min-width: 1024px) {
+        .fixed-size-card:hover .product-image {
+            transform: scale(1.05);
+        }
+    }
+
+    /* --- MOBILE-FIRST PRODUCT INFO --- */
+    .product-info {
+        flex: 1 !important;
+        padding: var(--card-padding) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+    }
+    
+    /* Tablet and up */
+    @@media (min-width: 768px) {
+        .product-info {
+            padding: 12px !important;
+        }
+    }
+    
+    /* Desktop and up */
+    @@media (min-width: 1024px) {
+        .product-info {
+            padding: 15px !important;
+        }
+    }
+
+    /* --- MOBILE-FIRST PRODUCT NAME --- */
+    .product-name {
+        font-size: var(--title-size) !important;
+        font-weight: 600 !important;
+        margin-bottom: 8px !important;
+        line-height: 1.3 !important;
+        height: 32px !important;
+        overflow: hidden !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+    }
+    
+    /* Tablet and up */
+    @@media (min-width: 768px) {
+        .product-name {
+            margin-bottom: 10px !important;
+            height: 34px !important;
+        }
+    }
+    
+    /* Desktop and up */
+    @@media (min-width: 1024px) {
+        .product-name {
+            height: 36px !important;
+        }
+    }
+
+    .product-name a {
+        color: #333 !important;
+        text-decoration: none !important;
+        transition: color 0.3s ease;
+    }
+
+    .product-name a:hover {
+        color: #007bff !important;
+    }
+
+    /* --- MOBILE-FIRST PRODUCT PRICE --- */
+    .product-price {
+        font-size: var(--price-size) !important;
+        font-weight: bold !important;
+        color: #e74c3c !important;
+        margin-top: auto !important;
+    }
+
+    /* --- MOBILE-FIRST CART ICON --- */
+    .product-cart-icon {
+        position: absolute !important;
+        top: 8px !important;
+        right: 8px !important;
+        width: var(--icon-size) !important;
+        height: var(--icon-size) !important;
+        background: rgba(0,123,255,0.9) !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: white !important;
+        text-decoration: none !important;
+        opacity: 0 !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        cursor: pointer !important;
+        font-size: 12px !important;
+    }
+    
+    /* Tablet and up */
+    @@media (min-width: 768px) {
+        .product-cart-icon {
+            top: 10px !important;
+            right: 10px !important;
+            font-size: 13px !important;
+        }
+    }
+    
+    /* Desktop and up */
+    @@media (min-width: 1024px) {
+        .product-cart-icon {
+            font-size: 14px !important;
+        }
+    }
+
+    /* --- CART ICON INTERACTIONS --- */
+    .fixed-size-card:hover .product-cart-icon {
+        opacity: 1 !important;
+    }
+
+    .product-cart-icon:hover {
+        background: #0056b3 !important;
+        transform: scale(1.05) !important;
+    }
+    
+    /* Tablet and up */
+    @@media (min-width: 768px) {
+        .product-cart-icon:hover {
+            transform: scale(1.08) !important;
+        }
+    }
+    
+    /* Desktop and up */
+    @@media (min-width: 1024px) {
+        .product-cart-icon:hover {
+            transform: scale(1.1) !important;
+        }
+    }
+
+    /* --- MOBILE-FIRST CAROUSEL LAYOUT --- */
+    .carousel-inner .row {
+        margin: 0 !important;
+    }
+
+    .product-grid-item {
+        padding: var(--card-padding) !important;
+    }
+    
+    /* Tablet and up */
+    @@media (min-width: 768px) {
+        .product-grid-item {
+            padding: 10px !important;
+        }
+    }
+    
+    /* Desktop and up */
+    @@media (min-width: 1024px) {
+        .product-grid-item {
+            padding: 12px !important;
+        }
+    }
+
+    /* --- MOBILE-FIRST SECTION HEADING --- */
+    .widget-product-grid .box-heading-new {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .widget-product-grid .box-heading-new h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    /* Tablet and up */
+    @@media (min-width: 768px) {
+        .widget-product-grid .box-heading-new {
+            margin-bottom: 25px;
+        }
+        
+        .widget-product-grid .box-heading-new h2 {
+            font-size: 24px;
+        }
+    }
+    
+    /* Desktop and up */
+    @@media (min-width: 1024px) {
+        .widget-product-grid .box-heading-new {
+            margin-bottom: 30px;
+        }
+        
+        .widget-product-grid .box-heading-new h2 {
+            font-size: 28px;
+        }
+    }
+
+    /* --- MOBILE-FIRST CAROUSEL CONTROLS --- */
+    .carousel-control {
+        width: 40px !important;
+        height: 40px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        background: rgba(0,0,0,0.5) !important;
+        border-radius: 50% !important;
+        opacity: 0.7 !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .carousel-control.left {
+        left: 10px !important;
+    }
+    
+    .carousel-control.right {
+        right: 10px !important;
+    }
+    
+    .carousel-control:hover {
+        opacity: 1 !important;
+        background: rgba(0,0,0,0.7) !important;
+    }
+    
+    .carousel-control .fa {
+        font-size: 18px !important;
+        line-height: 40px !important;
+    }
+    
+    /* Tablet and up */
+    @@media (min-width: 768px) {
+        .carousel-control {
+            width: 45px !important;
+            height: 45px !important;
+        }
+        
+        .carousel-control.left {
+            left: 15px !important;
+        }
+        
+        .carousel-control.right {
+            right: 15px !important;
+        }
+        
+        .carousel-control .fa {
+            font-size: 20px !important;
+            line-height: 45px !important;
+        }
+    }
+    
+    /* Desktop and up */
+    @@media (min-width: 1024px) {
+        .carousel-control {
+            width: 50px !important;
+            height: 50px !important;
+        }
+        
+        .carousel-control.left {
+            left: 20px !important;
+        }
+        
+        .carousel-control.right {
+            right: 20px !important;
+        }
+        
+        .carousel-control .fa {
+            font-size: 22px !important;
+            line-height: 50px !important;
+        }
+    }
+
+    /* --- MOBILE-SPECIFIC OPTIMIZATIONS --- */
+    @@media (max-width: 480px) {
+        .carousel-indicators {
+            bottom: -30px !important;
+        }
+        
+        .carousel-indicators li {
+            width: 8px !important;
+            height: 8px !important;
+            margin: 0 3px !important;
+        }
+        
+        .product-cart-icon {
+            opacity: 1 !important; /* Always visible on mobile */
+        }
+    }
+
+    /* --- ACCESSIBILITY & PERFORMANCE --- */
+    @@media (prefers-reduced-motion: reduce) {
+        .fixed-size-card,
+        .product-image,
+        .product-cart-icon {
+            transition: none !important;
+        }
+        
+        .fixed-size-card:hover {
+            transform: none !important;
+        }
+        
+        .fixed-size-card:hover .product-image {
+            transform: none !important;
+        }
+    }
+    
+    /* Touch device optimizations */
+    @@media (hover: none) and (pointer: coarse) {
+        .product-cart-icon {
+            opacity: 1 !important; /* Always visible on touch devices */
+        }
+        
+        .fixed-size-card:hover {
+            transform: none !important;
+        }
+        
+        .fixed-size-card:hover .product-image {
+            transform: none !important;
+        }
+    }
+</style>
+
+<script defer>
+(function() {
+    'use strict';
+    
+    function initCarousel() {
+        // Wait for jQuery and Bootstrap to be available
+        if (typeof jQuery === 'undefined' || typeof jQuery().carousel === 'undefined') {
+            setTimeout(initCarousel, 100);
+            return;
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- MOBILE-OPTIMIZED CAROUSEL FUNCTIONALITY ---
+            
+            const carousel = document.getElementById('featured-product-carousel');
+            if (!carousel) return;
+    
+    // Mobile-specific carousel optimizations
+    function optimizeCarouselForMobile() {
+        const isMobile = window.innerWidth <= 768;
+        const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+        
+        if (isMobile) {
+            // Enable touch swipe on mobile
+            let startX = 0;
+            let endX = 0;
+            
+            carousel.addEventListener('touchstart', function(e) {
+                startX = e.touches[0].clientX;
+            }, { passive: true });
+            
+            carousel.addEventListener('touchend', function(e) {
+                endX = e.changedTouches[0].clientX;
+                handleSwipe();
+            }, { passive: true });
+            
+            function handleSwipe() {
+                const threshold = 50;
+                const diff = startX - endX;
+                
+                if (Math.abs(diff) > threshold) {
+                    if (diff > 0) {
+                        // Swipe left - next slide
+                        $('#featured-product-carousel').carousel('next');
+                    } else {
+                        // Swipe right - previous slide
+                        $('#featured-product-carousel').carousel('prev');
+                    }
+                }
+            }
+            
+            // Auto-play slower on mobile
+            $('#featured-product-carousel').carousel({
+                interval: 6000,
+                pause: 'hover'
+            });
+        } else {
+            // Faster auto-play on desktop
+            $('#featured-product-carousel').carousel({
+                interval: 4000,
+                pause: 'hover'
+            });
+        }
+    }
+    
+    // Initialize carousel optimization
+    optimizeCarouselForMobile();
+    
+    // Re-optimize on window resize
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(optimizeCarouselForMobile, 250);
+    }, { passive: true });
+    
+    // Lazy loading for product images
+    const productImages = document.querySelectorAll('.product-image');
+    
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                        imageObserver.unobserve(img);
+                    }
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '50px'
+        });
+        
+        productImages.forEach(img => {
+            if (img.src && img.src !== img.dataset.src) {
+                imageObserver.observe(img);
+            }
+        });
+    }
+    
+    // Performance optimization: Pause animations when not visible
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                $('#featured-product-carousel').carousel('cycle');
+            } else {
+                $('#featured-product-carousel').carousel('pause');
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    sectionObserver.observe(carousel);
+        });
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCarousel);
+    } else {
+        initCarousel();
+    }
+})();
+</script>

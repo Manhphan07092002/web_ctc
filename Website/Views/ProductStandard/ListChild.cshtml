@@ -1,0 +1,126 @@
+﻿@{
+    Layout = null;
+    var name = ViewData["ProductStandardName"];
+}
+
+
+<style>
+    #tbProductStandardChild > tbody > tr:nth-of-type(odd) {
+        background-color: #f9f9f9 !important;
+    }
+
+    /*.form-group input {display:block;
+     margin-bottom: 15px;*/
+    }
+
+    .row-header {
+        background-color: #f1f5f9 !important;
+    }
+
+    #datatablePreOrder_processing, #datatablePreOrder_waiting, #datatablePreOrder_popup {
+        border-collapse: collapse !important;
+    }
+
+    .row-noneborder-bottom {
+        border-top: 3px solid #3c8dbc !important;
+        border-left: 3px solid #3c8dbc !important;
+        border-right: 3px solid #3c8dbc !important;
+    }
+
+    .row-noneborder-top {
+        border-bottom: 3px solid #3c8dbc !important;
+        border-left: 3px solid #3c8dbc !important;
+        border-right: 3px solid #3c8dbc !important;
+    }
+
+    .table-responsive {
+        width: 100%;
+        margin-bottom: 15px;
+        overflow-y: hidden;
+    }
+
+    .dataTables_scrollBody {
+        overflow-x: hidden !important;
+    }
+</style>
+@*<div class="row">
+    <div class="col-xs-12">
+        <div class="panel panel-master list-panel" id="list-panel">
+            <div class="panel-body">
+                <div class="table-responsive">*@
+<table id="tbProductStandardChild" class="table table-striped" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th>Tên Tiêu Chuẩn</th>
+            <th>
+                <button type="button" class="btn btn-danger btn-xs refresh-button" id="refresh-button" onclick="UpdateStandardValue(0,@ViewData["ProductStandardID"])">
+                    <i title="Thêm Mới" class="glyphicon glyphicon-plus" aria-hidden="true"></i> Thêm mới
+                </button>
+                <input type="hidden" id="namehidden" value="@name" />
+            </th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+@*</div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+<script>
+
+    $(document).ready(function () {
+        LoadProductStandardChild();
+    });
+    function LoadProductStandardChild(){
+        $('#tbProductStandardChild').DataTable({
+            "bDestroy": true,
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": '/ProductStandard/GetListProductStandard',
+                "type": "POST",
+                "data": function (d) {
+                    return $.extend({}, d, {
+                        'ProductStandardID':  @ViewData["ProductStandardID"],
+                    })
+                }
+            },
+            "columns": [
+                { "name": "Name", "data": "Name", "width":"85%",
+                'render': function (data, type, full, meta) {
+                    var html='';
+                    if(full.Name.includes('#')){
+                        html = '<button type="button" class="btn btn-flat btn-md" style="background:' + full.Name + '"></button> ';
+                    }else{
+                        html=full.Name;
+                    }
+                         return html;
+                    }
+                },
+                {
+                    targets: 'no-sort',
+                    orderable: false,
+                    'class': 'text-center',
+                    'width': '10%',
+                    'render': function (data, type, full, meta) {
+                        var html = '<button type="button" data-toggle="modal"  data-target="#ModalProductStandard"  style="margin-right: 5px;" class="btn btn-warning btn-xs" title="Cập Nhật" onclick="Update(' + full.ID + '\','+@ViewData["ProductStandardID"]+')"><i class="glyphicon glyphicon-edit"></i></button>'+
+                            '<button type="button"  class="btn  btn-dark btn-xs"  style="margin-right: 5px;" title="Xóa" onclick="Remove(this,' + full.ID + ',\'child\')"> <i class="glyphicon glyphicon-trash"></i></button> ';
+                        return html;
+                    }
+                },
+            ],
+            "scrollCollapse": true,
+            "scrollX": true,
+            "paging": true,
+            "lengthChange": true,
+            "searching": false,
+            "ordering": true,
+            "info": false,
+            "autoWidth": false,
+
+            "dom": '<"top"i>rt<"bottom row"<"col-md-3"l><"col-md-9"<"pullright"p>>><"clear">'
+
+        });
+    }
+</script>

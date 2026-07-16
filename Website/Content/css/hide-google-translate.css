@@ -1,0 +1,155 @@
+/**
+ * Hide Google Translate UI - Optimized Complete Solution
+ * Author: AI Assistant
+ * Date: 2025-10-05
+ */
+
+/* === HIDE ALL GOOGLE TRANSLATE UI ELEMENTS === */
+
+/* Ẩn tooltip & popup khi hover vào chữ */
+#goog-gt-tt, .goog-te-balloon-frame { 
+    display: none !important; 
+}
+.goog-text-highlight { 
+    background: transparent !important; 
+    box-shadow: none !important; 
+}
+
+/* Ẩn banner trên cùng và reset vị trí body */
+.goog-te-banner-frame.skiptranslate { 
+    display: none !important; 
+}
+body { 
+    top: 0 !important; 
+}
+
+/* Main banner frame */
+.goog-te-banner-frame,
+iframe.goog-te-banner-frame {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+}
+
+/* Ẩn widget mặc định & menu frame */
+.goog-te-gadget, 
+.goog-te-gadget-simple, 
+.goog-te-menu-frame, 
+.goog-te-menu2,
+.goog-te-combo,
+.goog-te-ftab {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Ẩn logo Google & text "Powered by" */
+.goog-logo-link, 
+.goog-te-gadget span { 
+    display: none !important; 
+}
+
+/* Skip translate elements */
+.skiptranslate {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Google translate element container */
+#google_translate_element,
+#google_translate_element * {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Body modifications by Google Translate */
+body {
+    top: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Remove any top positioning */
+html {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Hide any iframe with Google Translate */
+iframe[src*="translate.google"] {
+    display: none !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+}
+
+/* Hide notification bars */
+.goog-te-banner-frame:first-child {
+    display: none !important;
+}
+
+/* Ensure no space is reserved for hidden elements */
+body.translated-ltr,
+body.translated-rtl {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Hide any Google branding */
+.goog-logo-link {
+    display: none !important;
+}
+
+/* Additional safety rules */
+[id*="google_translate"],
+[class*="goog-te"],
+[class*="skiptranslate"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+}
+
+/* Prevent any layout shifts */
+* {
+    margin-top: 0 !important;
+}
+
+/* Override any inline styles */
+body[style*="margin-top"] {
+    margin-top: 0 !important;
+}
+
+body[style*="top"] {
+    top: 0 !important;
+}
+
+/* Hide notification popups */
+.goog-te-spinner-pos,
+.goog-te-spinner {
+    display: none !important;
+}
+
+/* Final catch-all for any Google Translate UI */
+*[class*="goog-te"]:not(.language-switcher):not(.language-switcher *) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+    z-index: -9999 !important;
+}

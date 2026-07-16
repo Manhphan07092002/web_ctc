@@ -1,0 +1,38 @@
+@{
+    ViewBag.Title = "CÔNG TY CỔ PHẦN XÂY LẮP BƯU ĐIỆN MIỀN TRUNG";
+}
+<style>
+    .body-content {
+        margin-top: 0px;
+    }
+    /* Prevent layout shift during page load */
+    body {
+        overflow-x: hidden;
+    }
+</style>
+
+<h1 class="hidden">CÔNG TY CỔ PHẦN XÂY LẮP BƯU ĐIỆN MIỀN TRUNG</h1>
+
+@* Critical above-the-fold content - load immediately *@
+@Html.Partial("~/Views/Home/_Slider.cshtml")
+
+@* Sections below the fold - will be optimized with defer loading *@
+@Html.Partial("~/Views/Home/_GioiThieu.cshtml")
+
+@Html.Partial("~/Views/Home/_FeaturesSection.cshtml")
+
+@Html.Partial("~/Views/Home/_Ho_tro.cshtml")
+
+@Html.Partial("~/Views/Home/_Danh_muc_san_pham.cshtml")
+
+@Html.Partial("~/Views/Home/_RecommendProduct.cshtml") 
+
+@Html.Partial("~/Views/Home/_Tai_sao.cshtml") 
+
+@Html.Partial("~/Views/Home/_OurCustomer.cshtml")
+
+@Html.Partial("~/Views/Home/_thong_so.cshtml")
+
+@Html.Partial("~/Views/Home/_Tin_tuc.cshtml")
+
+@Html.Partial("~/Views/Home/_ThongTinLienHe.cshtml")

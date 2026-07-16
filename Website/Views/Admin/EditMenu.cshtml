@@ -1,0 +1,167 @@
+﻿
+@{
+    Layout = null;
+    var menu = ViewData["obj"] as Cubetech.Website.Models.Menu;
+    var referenceID = (menu.ReferenceID != null) ? menu.ReferenceID : "0";
+    string url = Request.Url.Scheme + System.Uri.SchemeDelimiter + Request.Url.Host;
+}
+<style>
+    .select2-container--default {
+        width: 100% !important;
+    }
+</style>
+<div class="modal" id="ModalMenu" role="dialog" data-easein="bounceIn">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">@ViewData["Title"]</h4>
+            </div>
+            <form  id="MenuForm">
+
+                <div class="modal-body">
+                    <input type="hidden" name="mode" id="mode" value="@ViewData["Mode"]" />
+                    <input type="hidden" name="ID" id="ID" value="@menu.ID" />
+                    <div class="form-group">
+                        <label for="FullName">Tên Menu</label>
+                        <input type="text" class="form-control" id="MenuName" name="MenuName" placeholder="Tên Menu" tabindex="1" value="@menu.MenuName" autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="FullName">Tên tiếng Anh</label>
+                        <input type="text" class="form-control" id="MenuEnglishName" name="MenuEnglishName" placeholder="Tên tiếng Anh" tabindex="1" value="@menu.MenuEnglishName" autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="pwd">Hình Đại Diện:</label>
+
+                        <div class="fileupload-item">
+
+                            <img id="imageDisplay" src="@menu.MenuImage" />
+                            <button type="button" class="btn btn-dark pull-right btn-sm btn-flat" onclick="deleteImageDetail('imageDisplay', 'MenuImage')"><i class="fa fa-trash-o" aria-hidden="true"></i></button><br /><br />
+                            <label class="btn btn-success pull-right btn-sm btn-flat" onclick="selectIMG('#MenuImage', '#imageDisplay')">
+                                <i class="fa fa-camera" aria-hidden="true"></i> Ảnh
+                            </label>
+                            <input type="hidden" name="MenuImage" id="MenuImage" value="@menu.MenuImage" />
+                        </div><hr style="margin-top:36px" />
+                    </div>
+
+                    <div class="clearfix"></div>
+                    <div class="form-group">
+                        <label for="FullName">Thứ Tự</label>
+                        <input type="number" class="form-control" id="Rank" name="Rank" placeholder="Thứ Tự" tabindex="1" min="0" value="@menu.Rank" autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="FullName">Loại Menu</label>
+
+                        @Html.DropDownList("ReferenceType", new SelectList(ViewBag.ListMenuType, "ID", "Name", menu.ReferenceType), "--Chọn Loại Menu--", new { @class = "form-control select2", @style = "width:100%", @onchange = "fillReferenceID(event, " + @referenceID + ")" })
+                    </div>
+
+                    <script>
+                        $(document).ready(function () {
+                            $("#ReferenceType").trigger("change");
+                        })
+                        function fillReferenceID(event, referenceID) {
+                            var domElement = $(event.target);
+                            var referenceType = domElement.val();
+                            $.ajax({
+                                url: '/Admin/FillReferenceID/',
+                                type: "POST",
+                                data: {
+                                    referenceType: referenceType,
+                                    referenceID: referenceID
+                                },
+                                dataType: "JSON",
+                                success: function (result) {
+                                    $("#ddlReferenceID #ReferenceID").html("");
+                                    if (result.referenceType == "BLOG") {
+                                        $.each(result.list, function (i, item) {
+                                            if (result.referenceID == item.ID) {
+                                                $("#ddlReferenceID #ReferenceID").append($('<option selected="true"></option>').val(item.ID).html(item.BlogCategoryName));
+                                            } else {
+                                                $("#ddlReferenceID #ReferenceID").append($('<option></option>').val(item.ID).html(item.BlogCategoryName));
+                                            }
+                                        });
+                                    }
+                                    else if (result.referenceType == "STATICPAGE") {
+                                        $.each(result.list, function (i, item) {
+                                            if (result.referenceID == item.ID) {
+                                                $("#ddlReferenceID #ReferenceID").append($('<option selected="true"></option>').val(item.ID).html(item.Name));
+                                            } else {
+                                                $("#ddlReferenceID #ReferenceID").append($('<option></option>').val(item.ID).html(item.Name));
+                                            }
+                                        });
+                                    }                                    else {
+                                        $.each(result.list, function (i, item) {
+                                            if (result.referenceID == item.ID) {
+                                                $("#ddlReferenceID #ReferenceID").append($('<option selected="true"></option>').val(item.ID).html(item.Name));
+                                            } else {
+                                                $("#ddlReferenceID #ReferenceID").append($('<option></option>').val(item.ID).html(item.Name));
+                                            }
+                                        });
+                                    }
+
+                                }
+                            });
+                        }
+                    </script>
+                    <div class="form-group" id="ddlReferenceID">
+                        <label for="FullName">Menu</label>
+                        @Html.DropDownList("ReferenceID", new SelectList(Enumerable.Empty<SelectListItem>()), new { @class = "form-control Reference" })
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="ParrentID">Menu cha</label>
+                        @{
+                            Cubetech.Website.DAO.AdminDAO wdao = new Cubetech.Website.DAO.AdminDAO();
+                            var lstParent = wdao.GetListMenuTreView();
+                        }
+                        <select class="form-control" id="ParentID" name="ParentID">
+                            <option value="0">--Tất Cả--</option>
+                            @foreach (var item in lstParent)
+                            {
+                                var str = "";
+
+                                for (var i = 0; i < item.LevelDisPlay; i++)
+                                {
+                                    str += "&nbsp;&nbsp;";
+                                }
+                                str += "|-";
+
+                                <option value="@item.ID">@Html.Raw(str)  @item.MenuName</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label><input type="checkbox" id="cbkIsActive" class="flat" @if (menu.IsActive) { ViewContext.Writer.Write("checked"); } /> Hoạt Động
+                            </label>
+                        </div>
+                        <input type="hidden" value="@menu.IsActive.ToString()" name="IsActive" id="IsActive" />
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" data-dismiss="modal" aria-hidden="true">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hủy
+                    </button>
+                    <button type="button" onclick="fnSaveMenu()" class="btn btn-danger"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Lưu</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+<script>
+    if ('@ViewData["Mode"].ToString()' == 'UPDATE') {
+        $('#ParentID').val('@menu.ParentID');
+    }
+    setIcheck("#cbkIsActive", "[name=IsActive]", "true", "false", function (e) { });
+    //$('#ParentID').select2();
+
+    //$('.Reference').select2();
+    //$('#ReferenceType').select2();
+
+
+</script>

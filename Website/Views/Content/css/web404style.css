@@ -1,0 +1,73 @@
+﻿body {
+}
+
+@font-face {
+    font-family: 'AvantGarde Regular';
+    src: url('../fonts/AvantGarde Regular.ttf') format('truetype');
+}
+.content_404{
+
+    text-align: center;
+    position:fixed;
+    height:100%;
+    width:100%;
+    padding-bottom:60px;
+       
+}
+.content_404_inner{
+    padding:30px 0;
+}
+.top_logo {
+    text-align:left;
+}
+.top_logo img{
+    width:20%;
+}
+.top_img img{
+    width:40%;
+}
+.inner_text_1{
+    font-weight:700;
+    font-size:30px;
+    color:#89c1d6;
+}
+.inner_text_2{
+    font-size:20px;
+    color:white;
+    padding-bottom: 15px;
+}
+.bt_pageMain a{
+    color:white;
+    font-size:20px;
+    border:3px solid #89c1d6;
+    background:#89c1d6;
+    padding:15px 30px;
+    border-radius:50px;
+
+}
+.inner_text{
+    padding-top:40px;
+}
+.bt_pageMain a:hover{
+    text-decoration:none;
+}
+@media(max-width:768px){
+    .top_logo {
+    text-align:center;
+    padding-bottom:100px;
+}
+    .top_img img{
+    width:60%;
+}
+    .inner_text_1{
+        font-size:16px;
+    }
+    .inner_text_2{
+        font-size:20px;
+    }
+    .bt_pageMain a{
+        font-size:17px;
+         border-radius:50px;
+         padding:10px 30px;
+    }
+}

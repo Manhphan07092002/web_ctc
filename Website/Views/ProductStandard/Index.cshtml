@@ -1,0 +1,280 @@
+﻿
+@{
+    ViewBag.Title = "Tiêu chuẩn sản phẩm";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<style type="text/css">
+    .search-top {
+        padding-top: 5px;
+    }
+</style>
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-master list-panel" id="list-panel">
+            <div class="panel-heading list-panel-heading">
+                <div class="col-lg-6">
+                    <div class="input-group input-group-sm pull-right">
+                        <input type="text" class="form-control" id="Info" name="Info" placeholder="Thông tin tìm kiếm">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-success btn-flat" onclick="ReloadTable()">
+                                <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Tìm kiếm
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-2 pull-right search-top">
+                    <button type="button" class="btn btn-danger  btn-sm refresh-button" id="refresh-button" onclick="UpdateStandard(0);">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Thêm mới
+                    </button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="">
+                    <table id="tbProductStandard" class="table table-striped" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Tên Tiêu Chuẩn</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+  <script>
+      $(document).ready(function () {
+          Load();
+      });
+      var tableProductStandard = null;
+      function format(d) {
+          return '<div id="TableProductStandardChild" class="TableProductStandardChild"></div>';
+      }
+      var data;
+      var tempchildcount, tempid;
+      function Load() {
+          tableProductStandard = $('#tbProductStandard').DataTable({
+              "bDestroy": true,
+              "processing": true,
+              "serverSide": true,
+              "ajax": {
+                  "url": "/ProductStandard/GetListProductStandard",
+                  "type": "POST",
+                  "data": function (d) {
+                      return $.extend({}, d, {
+                          'Info': $('#Info').val(),
+                          'ProductStandardID': ''
+                      })
+                  }
+              },
+              "columns": [
+                           {
+                               "name": "Name", "data": "Name", "width": "85%",
+                               'render': function (data, type, full, meta) {
+                                   var html = '';
+                                   html += '<label>' + full.Name + '</label><br/>';
+
+                                   if (full.ChildCount != null) {
+                                       html += '<a style="font-style:italic;font-size:11px;cursor: pointer" onclick="getStatusDetail(this)">( </a>' + '<a id="' + full.ID + '" style="font-style:italic;font-size:11px;cursor: pointer" onclick="getStatusDetail(this)">' + full.ChildCount + '</a>' + ' <a style="font-style:italic;font-size:11px;cursor: pointer" onclick="getStatusDetail(this)">tiêu chuẩn con )</a>';
+                                   }
+                                   return html;
+                               }
+                           },
+                          {
+                              targets: 'no-sort',
+                              orderable: false,
+                              'class': 'text-center',
+                              'width': '10%',
+                              'render': function (data, type, full, meta) {
+                                  var html = '<button type="button" style="margin-right: 10px;" class="btn btn-warning btn-xs" title="Cập Nhật"  onclick="UpdateStandard(' + full.ID + ')"><i class="glyphicon glyphicon-edit"></i></button>' +
+                                      '<button type="button" class="btn  btn-dark btn-xs" style="margin-right: 10px;" title="Xóa" onclick="Remove(this,\'' + full.ID + '\',\'parent\')"><i class="glyphicon glyphicon-trash"></i></button> ';
+                                  return html;
+                              }
+                          },
+              ],
+              "scrollCollapse": true,
+              "scrollX": true,
+              "paging": true,
+              "lengthChange": true,
+              "searching": false,
+              "ordering": true,
+              "info": false,
+              "autoWidth": false,
+              "dom": '<"top"i>rt<"bottom row"<"col-md-3"l><"col-md-9"<"pullright"p>>><"clear">',
+              "createdRow": function (row, data, index) {
+                  $(row).addClass('pstandardclass');
+              }
+          });
+      }
+      function getStatusDetail(thiz) {
+          $('.TableProductStandardChild').parent().parent().remove();
+          $('.row-noneborder-bottom').removeClass('row-noneborder-bottom');
+          var tr = $(thiz).parent().parent();
+          var row = tableProductStandard.row(tr);
+          $("#tbProductStandard  .pstandardclass").each(function (index) {
+              if ($(this).is(tr) == false) {
+                  var row2 = tableProductStandard.row(this);
+                  row2.child.hide();
+                  $(this).removeClass('shown');
+                  $(this).removeClass('row-noneborder-bottom');
+                  $(this).removeClass('row-header');
+              }
+          });
+          if (row.child.isShown()) {
+              row.child.hide();
+              tr.removeClass('shown');
+              tr.removeClass('row-noneborder-bottom');
+              tr.removeClass('row-header');
+          }
+          else {
+              row.child(format(row.data())).show();
+              data = tableProductStandard.row(tr).data();
+              if (data != undefined) {
+                  var id = data.ID;
+                  GetProductStandardChildByID(id);
+              }
+              var styleChild = $('#TableProductStandardChild').parent();
+              styleChild.addClass('row-noneborder-top');
+              tr.addClass('shown');
+              tr.addClass('row-noneborder-bottom');
+              tr.addClass('row-header');
+          }
+      }
+      function GetProductStandardChildByID(parentID) {
+          //save value to temp variable when click tr on table parent
+          tempchildcount = data.ChildCount;
+          tempid = data.ID;
+          //tempchildcount = $("#" + tempid).text();
+          $.ajax({
+              url: "/ProductStandard/ListChild",
+              data: { ProductStandardID: parentID },
+              success: function (data) {
+                  $('#TableProductStandardChild').html(data);
+              }
+          });
+      }
+      
+      function Remove(thiz, id, type) {
+          showConfirm("Thông Báo !", 'Bạn chắc chắn muốn xóa ?',
+              function () {
+                  $.ajax({
+                      type: "POST",
+                      url: '/ProductStandard/Delete',
+                      data: { id: id, type: type },
+                  }).success(function (data) {
+                      if (data.Code === 1) {
+                          ReloadTable();
+                          showSuccess("Thành Công", data.message);
+                          //change value childcount after delete               
+
+                          //end
+                      } else {
+                          showError('Lỗi', data.message);
+                      }
+                  });
+              }
+              , NoCallAction())
+      }
+      
+      function ReloadTableChild() {
+          $("#Info").val($.trim($("#Info").val()));
+          var table = $('#tbProductStandardChild').DataTable();
+          table.ajax.reload();
+      }
+      function ReloadTable() {
+          $("#Info").val($.trim($("#Info").val()));
+          var table = $('#tbProductStandard').DataTable();
+          table.ajax.reload();
+      }
+
+      enterSearch("#Info", ReloadTable);
+
+
+
+      function UpdateStandard(id) {
+          $.ajax({
+              url: "/ProductStandard/AddNewEditStandard",
+              method: "POST",
+              beforeSend: function () {
+                  showSpinLoading();
+              },
+              data: {
+                  id: id
+              },
+              success: function (data) {
+                  hideSpinLoading();
+                  $("#popupContainer1").html(data);
+                  $("#ModalProductStandard").modal("show");
+              }
+          });
+      }
+
+      function saveStandard() {
+          var fd = new FormData(document.getElementById("ProductStandardForm"));
+          $.ajax({
+              url: "/ProductStandard/UpdateProductStandard",
+              method: "POST",
+              beforeSend: function () {
+                  showSpinLoading();
+              },
+              data: fd,
+              enctype: 'multipart/form-data',
+              processData: false,  // tell jQuery not to process the data
+              contentType: false,   // tell jQuery not to set contentType
+              success: function (data) {
+                  hideSpinLoading();
+                  if (data.Code === 1) {
+                      $('#ModalProductStandard').modal('hide');
+                      ReloadTable();
+                      showSuccess("Thành Công", data.message);
+                  } else {
+                      showError('Lỗi', data.message);
+                  }
+              }
+          });
+      }
+
+      function UpdateStandardValue(id, parent) {
+          $.ajax({
+              url: "/ProductStandard/AddNewEditStandardValue",
+              method: "POST",
+              beforeSend: function () {
+                  showSpinLoading();
+              },
+              data: {
+                  id: id  , parentID: parent
+              },
+              success: function (data) {
+                  hideSpinLoading();
+                  $("#popupContainer2").html(data);
+                  $("#ModalProductStandardValue").modal("show");
+              }
+          });
+      }
+
+      function saveStandardValue() {
+          var fd = new FormData(document.getElementById("ProductStandardValueForm"));
+          $.ajax({
+              url: "/ProductStandard/UpdateProductStandardValue",
+              method: "POST",
+              beforeSend: function () {
+                  showSpinLoading();
+              },
+              data: fd,
+              enctype: 'multipart/form-data',
+              processData: false,  // tell jQuery not to process the data
+              contentType: false,   // tell jQuery not to set contentType
+              success: function (data) {
+                  hideSpinLoading();
+                  if (data.Code === 1) {
+                      $('#ModalProductStandardValue').modal('hide');
+                      ReloadTable();
+                      showSuccess("Thành Công", data.message);
+                  } else {
+                      showError('Lỗi', data.message);
+                  }
+              }
+          });
+      }
+  </script>

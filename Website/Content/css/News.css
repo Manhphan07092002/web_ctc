@@ -1,0 +1,121 @@
+/* File: ~/Content/css/News.css */
+
+.news-section {
+    padding: 30px 0;
+}
+
+.top_blog_title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    position: relative;
+    text-transform: uppercase;
+    color: #333;
+}
+
+/* Tạo một đường gạch chân trang trí cho tiêu đề */
+.top_blog_title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background-color: #337ab7; /* Màu xanh chủ đạo của Bootstrap */
+}
+
+/* --- Styling cho mỗi mục tin tức (thumbnail) --- */
+
+.news-item {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+    height: 420px; /* Cố định chiều cao để các box bằng nhau */
+    display: flex;
+    flex-direction: column;
+}
+
+.news-item:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+}
+
+.news-item-img-container {
+    position: relative;
+    overflow: hidden;
+    height: 200px; /* Chiều cao cố định cho vùng ảnh */
+}
+
+.news-item-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Đảm bảo ảnh lấp đầy khung mà không bị méo */
+    transition: transform 0.4s ease;
+}
+
+.news-item:hover .news-item-img {
+    transform: scale(1.05); /* Hiệu ứng zoom ảnh khi hover */
+}
+
+/* Nhãn nguồn tin (Thanh Niên, 24h, ...) */
+.news-source-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(51, 122, 183, 0.9); /* Màu xanh Bootstrap có độ trong */
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.news-item .caption {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Cho phép caption co giãn để lấp đầy không gian còn lại */
+}
+
+.news-item-title {
+    height: 40px; /* Giới hạn chiều cao tiêu đề (khoảng 2 dòng) */
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Số dòng tối đa */
+    -webkit-box-orient: vertical;
+}
+
+.news-item-title a {
+    color: #333;
+    text-decoration: none;
+}
+
+.news-item-title a:hover {
+    color: #337ab7;
+}
+
+.news-item-description {
+    font-size: 14px;
+    color: #666;
+    flex-grow: 1; /* Cho phép description co giãn */
+    margin-bottom: 15px;
+    height: 60px; /* Giới hạn chiều cao mô tả (khoảng 3 dòng) */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Số dòng tối đa */
+    -webkit-box-orient: vertical;
+}
+
+.news-item .btn {
+    margin-top: auto; /* Đẩy nút "Xem chi tiết" xuống dưới cùng của caption */
+    width: fit-content;
+}

@@ -1,0 +1,238 @@
+/**
+ * Language Switcher - Optimized CSS
+ * Author: AI Assistant
+ * Date: 2025-10-07
+ * Features: Modern design, mobile responsive, smooth animations
+ */
+
+/* Language Switcher Container */
+.language-switcher {
+    position: relative;
+    display: inline-block;
+    z-index: 1000;
+}
+
+/* Dropdown Toggle Button */
+.language-switcher .dropdown-toggle {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    padding: 6px 12px;
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 80px;
+}
+
+.language-switcher .dropdown-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    color: #fff;
+}
+
+/* Flag Image */
+.language-switcher .flag-img {
+    width: 20px;
+    height: 15px;
+    object-fit: cover;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* Language Text */
+.language-switcher .lang-text {
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+/* Dropdown Arrow */
+.language-switcher .dropdown-arrow {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+    font-size: 12px;
+}
+
+.language-switcher.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+/* Dropdown Menu */
+.language-switcher .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1001;
+    min-width: 120px;
+    margin-top: 4px;
+}
+
+.language-switcher.open .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Language Options */
+.language-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: #333;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+}
+
+.language-option:hover {
+    background-color: #f5f5f5;
+    color: #333;
+    text-decoration: none;
+}
+
+.language-option:first-child {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+.language-option:last-child {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+/* Language Option Flag */
+.language-option .flag-img {
+    width: 18px;
+    height: 13px;
+    object-fit: cover;
+    border-radius: 2px;
+}
+
+/* Language Option Text */
+.language-option .lang-text {
+    font-weight: 500;
+    font-size: 13px;
+}
+
+/* Loading State */
+.language-switcher.translating .dropdown-toggle {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.language-switcher.translating .lang-text::after {
+    content: "...";
+    animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: ""; }
+    40% { content: "."; }
+    60% { content: ".."; }
+    80%, 100% { content: "..."; }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .language-switcher .dropdown-toggle {
+        padding: 8px 10px;
+        font-size: 12px;
+        min-width: 70px;
+    }
+    
+    .language-switcher .flag-img {
+        width: 18px;
+        height: 13px;
+    }
+    
+    .language-switcher .lang-text {
+        font-size: 12px;
+    }
+    
+    .language-switcher .dropdown-menu {
+        min-width: 100px;
+    }
+    
+    .language-option {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+}
+
+/* Dark Theme Support */
+@media (prefers-color-scheme: dark) {
+    .language-switcher .dropdown-menu {
+        background: #2d2d2d;
+        border-color: #555;
+    }
+    
+    .language-option {
+        color: #fff;
+    }
+    
+    .language-option:hover {
+        background-color: #404040;
+        color: #fff;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .language-switcher .dropdown-toggle {
+        border-width: 2px;
+    }
+    
+    .language-switcher .dropdown-menu {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .language-switcher .dropdown-toggle,
+    .language-switcher .dropdown-menu,
+    .language-switcher .dropdown-arrow,
+    .language-option {
+        transition: none;
+    }
+    
+    .language-switcher.translating .lang-text::after {
+        animation: none;
+        content: "...";
+    }
+}
+
+/* Focus States for Accessibility */
+.language-switcher .dropdown-toggle:focus,
+.language-option:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .language-switcher {
+        display: none;
+    }
+}

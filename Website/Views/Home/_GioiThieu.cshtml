@@ -1,0 +1,676 @@
+﻿@{
+    Layout = null; // Bỏ comment nếu đây là partial view và không dùng layout chung
+}
+
+<style>
+    /* === MODERN CSS FOR GIOI THIEU PAGE === */
+    
+    /* --- CSS VARIABLES --- */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #2677f1 0%, #1565c0 100%);
+        --secondary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --accent-color: #2677f1;
+        --accent-light: rgba(38, 119, 241, 0.1);
+        --heading-color: #1a1a1a;
+        --text-color: #4a5568;
+        --text-light: #718096;
+        --border-color: #e2e8f0;
+        --background-light: #ffffff;
+        --background-gradient: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.05);
+        --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
+        --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.15);
+        --font-heading: 'Be Vietnam Pro', 'Roboto', sans-serif;
+        --font-body: 'Be Vietnam Pro', 'Roboto', sans-serif;
+        --border-radius: 16px;
+        --border-radius-lg: 24px;
+    }
+
+    /* --- KEYFRAME ANIMATIONS --- */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes fadeInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @@keyframes shimmer {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    @@keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    /* --- MODERN STYLING --- */
+    #imageTriggerGioiThieu {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto 40px auto;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-medium);
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    #imageTriggerGioiThieu::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.6s ease;
+    }
+
+    #imageTriggerGioiThieu:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: var(--shadow-heavy);
+        animation: float 3s ease-in-out infinite;
+    }
+
+    #imageTriggerGioiThieu:hover::before {
+        left: 100%;
+    }
+
+    #contentGioiThieu {
+        border: none;
+        padding: 0;
+        background: var(--background-gradient);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-medium);
+        margin: 20px auto;
+        overflow: hidden;
+        animation: scaleIn 0.6s ease-out;
+    }
+    
+    .company-profile-container {
+        font-family: var(--font-body);
+        color: var(--text-color);
+        line-height: 1.8;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 60px 40px;
+        background: var(--background-light);
+        border-radius: var(--border-radius-lg);
+        position: relative;
+    }
+
+    .company-profile-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    }
+
+    /* --- MODERN TITLES --- */
+    .company-profile-container h2.section-title {
+        font-family: var(--font-heading);
+        font-size: clamp(24px, 4vw, 32px);
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 40px 0;
+        padding-bottom: 20px;
+        position: relative;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        animation: fadeInLeft 0.8s ease-out 0.2s both;
+    }
+
+    .company-profile-container h2.section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 80px;
+        height: 4px;
+        background: var(--primary-gradient);
+        border-radius: 2px;
+        animation: fadeInLeft 0.8s ease-out 0.4s both;
+    }
+
+    .company-profile-container h3.subsection-title {
+        font-family: var(--font-heading);
+        font-size: clamp(18px, 3vw, 24px);
+        font-weight: 700;
+        color: var(--accent-color);
+        margin-bottom: 25px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        padding-left: 20px;
+        animation: fadeInRight 0.8s ease-out 0.3s both;
+    }
+
+    .company-profile-container h3.subsection-title::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 100%;
+        background: var(--primary-gradient);
+        border-radius: 2px;
+    }
+
+    /* --- MODERN CONTENT --- */
+    .company-profile-container p.intro-paragraph {
+        font-size: 18px;
+        margin-bottom: 25px;
+        text-align: justify;
+        line-height: 1.8;
+        color: var(--text-color);
+        animation: fadeInUp 0.8s ease-out 0.5s both;
+        padding: 20px;
+        background: rgba(38, 119, 241, 0.02);
+        border-left: 4px solid var(--accent-color);
+        border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    }
+
+    /* --- MODERN BUSINESS AREAS --- */
+    .business-areas {
+        margin-top: 50px;
+        padding-top: 40px;
+        position: relative;
+    }
+
+    .business-areas::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 2px;
+        background: var(--primary-gradient);
+        border-radius: 1px;
+    }
+
+    .business-areas .subsection {
+        margin-bottom: 40px;
+        padding: 30px;
+        background: var(--background-light);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-light);
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.8s ease-out both;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .business-areas .subsection:nth-child(odd) {
+        animation-delay: 0.1s;
+    }
+
+    .business-areas .subsection:nth-child(even) {
+        animation-delay: 0.2s;
+    }
+
+    .business-areas .subsection:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .business-areas .subsection::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--secondary-gradient);
+    }
+
+    .business-areas ul.item-list {
+        list-style-type: none;
+        padding-left: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
+
+    .business-areas ul.item-list li {
+        font-size: 16px;
+        padding: 15px 20px 15px 50px;
+        position: relative;
+        background: var(--accent-light);
+        border-radius: var(--border-radius);
+        transition: all 0.3s ease;
+        border-left: 3px solid var(--accent-color);
+    }
+
+    .business-areas ul.item-list li:hover {
+        transform: translateX(5px);
+        background: rgba(38, 119, 241, 0.15);
+        box-shadow: var(--shadow-light);
+    }
+
+    .business-areas ul.item-list li::before {
+        content: "\f00c";
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        color: var(--accent-color);
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 14px;
+    }
+
+    /* --- MODERN IMAGE & CONTACT --- */
+    .hinh-anh-cong-ty {
+        display: block;
+        width: 100%;
+        height: auto;
+        margin: 40px 0;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-medium);
+        transition: all 0.4s ease;
+        animation: fadeInUp 0.8s ease-out 0.6s both;
+    }
+
+    .hinh-anh-cong-ty:hover {
+        transform: scale(1.02);
+        box-shadow: var(--shadow-heavy);
+    }
+
+    .contact-info-list {
+        list-style: none;
+        padding: 40px 0 0 0;
+        margin-top: 40px;
+        position: relative;
+    }
+
+    .contact-info-list::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 2px;
+        background: var(--primary-gradient);
+        border-radius: 1px;
+    }
+
+    .contact-info-list li {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 20px;
+        background: var(--background-light);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-light);
+        transition: all 0.3s ease;
+        animation: fadeInLeft 0.8s ease-out both;
+        border-left: 4px solid var(--accent-color);
+    }
+
+    .contact-info-list li:nth-child(odd) {
+        animation-delay: 0.1s;
+    }
+
+    .contact-info-list li:nth-child(even) {
+        animation-delay: 0.2s;
+        animation-name: fadeInRight;
+    }
+
+    .contact-info-list li:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-medium);
+        border-left-color: var(--accent-color);
+    }
+
+    .contact-info-list .contact-icon {
+        width: 50px;
+        height: 50px;
+        margin-right: 20px;
+        background: var(--primary-gradient);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-light);
+    }
+
+    .contact-info-list .contact-icon i {
+        font-size: 18px;
+    }
+
+    .contact-info-list .contact-label {
+        font-weight: 700;
+        margin-right: 10px;
+        color: var(--heading-color);
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .contact-info-list .contact-value {
+        font-size: 16px;
+        color: var(--text-color);
+    }
+
+    .contact-info-list .contact-value a {
+        color: var(--accent-color);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .contact-info-list .contact-value a::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--primary-gradient);
+        transition: width 0.3s ease;
+    }
+
+    .contact-info-list .contact-value a:hover::after {
+        width: 100%;
+    }
+
+    .contact-info-list .contact-value a:hover {
+        color: var(--accent-color);
+        transform: translateX(5px);
+    }
+
+    /* === BẮT ĐẦU PHẦN RESPONSIVE === */
+
+    /* Cho máy tính bảng */
+    @@media (max-width: 991.98px) {
+        .company-profile-container {
+            padding: 30px 20px;
+        }
+        .company-profile-container h2.section-title {
+            font-size: 24px;
+        }
+        .company-profile-container h3.subsection-title {
+            font-size: 18px;
+        }
+    }
+
+    /* Cho điện thoại di động */
+    @@media (max-width: 767.98px) {
+        #contentGioiThieu {
+            border-top: none;
+            border-bottom: none;
+        }
+        .company-profile-container {
+            padding: 25px 15px;
+        }
+        .company-profile-container h2.section-title {
+            font-size: 22px;
+            margin-bottom: 25px;
+        }
+        .company-profile-container p.intro-paragraph,
+        .business-areas ul.item-list li,
+        .contact-info-list {
+            font-size: 15px;
+        }
+    }
+    /* === KẾT THÚC PHẦN RESPONSIVE === */
+</style>
+
+@* Lưu ý: Để các icon (fas fa-...) hiển thị, bạn cần thêm thư viện Font Awesome
+   vào trang của mình, ví dụ trong <head>:
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+*@
+
+@* 1. Hình ảnh để người dùng nhấp vào - Optimized with lazy loading *@
+<div>
+    <img id="imageTriggerGioiThieu"
+         src="@Url.Content("~/Image/gioi_thieu_cong_ty1.jpg")"
+         alt="Xem thông tin chi tiết công ty"
+         title="Nhấp để xem/ẩn thông tin chi tiết"
+         loading="lazy"
+         decoding="async" />
+</div>
+
+@* 2. Khối nội dung chi tiết, ban đầu được ẩn *@
+<div id="contentGioiThieu" style="display:none;">
+    <div class="company-profile-container">
+        <div class="section gioi-thieu">
+            <h2 class="section-title">Giới thiệu Công Ty</h2>
+            <h3 class="section-title" style="font-family: 'Roboto', sans-serif; color: rgb(33, 33, 240);">CÔNG TY CỔ PHẦN XÂY LẮP BƯU ĐIỆN MIỀN TRUNG(CTC) </h3>
+            <h3 class="section-title" style="font-family: 'Roboto', sans-serif; color: rgb(33, 33, 240);">TÊN QUỐC TẾ: CENTRAL VIETNAM POSTS AND TELECOMMUNICATIONS CONSTRUCTION JOINT - STOCK COMPANY</h3>
+            <p class="intro-paragraph">
+                Công ty Cổ phần Xây lắp Bưu điện Miền Trung (CTC) là đơn vị chuyên nghiệp, tự hào với bề dày kinh nghiệm trong việc triển khai các giải pháp hạ tầng kỹ thuật. Chúng tôi cung cấp dịch vụ trọn gói từ xây dựng, lắp đặt đến bảo trì, đảm bảo hiệu suất và độ tin cậy cho các hệ thống thiết yếu.
+            </p>
+            <p class="intro-paragraph">
+                Đặc biệt, CTC tập trung nguồn lực và chuyên môn để phục vụ hiệu quả cho các ngành Bưu chính, Viễn thông và Công nghệ Thông tin, qua đó khẳng định vai trò là đối tác đồng hành quan trọng trong sự phát triển và hiện đại hóa của toàn khu vực Miền Trung.
+            </p>
+            <img src="@Url.Content("~/Image/cong_ty.jpg")" alt="Hình ảnh công ty" class="hinh-anh-cong-ty" loading="lazy" decoding="async">
+            <ul class="contact-info-list">
+                <h2 class="section-title">Thông tin liên hệ</h2>
+                <li>
+                    <span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span>
+                    <div>
+                        <span class="contact-label">Địa chỉ:</span>
+                        <span class="contact-value ">50B Nguyễn Du, P. Hải Châu, Đà Nẵng, Việt Nam</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="contact-icon"><i class="fas fa-phone-alt"></i></span>
+                    <div>
+                        <span class="contact-label">SĐT:</span>
+                        <span class="contact-value"><a href="tel:02363745678">0236 3745 678</a></span>
+                    </div>
+                </li>
+                <li>
+                    <span class="contact-icon"><i class="fas fa-envelope"></i></span>
+                    <div>
+                        <span class="contact-label">Email:</span>
+                        <span class="contact-value"><a href="mailto:contact@ctcdn.vn">contact@ctcdn.vn</a></span>
+                    </div>
+                </li>
+                <li>
+                    <span class="contact-icon"><i class="fas fa-globe"></i></span>
+                    <div>
+                        <span class="contact-label">Website:</span>
+                        <span class="contact-value"><a href="http://www.ctcdn.vn" target="_blank" rel="noopener noreferrer">www.ctcdn.vn</a></span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="section linh-vuc-kinh-doanh business-areas">
+            <h2 class="section-title">Lĩnh vực kinh doanh</h2>
+            <div class="subsection">
+                <h3 class="subsection-title">SẢN PHẨM</h3>
+                <ul class="item-list">
+                    <li>Điện tử viễn thông</li>
+                    <li>Cáp thông tin</li>
+                    <li>Switching & Routing</li>
+                    <li>Wireless</li>
+                    <li>Security</li>
+                    <li>Video Surveillance</li>
+                </ul>
+            </div>
+            <div class="subsection">
+                <h3 class="subsection-title">GIẢI PHÁP</h3>
+                <ul class="item-list">
+                    <li>Cơ sở hạ tầng</li>
+                    <li>Hệ thống viễn thông</li>
+                    <li>Bảo mật mạng</li>
+                    <li>Trung tâm dữ liệu</li>
+                    <li>Camera giám sát</li>
+                </ul>
+            </div>
+            <div class="subsection">
+                <h3 class="subsection-title">DỊCH VỤ</h3>
+                <ul class="item-list">
+                    <li>OutSourcing</li>
+                    <li>Tích hợp hệ thống</li>
+                    <li>Tư vấn thiết kế hệ thống</li>
+                    <li>Bảo trì, bảo dưỡng các thiết bị thuộc hệ thống chuyên ngành bưu chính viễn thông, tin học</li>
+                </ul>
+            </div>
+            <div class="subsection">
+                <h3 class="subsection-title">HỖ TRỢ</h3>
+                <ul class="item-list">
+                    <li>Hỗ trợ kỹ thuật</li>
+                    <li>Đào tạo</li>
+                    <li>Tư vấn giải pháp</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* 3. JavaScript (jQuery) để xử lý ẩn/hiện VÀ tự động ẩn khi cuộn qua - Optimized *@
+<script defer>
+    // Wait for jQuery to be available
+    (function() {
+        function initGioiThieu() {
+            if (typeof jQuery === 'undefined') {
+                setTimeout(initGioiThieu, 50);
+                return;
+            }
+            
+            $(document).ready(function() {
+        var $imageTrigger = $('#imageTriggerGioiThieu');
+        var $contentDiv = $('#contentGioiThieu');
+        var $window = $(window); // Lưu trữ đối tượng window để tối ưu
+        var isContentVisible = false; // Cờ theo dõi trạng thái hiển thị
+
+        // Hàm để ẩn nội dung
+        function hideContent() {
+            if (isContentVisible) {
+                $contentDiv.slideUp(function() {
+                    isContentVisible = false;
+                    // Gỡ bỏ trình nghe sự kiện cuộn khi nội dung đã ẩn
+                    $window.off('scroll.gioithieu');
+                });
+            }
+        }
+
+        // Hàm để kiểm tra vị trí cuộn và ẩn nếu cần
+        function checkScrollAndHide() {
+            // Chỉ kiểm tra nếu nội dung đang hiển thị
+            if (isContentVisible) {
+                var contentBottom = $contentDiv.offset().top + $contentDiv.outerHeight();
+                var windowTop = $window.scrollTop();
+                var windowHeight = $window.height();
+
+                // Điều kiện: Nếu đáy của nội dung đã cuộn lên trên đỉnh của cửa sổ
+                // (Tức là người dùng đã cuộn hoàn toàn qua nó)
+                if (contentBottom < windowTop) {
+                    hideContent();
+                }
+                // (TÙY CHỌN) Điều kiện khác: Nếu đỉnh của nội dung cuộn lên trên đáy cửa sổ
+                // (Tức là người dùng đã bắt đầu cuộn qua nó, nhưng nó vẫn còn trong view)
+                // Bạn có thể chọn 1 trong 2 hoặc kết hợp. Điều kiện trên phổ biến hơn.
+                // if ($contentDiv.offset().top < windowTop + windowHeight - someOffset) { ... }
+            }
+        }
+
+        // Hàm để hiện nội dung và gắn trình nghe sự kiện cuộn
+        function showContent() {
+            if (!isContentVisible) {
+                $contentDiv.slideDown(function() {
+                    isContentVisible = true;
+                    // Gắn trình nghe sự kiện cuộn (sử dụng namespace .gioithieu)
+                    $window.on('scroll.gioithieu', checkScrollAndHide);
+                    // Kiểm tra ngay lần đầu, phòng trường hợp nó đã bị cuộn qua
+                    checkScrollAndHide();
+                });
+            }
+        }
+
+        // Kiểm tra sự tồn tại của các phần tử
+        if ($imageTrigger.length && $contentDiv.length) {
+            // Gán sự kiện click cho hình ảnh
+            $imageTrigger.on('click', function() {
+                if (!isContentVisible) {
+                    showContent();
+                } else {
+                    hideContent(); // Cho phép người dùng nhấp để đóng lại
+                }
+            });
+        }
+            });
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initGioiThieu);
+        } else {
+            initGioiThieu();
+        }
+    })();
+</script>

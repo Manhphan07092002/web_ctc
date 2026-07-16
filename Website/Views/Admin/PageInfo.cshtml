@@ -1,0 +1,194 @@
+﻿
+@{
+    ViewBag.Title = "PageInfo";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-master list-panel" id="list-panel">
+            <form id="frmKeyGroupSearch">
+                <div class="panel-heading list-panel-heading">
+                    <div class="col-md-4">
+                        <div class="input-group input-group-sm pull-right">
+                            <input type="text" class="form-control" id="Info" name="Info" placeholder="Từ Khóa">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-success btn-flat" onclick="loadTable()">
+                                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Tìm kiếm
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 pull-right search-top">
+                        <button type="button" class="btn btn-danger btn-sm  refresh-button" id="refresh-button" onclick="showModalPageInfo('0')">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Thêm mới
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <div class="panel-body">
+                <table id="tbPageInfo" class="table table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Tên</th>
+                            <th>Email</th>
+                            <th>Hotline</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/common.js"></script>
+<script>
+    $(document).ready(function() {
+        loadTable();
+
+
+    });
+    var table = null;
+
+    function loadTable() {
+        $("#Info").val($.trim($("#Info").val()));
+        table = $('#tbPageInfo').DataTable({
+            pageLength: 25,
+            "bDestroy": true,
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "/Admin/GetListPageInfo",
+                "type": "POST",
+                "data": function(d) {
+                    return $.extend({},
+                        d,
+                        {
+                            'Info': $('#Info').val()
+                        })
+                }
+            },
+            "columns": [
+                { "name": "ShopName", "data": "ShopName" },
+                { "name": "Email", "data": "Email" },
+                { "name": "Hotline", "data": "Hotline" },
+                {
+                    targets: 'no-sort',
+                    orderable: false,
+                    'class': 'text-center',
+                    "width": "20%",
+                    'render': function(data, type, full, meta) {
+                        var html =
+                            '<button type="button"  style="margin-right: 10px;" class="btn btn-warning btn-xs" title="Cập Nhật"  onclick="showModalPageInfo(' +
+                                full.ID +
+                                ')"><i class="glyphicon glyphicon-edit"></i></button>' +
+                                '<button type="button" class="btn  btn-dark btn-xs" style="margin-right: 10px;" title="Xóa" onclick="Remove(this,' +
+                                full.ID +
+                                ')"><i class="glyphicon glyphicon-trash"></i></button> ';
+                        return html;
+                    }
+                }
+            ],
+            "scrollCollapse": true,
+            "scrollX": true,
+            "paging": true,
+            "lengthChange": true,
+            "searching": false,
+            "ordering": true,
+            "info": false,
+            "autoWidth": false,
+            "dom": '<"top"i>rt<"bottom row"<"col-md-3"l><"col-md-9"<"pullright"p>>><"clear">',
+        });
+    }
+
+    function showModalPageInfo(id) {
+        $.ajax({
+            url: "/Admin/AddNewEditPageInfo",
+            method: "POST",
+            beforeSend: function() {
+                showSpinLoading();
+            },
+            data: {
+                id: id
+            },
+            success: function(data) {
+                hideSpinLoading();
+                $("#popupContainer1").html(data);
+                $("#ModalPageInfo").modal("show");
+            }
+        });
+    }
+
+    function reloadTable() {
+        $("#Info").val($.trim($("#Info").val()));
+        var table = $('#tbPageInfo').DataTable();
+        table.ajax.reload();
+    }
+
+    function savePageInfo() {
+        var fd = new FormData(document.getElementById("FormPageInfo"));
+        var validation = validate();
+
+        if (validation === true) {
+            $.ajax({
+                url: "@Url.Content("/Admin/UpdatePageInfo")",
+                type: "POST",
+                data: fd,
+                enctype: 'multipart/form-data',
+                processData: false, // tell jQuery not to process the data
+                contentType: false, // tell jQuery not to set contentType
+                success: function(data) {
+                    if (data.Code == 1) {
+                        $('#ModalPageInfo').modal("hide");
+                        showSuccess("Thành Công", data.message);
+                        reloadTable();
+
+                    } else {
+                        showError('Lỗi', data.message);
+                    }
+
+                }
+
+            });
+        }
+    }
+
+    function Remove(thiz, id) {
+        showConfirm("", "Bạn có chắc chắn muốn xóa?",
+            function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Admin/DeletePageInfo',
+                    data: { id: id },
+
+                }).success(function (data) {
+                    if (data.Code === 1) {
+                        $('#tbPageInfo').DataTable().row($(thiz).parents('tr')).remove().draw(false);
+                        showSuccess('Thông báo', data.message);
+                    } else {
+                        showError('Lỗi', data.message);
+                    }
+                });
+
+            }, function () { }
+         )
+    }
+    enterSearch("#Info", reloadTable);
+
+    function validate() {
+//        if ($('#ShopName').val() == "") {
+//            showError("Lỗi", "Bạn chưa nhập tên");
+//            return false;
+//        }
+//        if ($('#Email').val() == "") {
+//            showError("Lỗi", "Email không đúng định dạng");
+//            return false;
+//        }
+
+        return true;
+    }
+</script>

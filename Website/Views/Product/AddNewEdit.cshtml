@@ -1,0 +1,1024 @@
+﻿@{
+    ViewBag.Title = ViewData["Title"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    Cubetech.Website.Models.Product pro = ViewData["obj"] as Cubetech.Website.Models.Product;
+    Cubetech.Website.DAO.BaseWebDAO dao = new Cubetech.Website.DAO.BaseWebDAO();
+
+    Cubetech.Website.DAO.UnitDAO unitdao = new Cubetech.Website.DAO.UnitDAO();
+    Cubetech.Website.DAO.CategoryDAO catedao = new Cubetech.Website.DAO.CategoryDAO();
+
+    var lstUnit = unitdao.GetALL();
+    var lstCate = catedao.GetAll();
+    lstCate.Insert(0, new Cubetech.Website.Models.Category() { ID = 0, Name = "--Chọn danh mục--" });
+
+}
+
+
+<style>
+    .imageDetail {
+        height: 200px;
+        margin-bottom: 10px;
+        border: 1px solid #e8e4e4;
+    }
+        .imageDetail img{
+            height:198px;
+        } .group-button {
+            position: absolute;
+            right: 16px;
+            top: 170px;
+        }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-master list-panel" id="list-panel">
+            <div class="panel-body" style="padding-top:10px">
+                <form id="ProductForm" onsubmit="return false;">
+                    <input type="hidden" name="mode" id="mode" value="@ViewData["Mode"]" />
+                    <input type="hidden" name="IDAndSize" id="IDAndSize" value="@pro.IDAndSize" />
+
+                    <div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="email">Mã Sản Phẩm:</label>
+
+                                @if (string.IsNullOrEmpty(pro.IDAndSize))
+                                {
+                                    <input type="text" class="form-control nounicode" name="ID" id="ID" placeholder="Mã Sản Phẩm" tabindex="1" value="@pro.ID">
+                                }
+                                else
+                                {
+                                    <input type="text" class="form-control nounicode" name="ID" id="ID" placeholder="Mã Sản Phẩm" tabindex="1" value="@pro.ID" readonly>
+                                }
+
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="pwd">Danh Mục:</label>
+                                        <div class="input-group">
+                                            @Html.DropDownList("CategoryID", new SelectList(lstCate, "ID", "Name", pro.CategoryID), new { @class = "form-control select2", @style = "width:100%", @requied = "true" })
+                                            <span class="input-group-addon btn btn-primary" style="background:#337ab7;color:white" data-toggle="modal" data-target="#ModalCategory"><i class="fa fa-plus" aria-hidden="true"></i></span>
+                                            @*<input type="hidden" name="CategoryID" id="CategoryID" value="@pro.CategoryID" /*@
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="pwd">Đơn Vị:</label>
+
+                                        <div class="input-group">
+                                            @Html.DropDownList("UnitID", new SelectList(lstUnit, "ID", "Name", pro.UnitID), new { @class = "form-control select2", @style = "width:100%", @requied = "true" })
+                                            <span class="input-group-addon btn btn-primary" style="background:#337ab7;color:white" data-toggle="modal" data-target="#ModalUnit"><i class="fa fa-plus" aria-hidden="true"></i></span>
+                                            @*<input type="hidden" name="UnitID" id="UnitID" value="@pro.UnitID" />*@
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+                            <div class="form-group">
+                                <label for="FullName">Từ khóa tìm kiếm</label>
+                                <textarea id="SearchText" name="SearchText" class="form-control" rows="4" style="resize:none;width:100%" placeholder="Search Tag">@pro.SearchText</textarea>
+                            </div>
+                            <div class="col-md-6" style="padding-left:0px;">
+                                <div class="form-group">
+
+                                    <div class="checkbox icheck" style="margin-top:0px">
+                                        <label for="ckbIcheck">
+                                            <input type="checkbox" id="ckbIcheck" @if ((pro.IsActive ?? false)) { ViewContext.Writer.Write("checked"); } /> Kích Hoạt
+                                        </label>
+                                        <input type="hidden" name="IsActive" id="IsActive" value="@pro.IsActive.ToString()" />
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            <div class="col-md-6" style="padding-right:0px;">
+                                <div class="form-group">
+
+                                    <div class="checkbox icheck" style="float:right;margin-top:0px">
+                                        <label for="ckbIsShowWeb">
+                                            <input type="checkbox" id="ckbIsShowWeb" @if ((pro.IsShowWeb ?? false)) { ViewContext.Writer.Write("checked"); } /> Hiển thị Web
+                                        </label>
+                                        <input type="hidden" name="IsShowWeb" id="IsShowWeb" value="@pro.IsShowWeb.ToString()" />
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+
+
+
+
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="pwd">Tên Sản Phẩm:</label>
+                                <input type="text" class="form-control" name="Name" id="Name" placeholder="Tên Sản Phẩm" tabindex="2" value="@pro.Name" onblur="txtNameKeyup(event)">
+
+                            </div>
+                            <div class="form-group">
+                                <label for="pwd">Giá Nhập:</label>
+
+                                <input type="text" class="form-control money-textbox" name="PriceTarget" id="PriceTarget" placeholder="Giá Nhập" tabindex="3" value="@pro.Price">
+                                <input type="hidden" id="Price" name="Price" value="@pro.Price" />
+
+                            </div>
+                            <div class="form-group">
+                                <label for="pwd">Giá Gốc:</label>
+
+                                <input type="text" class="form-control money-textbox" name="PriceSaleTarget" id="PriceSaleTarget" value="@pro.PriceSale" placeholder="Giá Bán" tabindex="4" onblur="txtPriceSaleKeyup(event)">
+                                <input type="hidden" id="PriceSale" name="PriceSale" value="@pro.PriceSale" />
+
+                            </div>
+                            <div class="form-group">
+                                <label for="pwd">Giá Bán:</label>
+
+                                <input type="text" class="form-control money-textbox" name="PriceSale2Target" id="PriceSale2Target" value="@pro.PriceSale2" placeholder="Giá Bán" tabindex="5" onblur="txtPriceSale2Keyup(event)">
+                                <input type="hidden" id="PriceSale2" name="PriceSale2" value="@pro.PriceSale2" />
+
+                            </div>
+
+
+
+
+                        </div>
+
+
+
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="pwd">SEO Title</label>
+                                <input type="text" class="form-control" name="SEOTitle" id="SEOTitle" placeholder="SEO Title" tabindex="6" value="@pro.SEOTitle">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pwd">SEO Keywords</label>
+                                <input type="text" class="form-control" name="SEOKeywords" id="SEOKeywords" placeholder="SEO Keyword" tabindex="6" value="@pro.SEOKeywords">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pwd">SEO Descriptions</label>
+                                <input type="text" class="form-control" name="SEODescriptions" id="SEODescriptions" placeholder="SEO Description" tabindex="6" value="@pro.SEODescriptions">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pwd">Url:</label>
+                                <input type="text" class="form-control" name="Url" id="Url" placeholder="Link sản phẩm" tabindex="6" value="@pro.Url">
+                            </div>
+
+
+
+                            <div class="form-group">
+                                <label for="PhoneNumber">Thông Tin Cơ Bản</label>
+
+                                <textarea style="min-height:200px;" id="BasicInfo">@pro.BasicInfo</textarea>
+                                <input type="hidden" value="" id="htmlBasicInfo" name="htmlBasicInfo" />
+
+                            </div>
+                            <div class="form-group" id="main_detail">
+                                <label for="PhoneNumber">Thông Tin Chi Tiết</label>
+
+                                <textarea style="min-height:400px;" id="DetailInfo">@pro.DetailInfo</textarea>
+                                <input type="hidden" value="" id="htmlDetailInfo" name="htmlDetailInfo" />
+
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pwd">Hình Đại Diện:</label>
+                                <div class="clearfix"></div>
+                                <div class="col-md-4">
+                                    <div class="imageDetail">
+                                        <div class="fileupload-item">
+
+                                            <img id="imageDisplay" src="@pro.Image" />
+                                            <button type="button" class="btn btn-dark pull-right btn-sm btn-flat" onclick="deleteImageDetail('imageDisplay','Image')"><i class="fa fa-trash-o" aria-hidden="true"></i></button><br /><br />
+                                            <label class="btn btn-success pull-right btn-sm btn-flat" onclick="selectIMG( '#Image','#imageDisplay')">
+                                                <i class="fa fa-camera" aria-hidden="true"></i> Ảnh
+                                            </label>
+                                            <input type="hidden" name="Image" id="Image" value="@pro.Image" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="clearfix"></div>
+                            <div class="form-group">
+                                <label for="pwd">Hình Ảnh Chi Tiết:</label>
+                                <div class="clearfix"></div>
+                                <div class="col-md-4">
+                                    <div class="imageDetail">
+                                        <div class="fileupload-item">
+
+                                            <img id="imageDisplay1" src="@pro.Image1" />
+                                            <button type="button" class="btn btn-dark pull-right btn-sm btn-flat" onclick="deleteImageDetail('imageDisplay1','Image1')"><i class="fa fa-trash-o" aria-hidden="true"></i></button><br /><br />
+                                            <label class="btn btn-success pull-right btn-sm btn-flat" onclick="selectIMG( '#Image1','#imageDisplay1')">
+                                                <i class="fa fa-camera" aria-hidden="true"></i> Ảnh
+                                            </label>
+                                            <input type="hidden" name="Image1" id="Image1" value="@pro.Image1" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="imageDetail">
+                                        <div class="fileupload-item">
+
+                                            <img id="imageDisplay2" src="@pro.Image2" />
+                                            <button type="button" class="btn btn-dark pull-right btn-sm btn-flat" onclick="deleteImageDetail('imageDisplay2','Image2')"><i class="fa fa-trash-o" aria-hidden="true"></i></button><br /><br />
+                                            <label class="btn btn-success pull-right btn-sm btn-flat" onclick="selectIMG( '#Image2','#imageDisplay2')">
+                                                <i class="fa fa-camera" aria-hidden="true"></i> Ảnh
+                                            </label>
+                                            <input type="hidden" name="Image2" id="Image2" value="@pro.Image2" />
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-4">
+                                    <div class="imageDetail">
+                                        <div class="fileupload-item">
+
+                                            <img id="imageDisplay3" src="@pro.Image3" />
+                                            <button type="button" class="btn btn-dark pull-right btn-sm btn-flat" onclick="deleteImageDetail('imageDisplay3','Image3')"><i class="fa fa-trash-o" aria-hidden="true"></i></button><br /><br />
+                                            <label class="btn btn-success pull-right btn-sm btn-flat" onclick="selectIMG( '#Image3','#imageDisplay3')">
+                                                <i class="fa fa-camera" aria-hidden="true"></i> Ảnh
+                                            </label>
+                                            <input type="hidden" name="Image3" id="Image3" value="@pro.Image3" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="clearfix" style="clear:both;"></div>
+                                <div class="col-md-4">
+                                    <div class="imageDetail">
+                                        <div class="fileupload-item">
+
+                                            <img id="imageDisplay4" src="@pro.Image4" />
+                                            <button type="button" class="btn btn-dark pull-right btn-sm btn-flat" onclick="deleteImageDetail('imageDisplay4','Image4')"><i class="fa fa-trash-o" aria-hidden="true"></i></button><br /><br />
+                                            <label class="btn btn-success pull-right btn-sm btn-flat" onclick="selectIMG( '#Image4','#imageDisplay4')">
+                                                <i class="fa fa-camera" aria-hidden="true"></i> Ảnh
+                                            </label>
+                                            <input type="hidden" name="Image4" id="Image4" value="@pro.Image1" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="imageDetail">
+                                        <div class="fileupload-item">
+
+                                            <img id="imageDisplay5" src="@pro.Image5" />
+                                            <button type="button" class="btn btn-dark pull-right btn-sm btn-flat" onclick="deleteImageDetail('imageDisplay5','Image5')"><i class="fa fa-trash-o" aria-hidden="true"></i></button><br /><br />
+                                            <label class="btn btn-success pull-right btn-sm btn-flat" onclick="selectIMG( '#Image5','#imageDisplay5')">
+                                                <i class="fa fa-camera" aria-hidden="true"></i> Ảnh
+                                            </label>
+                                            <input type="hidden" name="Image5" id="Image5" value="@pro.Image5" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="imageDetail">
+                                        <div class="fileupload-item">
+
+                                            <img id="imageDisplay6" src="@pro.Image6" />
+                                            <button type="button" class="btn btn-dark pull-right btn-sm btn-flat" onclick="deleteImageDetail('imageDisplay6','Image6')"><i class="fa fa-trash-o" aria-hidden="true"></i></button><br /><br />
+                                            <label class="btn btn-success pull-right btn-sm btn-flat" onclick="selectIMG( '#Image6','#imageDisplay6')">
+                                                <i class="fa fa-camera" aria-hidden="true"></i> Ảnh
+                                            </label>
+                                            <input type="hidden" name="Image6" id="Image6" value="@pro.Image6" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-12" style="margin-bottom:10px">
+                            <div class="col-md-4" style="padding-left:5px">
+                                @if (pro.IsMultipleStandard == true)
+                                {
+                                    <label for="ckbMutilStandard">
+                                        <input type="checkbox" id="ckbMutilStandard" checked /> Sản phẩm có nhiều thuộc tính
+                                    </label>
+                                    <input type="hidden" value="true" name="IsMultipleStandard" />
+                                    <script>
+                                        $(document).ready(function(){
+                                            $(".divStandard").show();
+                                        })
+
+                                    </script>
+                                }
+                                else
+                                {
+                                    <label for="ckbMutilStandard">
+                                        <input type="checkbox" id="ckbMutilStandard" /> Sản phẩm có nhiều thuộc tính
+                                    </label>
+                                    <input type="hidden" value="false" name="IsMultipleStandard" />
+                                    <script>
+                                        $(document).ready(function(){
+                                            $(".divStandard").hide();
+                                        })
+                                    </script>
+                                }
+                            </div>
+
+
+                        </div>
+
+                        <div class="col-md-12 divStandard">
+                            <table class="table table-bordered">
+                                <colgroup>
+                                    <col style="width: 150px" />
+                                    <col style="width: auto" />
+                                    <col style="width: 50px" />
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th>Thuộc tính</th>
+                                        <th>Giá trị</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var lstStandard = dao.Model.ProductStandardDetails.Where(f => f.ProductID == pro.ID).ToList();
+                                        foreach (var item in lstStandard)
+                                        {
+                                            Html.RenderAction("GetStandard", new { selected = "", standardID = item.StandardID, val = item.Val });
+                                        }
+                                    }
+
+                                    <tr id="rowAddNewStandard">
+                                        <td colspan="2">
+                                            <a href="#" onclick="return addNewStandar()"> Thêm thuộc tính</a>
+
+                                        </td>
+
+                                        <td>
+                                            <span class="input-group-addon btn btn-primary" style="background:#337ab7;color:white" data-toggle="modal" data-target="#ModalStandard"><i class="fa fa-plus" aria-hidden="true"></i></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-12 divStandard">
+                            <table class="table table-bordered">
+                                <colgroup>
+                                    <col style="width: 5%" />
+                                    <col style="width: 20%" />
+                                    <col style="width: 35%" />
+                                    <col style="width: 20%" />
+                                    <col style="width: 20%" />
+
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th>
+
+                                        </th>
+                                        <th>
+                                            Mã
+                                        </th>
+                                        <th>
+                                            Tên
+                                        </th>
+                                        <th>
+                                            Giá gốc
+                                        </th>
+                                        <th>
+                                            Giá bán
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblSubItems"></tbody>
+                            </table>
+                        </div>
+                        <hr />
+                        <div class="form-group">
+                            <div class="col-sm-12" style="padding:10px">
+                                <button type="button" class="btn btn-danger pull-right" onclick="saveProduct()"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Lưu</button>
+                                <a class="btn btn-dark pull-right" href="~/Product/Index" style="margin-right:10px">
+                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hủy
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+
+
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+<div class="modal" id="ModalCategory" role="dialog">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Thêm Mới Danh Mục</h4>
+            </div>
+            <form action="/Category/UpdateCategory" data-ajax="true"
+                  data-ajax-method="POST"
+                  data-ajax-mode="replace"
+                  data-ajax-success="OnSuccessCategory"
+                  id="CustomerForm" method="post"
+                  data-toggle="validator">
+                <div class="modal-body">
+                    <input type="hidden" name="mode" id="mode" value="ADD" />
+                    <div class="form-group">
+                        <label for="PhoneNumber">Tên Danh Mục</label>
+                        <input type="text" class="form-control" name="Name" id="Name" placeholder="Tên Danh Mục" tabindex="6">
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+                <div class="modal-footer">
+                    <button class="btn bg-grey-custom" data-dismiss="modal" aria-hidden="true">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hủy
+                    </button>
+                    <button class="btn bg-pink-custom"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Lưu</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+<div class="modal" id="ModalUnit" role="dialog">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Thêm Mới Đơn Vị</h4>
+            </div>
+            <form action="/Unit/UpdateUnit" data-ajax="true"
+                  data-ajax-begin="return OnBegin();"
+                  data-ajax-method="POST"
+                  data-ajax-mode="replace"
+                  data-ajax-success="OnSuccessUnit"
+                  id="CustomerForm" method="post"
+                  data-toggle="validator">
+                <div class="modal-body">
+                    <input type="hidden" name="mode" id="mode" value="ADD" />
+                    <div class="form-group">
+                        <label for="PhoneNumber">Tên Đơn Vị</label>
+                        <input type="text" class="form-control" name="Name" id="Name" placeholder="Tên Đơn Vị" tabindex="6" value="@pro.Name">
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+                <div class="modal-footer">
+                    <button class="btn bg-grey-custom" data-dismiss="modal" aria-hidden="true">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hủy
+                    </button>
+                    <button class="btn bg-pink-custom"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Lưu</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+<div class="modal" id="ModalStandard" role="dialog">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Thêm Mới Thuộc Tính</h4>
+            </div>
+            <form action="/Product/AddStandard" data-ajax="true"
+                  data-ajax-method="POST"
+                  data-ajax-mode="replace"
+                  data-ajax-success="OnSuccessStandard"
+                  id="CustomerForm" method="post"
+                  data-toggle="validator">
+                <div class="modal-body">
+                    <input type="hidden" name="mode" id="mode" value="ADD" />
+                    <div class="form-group">
+                        <label for="PhoneNumber">Tên Thuộc Tính</label>
+                        <input type="text" class="form-control" name="Name" id="Name" placeholder="Tên Thuộc Tính" tabindex="6" value="@pro.Name">
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+                <div class="modal-footer">
+                    <button class="btn bg-grey-custom" data-dismiss="modal" aria-hidden="true">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hủy
+                    </button>
+                    <button class="btn bg-pink-custom"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Lưu</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+<div class="modal" id="ModalBrand" role="dialog">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Thêm Mới Thương Hiệu</h4>
+            </div>
+            <form action="/Brand/UpdateBrand" data-ajax="true"
+                  data-ajax-method="POST"
+                  data-ajax-mode="replace"
+                  data-ajax-success="OnSuccessBrand"
+                  id="CustomerForm" method="post"
+                  data-toggle="validator">
+                <div class="modal-body">
+                    <input type="hidden" name="mode" id="mode" value="ADD" />
+                    <div class="form-group">
+                        <label for="PhoneNumber">Tên Thương Hiệu</label>
+                        <input type="text" class="form-control" name="Name" id="Name" placeholder="Tên Thương Hiệu" tabindex="6">
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="modal-footer">
+                    <button class="btn bg-grey-custom" data-dismiss="modal" aria-hidden="true">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hủy
+                    </button>
+                    <button class="btn bg-pink-custom"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Lưu</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+<div class="modal" id="ModalCategoryWeb" role="dialog">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Thêm Mới Danh Mục</h4>
+            </div>
+            <form action="/WCategory/UpdateCategory" data-ajax="true"
+                  data-ajax-method="POST"
+                  data-ajax-mode="replace"
+                  data-ajax-success="OnSuccessCategoryWeb"
+                  id="CustomerForm" method="post"
+                  data-toggle="validator">
+                <div class="modal-body">
+                    <input type="hidden" name="mode" id="mode" value="ADD" />
+                    <div class="form-group">
+                        <label for="PhoneNumber">Tên Danh Mục</label>
+                        <input type="text" class="form-control" name="Name" id="CategoryWebName" placeholder="Tên Danh Mục" tabindex="6">
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+                <div class="modal-footer">
+                    <button class="btn bg-grey-custom" data-dismiss="modal" aria-hidden="true">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hủy
+                    </button>
+                    <button class="btn bg-pink-custom"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Lưu</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+<table style="display:none">
+
+    <tbody id="subItemTemplate">
+        <tr prid="{id}">
+            <td>
+                <input type="checkbox" id="ckbDelete_i_" {checked} />
+                <input type="hidden" name="ckbDelete_i_" />
+
+
+            </td>
+            <td>
+                {id}
+            </td>
+            <td>
+                {name}
+            </td>
+            <td>
+                <input class="form-control pricesale" type="text" value="{pricesale}" onblur="txtPriceSaleKeyUp(this)" />
+            </td>
+            <td>
+                <input class="form-control pricesale2" type="text" value="{pricesale2}" onblur="txtPriceSale2KeyUp(this)" />
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+
+    $(document).ready(function () {
+
+
+        setMoneyTextBox(".money-textbox");
+        setIcheck('#ckbIcheck', "[name=IsActive]", "true", "false", function (e) { });
+        setIcheck("#ckbMutilStandard", "[name=IsMultipleStandard]", "true", "false", function (e) {
+            if (e) {
+                $(".divStandard").show();
+            } else {
+                $(".divStandard").hide();
+            }
+        });
+
+
+
+
+        setIcheck("#cbkIsOverSales", "[name=IsOverSales]", "true", "false", function (e) {});
+        setIcheck("#ckbIsShowWeb", "[name=IsShowWeb]", "true", "false", function (e) {});
+
+        tinymce.init(tinymceOption('#DetailInfo'));
+        tinymce.init(tinymceOption('#BasicInfo'));
+
+        genarateSubItem();
+
+
+
+    });
+
+    @{
+        var lstSub = dao.Model.Products.Where(f => f.ID == pro.ID && f.IDAndSize != f.ID).Select(f=> new { f.ID, f.IDAndSize, f.IsDelete, f.PriceSale,f.PriceSale2,f.Standard1,f.Standard2,f.Standard3,f.Standard4}).ToList();
+        string sss = Newtonsoft.Json.JsonConvert.SerializeObject(lstSub);
+    }
+
+    var lstSubItem = @Html.Raw(sss);
+
+
+    function addNewStandar() {
+        var s = '';
+
+        $(".ckbStandard").each(function (index) {
+            if (index > 0)
+                s += ',';
+            s += $(this).val();
+        });
+        $.ajax({
+            url: "@Url.Content("/Product/GetStandard")",
+            data: { selected: s },
+            success: function (data) {
+                $("#rowAddNewStandard").before(data);
+            }
+        });
+        return false;
+    }
+
+    function standardChange(e) {
+        var id = $(e).val();
+        $.ajax({
+            url: "@Url.Content("/Product/GetTokenField")",
+            data: { id: id },
+            success: function (data) {
+                $(e).closest("tr").find('.val_container').html(data);
+                genarateSubItem();
+            }
+        });
+    }
+
+    function removeStandard(e) {
+        $(e).closest("tr").remove();
+        genarateSubItem();
+    }
+
+    function genarateSubItem(isKeepPrice) {
+        var keepPrice =true;
+        if(typeof isKeepPrice !="undefined" ){
+            keepPrice = isKeepPrice;
+        }
+        var array = new Array();
+        $(".standardVal").each(function (index) {
+            var arrayToken = $(this).tokenfield('getTokens');
+            var arrayVal = new Array();
+            for (var i = 0; i < arrayToken.length; i++) {
+                arrayVal.push(arrayToken[i].label);
+
+            }
+            console.log(arrayVal);
+            array.push(arrayVal);
+
+        });
+        //lấy tổ hợp các tiêu chuẩn
+        while (array.length > 1) {
+            var arrayTarget = array[array.length - 2];
+            var arraySource = array[array.length - 1];
+            var arrayOut = new Array();
+            for (var i = 0; i < arrayTarget.length; i++) {
+                var item = arrayTarget[i];
+                for (var j = 0; j < arraySource.length; j++) {
+                    arrayOut.push(item + "_" + arraySource[j]);
+                }
+            }
+            array[array.length - 2] = arrayOut;
+            array.splice(array.length - 1, 1);
+        }
+        var listProduct = new Array();
+        var id = $("#ID").val();
+        var name = $("#Name").val();
+        var price = $("#PriceSale").val();
+        var priceSale = $("#PriceSale2").val();
+        //xuất các tiêu chuẩn
+        if (array.length == 1) {
+            var arrayId = array[0];
+            for (var i = 0; i < arrayId.length; i++) {
+                console.log(arrayId[i]);
+
+                var lstStandard =  arrayId[i].split("_");
+
+
+                var prID = id + '_' + arrayId[i];
+                var prName = name ;//+ ' ' + arrayId[i];
+                var pr = { ID: id, IDAndSize: prID, Name: prName, PriceSale: price, PriceSale2: priceSale,Standard1: lstStandard[0], Standard2:lstStandard[1], Standard3:lstStandard[2], IsDelete: false };
+                listProduct.push(pr);
+                var old = getSubItemByID(prID);
+                if (old != null) {
+                    pr.IsDelete = old.IsDelete;
+                    if(keepPrice){
+                        pr.PriceSale = old.PriceSale;
+                        pr.PriceSale2 = old.PriceSale2;
+                    }
+
+                }
+            }
+        }
+
+        lstSubItem = listProduct;
+        renderSubItem();
+
+    }
+
+    function renderSubItem() {
+        var html = '';
+        for (var i = 0; i < lstSubItem.length; i++) {
+            html += renderOnceSubItem(lstSubItem[i], i);
+        }
+        $("#tblSubItems").html(html);
+        for (var i = 0; i < lstSubItem.length; i++) {
+            setIcheck("#ckbDelete" + i, "[name=ckbDelete" + i + "]", "true", "false", function (val, e) {
+                console.log(e.currentTarget);
+                ckbDeleteChange(val, e.currentTarget);
+            });
+        }
+        //
+
+        setMoneyTextBox(".pricesale");
+        setMoneyTextBox(".pricesale2");
+
+
+    }
+
+    function renderOnceSubItem(item, i) {
+
+        var template = $("#subItemTemplate").html();
+        template = template.replace(/{id}/g, item.IDAndSize);
+        template = template.replace(/{name}/g, item.Name);
+        template = template.replace(/{pricesale}/g, item.PriceSale);
+        template = template.replace(/{pricesale2}/g, item.PriceSale2);
+        template = template.replace(/_i_/g, i);
+
+        if (!item.IsDelete) {
+            template = template.replace(/{checked}/g, 'checked');
+        } else {
+            template = template.replace(/{checked}/g, '');
+        }
+
+
+        return template;
+    }
+
+
+
+
+
+    function saveProduct() {
+        if (!validate()) {
+            return;
+        }
+
+        var fd = new FormData(document.getElementById("ProductForm"));
+
+        fd.append("htmlDetailInfo",encodeURIComponent(tinyMCE.get('DetailInfo').getContent()));
+        fd.append("htmlBasicInfo",encodeURIComponent(tinyMCE.get('BasicInfo').getContent()));
+
+
+
+        fd.append("lst", JSON.stringify(lstSubItem));
+        var array = new Array();
+        $(".standardVal").each(function (index) {
+            var arrayToken = $(this).tokenfield('getTokens');
+            var arrayVal = new Array();
+            var s = "";
+            for (var i = 0; i < arrayToken.length; i++) {
+                if (i > 0)
+                    s += ',';
+                s += arrayToken[i].label;
+            }
+            array.push(s);
+
+        });
+        var arrayS = new Array();
+        var prID = $("#ID").val();
+        var arrayStandardDetail = new Array();
+        $(".ckbStandard").each(function (index) {
+            var standarID = $(this).val();
+            arrayStandardDetail.push({ ProductID: prID, StandardID: standarID, Val: array[index] });
+
+        });
+
+        fd.append("standardDetail", JSON.stringify(arrayStandardDetail));
+
+
+
+
+        $.ajax({
+            url: "@Url.Content("/Product/UpdateProduct")",
+            type: "POST",
+            data: fd,
+            enctype: 'multipart/form-data',
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,   // tell jQuery not to set contentType
+            success: function (data) {
+                switch (data.Code) {
+                    case 1:
+                        showSuccess("Thành công", "Lưu sản phẩm thành công");
+                        $("#ModalProduct").modal("hide");
+                        window.location="/Product/Index";
+                        break;
+                    case 2:
+                        showError("Lỗi", "Mã sản phẩm này đã tồn tại");
+                        break;
+                    case 3:
+                        showConfirm("Lỗi", "Sản phẩm này đã bị xóa. Bạn có muốn khôi phục lại sản phẩm này", function(){
+
+                        }, function(){});
+                        break;
+                    default:
+
+                }
+
+            }
+        });
+
+        return false;
+    }
+
+    function validate() {
+        if($("[name=IsMultipleStandard]").val()=="true")
+        {
+            if(  $(".standardVal").length==0){
+                showError("Lỗi", "Bạn phải chọn ít nhât 1 thuộc tính");
+                return false;
+            }
+            var checkVal =true;
+            $(".standardVal").each(function (index) {
+                var arrayToken = $(this).tokenfield('getTokens');
+                if(arrayToken.length ==0){
+                    showError("Lỗi", "Bạn phải chọn ít nhât 1 giá trị cho thuộc tính");
+                    checkVal=  false;
+                }
+
+
+            });
+            if(!checkVal)
+                return false;
+
+        }
+        return true;
+    }
+
+    function getSubItemByID(id) {
+        for (var i = 0; i < lstSubItem.length; i++) {
+            var item = lstSubItem[i];
+            if (item.IDAndSize == id)
+                return item;
+        }
+        return null;
+    }
+
+    function txtPriceKeyUp(e) {
+        var id = $(e).closest("tr").attr("prid");
+        var val = $(e).val().replace(/,/g, "") * 1;
+        var pr = getSubItemByID(id);
+        if (pr != null)
+            pr.PriceSale = val;
+        console.log(pr);
+
+    }
+
+    function ckbDeleteChange(val, e) {
+        var id = $(e).closest("tr").attr("prid");
+        var pr = getSubItemByID(id);
+        if (pr != null)
+            pr.IsDelete = !val;
+        console.log(pr);
+    }
+
+    function OnSuccessCategory(data) {
+        if (data.Code === 1) {
+            $('#ModalCategory').modal('hide');
+            swal('Thành Công', data.message, 'success');
+            $('#CategoryID').append('<option value=' + data.data.ID + '>' + data.data.Name + '</option>');
+            $('#CategoryID').val(data.data.ID).trigger("change");
+        } else {
+            swal('Lỗi', data.message, 'error');
+        }
+    }
+    function OnSuccessCategoryWeb(data) {
+
+        if (data.Code == 1) {
+            $('#ModalCategoryWeb').modal('hide');
+            swal('Thành Công', data.message, 'success');
+            $('#CategoryIDWebTarget').append('<option value=' + data.data.ID + '>' + data.data.Name + '</option>');
+            $('#CategoryIDWebTarget').val(data.data.ID).trigger("change");
+        } else {
+            swal('Lỗi', data.message, 'error');
+        }
+    }
+    function OnSuccessUnit(data) { UnitID
+        if (data.Code === 1) {
+            $('#ModalCategory').modal('hide');
+            swal('Thành Công', data.message, 'success');
+            $('#CategroryID').append('<option value=' + data.data.ID + '>' + data.data.Name + '</option>');
+            $('#CategroryID').val(data.data.ID).trigger("change");
+            $('#CategroryID').val(data.data.ID);
+        } else {
+            swal('Lỗi', data.message, 'error');
+        }
+    }
+    function OnSuccessUnit(data) {
+        if (data.Code === 1) {
+            $('#ModalUnit').modal('hide');
+            swal('Thành Công', data.message, 'success');
+            $('#UnitID').append('<option value=' + data.data.ID + '>' + data.data.Name + '</option>');
+            $('#UnitID').val(data.data.ID).trigger("change");
+            $('#UnitID').val(data.data.ID);
+        } else {
+            swal('Lỗi', data.message, 'error');
+        }
+    }
+    function OnSuccessBrand(data) {
+        if (data.Code === 1) {
+            $('#ModalBrand').modal('hide');
+            showSuccess('Thành Công', data.message);
+            $('#MarkerID').append('<option value=' + data.data.ID + '>' + data.data.Name + '</option>');
+            $('#MarkerID').val(data.data.ID).trigger("change");
+        } else {
+            showError('Lỗi', data.message);
+        }
+    }
+    function OnSuccessStandard(data) {
+        if (data.Code === 1) {
+            $('#ModalStandard').modal('hide');
+
+            swal('Thành Công', data.message, 'success');
+        } else {
+            swal('Lỗi', data.message, 'error');
+        }
+    }
+
+    function txtNameKeyup(e){
+        //if(e.keyCode == 13){
+        genarateSubItem();
+        //}
+    }
+
+    function txtPriceSaleKeyup(e){
+        //if(e.keyCode == 13){
+        genarateSubItem(false);
+        //}
+    }
+
+    function txtPriceSale2Keyup(e){
+        //if(e.keyCode == 13){
+        genarateSubItem(false);
+        //}
+    }
+
+
+</script>
+
+
+<table style="display:none">
+    <tbody id="SetDetailTemplate">
+        <tr>
+            <td>{id}</td>
+            <td>{name}</td>
+            <td class="originalprice">
+                <input class="form-control price detail_price" onblur="changePriceTable('{index}', this)" type="text" value="{price}" />
+            </td>
+            <td align="center">
+                <span class="btn bg-grey-custom btn-xs" onclick="deletePro({index})">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                </span>
+            </td>
+        </tr>
+    </tbody>
+</table>

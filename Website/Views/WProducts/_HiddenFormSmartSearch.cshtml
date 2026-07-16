@@ -1,0 +1,21 @@
+@{
+    Cubetech.Website.Models.DTO.WpSearchViewDTO model = Model as Cubetech.Website.Models.DTO.WpSearchViewDTO;
+    string category = model.SearchCategory;
+    string smartform = "smartsearch_form" + category;
+    Cubetech.Website.Models.Form.SmartSearchForm form = model.Form;
+    if (form == null)
+    {
+        form = new Cubetech.Website.Models.Form.SmartSearchForm();
+    }
+}
+<form class="hidden" name="@smartform" id="@smartform">
+    <input type="hidden" name="Color" id="Color" value="@form.Color" />
+    <input type="hidden" name="Size" id="Size" value="@form.Size" />
+    <input type="hidden" name="Price" id="Price" value="@form.Price" />
+    <input type="hidden" name="Category" id="Category" value="@category" />
+    <input type="hidden" name="OrderBy" id="OrderBy" value="@form.OrderBy" />
+    <input type="hidden" name="SearchKey" id="SearchKey" value="@form.SearchKey" />
+
+    <input type="hidden" name="dispNumber" value="999999" />
+    <input type="hidden" name="pageNo" value="-1" />
+</form>

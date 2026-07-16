@@ -1,0 +1,256 @@
+@using System.Collections
+@using System.Collections.Generic
+@using System.Linq
+@using Cubetech.Website.Models
+@{
+    ViewBag.Title = ViewBag.Title ?? "Test Activities Table";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+    var allActivities = ViewBag.AllActivities as List<Activity> ?? new List<Activity>();
+    var publishedActivities = ViewBag.PublishedActivities as List<Activity> ?? new List<Activity>();
+    var featuredActivities = ViewBag.FeaturedActivities as List<Activity> ?? new List<Activity>();
+    var stats = ViewBag.Stats;
+    var groupedByType = ViewBag.GroupedByType;
+    var recentActivities = ViewBag.RecentActivities as List<Activity> ?? new List<Activity>();
+    var errorMessage = ViewBag.ErrorMessage as string;
+    var connectionTest = ViewBag.ConnectionTest as string;
+}
+
+<style>
+    .test-container { max-width: 1200px; margin: 20px auto; padding: 20px; }
+    .test-section { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .test-title { color: #495057; font-size: 1.2em; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #007bff; padding-bottom: 5px; }
+    .success { color: #28a745; font-weight: bold; }
+    .error { color: #dc3545; font-weight: bold; }
+    .warning { color: #ffc107; font-weight: bold; }
+    .info { color: #17a2b8; font-weight: bold; }
+    .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .data-table th, .data-table td { border: 1px solid #dee2e6; padding: 8px; text-align: left; }
+    .data-table th { background-color: #e9ecef; font-weight: bold; }
+    .data-table tr:nth-child(even) { background-color: #f8f9fa; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+    .stat-card { background: white; border: 1px solid #dee2e6; border-radius: 6px; padding: 15px; text-align: center; }
+    .stat-number { font-size: 2em; font-weight: bold; color: #007bff; }
+    .stat-label { color: #6c757d; margin-top: 5px; }
+    .json-display { background: #f1f3f4; border: 1px solid #dadce0; border-radius: 4px; padding: 10px; font-family: monospace; white-space: pre-wrap; }
+</style>
+
+<div class="test-container">
+    <h1>🧪 Activities Table SQL Test</h1>
+    <p><strong>URL:</strong> <code>/Test/Activities</code></p>
+    
+    <!-- Connection Test -->
+    <div class="test-section">
+        <div class="test-title">🔌 Database Connection Test</div>
+        <div class="@(connectionTest != null && connectionTest.Contains("✅") ? "success" : "error")">
+            @connectionTest
+        </div>
+        
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="error" style="margin-top: 10px;">
+                <strong>Error:</strong> @errorMessage
+            </div>
+            
+            @if (ViewBag.ErrorDetails != null)
+            {
+                <details style="margin-top: 10px;">
+                    <summary>Error Details</summary>
+                    <div class="json-display">@ViewBag.ErrorDetails</div>
+                </details>
+            }
+        }
+    </div>
+
+    <!-- Statistics -->
+    <div class="test-section">
+        <div class="test-title">📊 Database Statistics</div>
+        @if (stats != null)
+        {
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">@((dynamic)stats).TotalActivities</div>
+                    <div class="stat-label">Total Activities</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@((dynamic)stats).PublishedCount</div>
+                    <div class="stat-label">Published</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@((dynamic)stats).FeaturedCount</div>
+                    <div class="stat-label">Featured</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@((dynamic)stats).NewsCount</div>
+                    <div class="stat-label">News</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@((dynamic)stats).EventsCount</div>
+                    <div class="stat-label">Events</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@((dynamic)stats).TrainingCount</div>
+                    <div class="stat-label">Training</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@((dynamic)stats).ProjectsCount</div>
+                    <div class="stat-label">Projects</div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Group By Type -->
+    <div class="test-section">
+        <div class="test-title">📈 Activities by Type</div>
+        @if (groupedByType != null)
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Activity Type</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in groupedByType)
+                    {
+                        <tr>
+                            <td>@item.Type</td>
+                            <td>@item.Count</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <!-- All Activities (Raw Data) -->
+    <div class="test-section">
+        <div class="test-title">🗃️ All Activities (Raw Data)</div>
+        <p><strong>Count:</strong> @allActivities.Count</p>
+        
+        @if (allActivities.Any())
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Published</th>
+                        <th>Featured</th>
+                        <th>Views</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var activity in allActivities)
+                    {
+                        <tr>
+                            <td>@activity.ActivityID</td>
+                            <td>@activity.Title</td>
+                            <td><span class="info">@activity.ActivityType</span></td>
+                            <td>@(activity.IsPublished ? "✅" : "❌")</td>
+                            <td>@(activity.IsFeatured ? "⭐" : "")</td>
+                            <td>@activity.ViewCount</td>
+                            <td>@activity.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="warning">No activities found in database.</div>
+        }
+    </div>
+
+    <!-- Published Activities -->
+    <div class="test-section">
+        <div class="test-title">✅ Published Activities</div>
+        <p><strong>Count:</strong> @publishedActivities.Count</p>
+        
+        @if (publishedActivities.Any())
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>Featured</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var activity in publishedActivities)
+                    {
+                        <tr>
+                            <td>@activity.ActivityID</td>
+                            <td><strong>@activity.Title</strong></td>
+                            <td>@(activity.Description != null && activity.Description.Length > 100 ? activity.Description.Substring(0, 100) + "..." : activity.Description)</td>
+                            <td><span class="info">@activity.ActivityType</span></td>
+                            <td>@(activity.IsFeatured ? "⭐ Featured" : "")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <!-- Featured Activities -->
+    <div class="test-section">
+        <div class="test-title">⭐ Featured Activities</div>
+        <p><strong>Count:</strong> @featuredActivities.Count</p>
+        
+        @if (featuredActivities.Any())
+        {
+            @foreach (var activity in featuredActivities)
+            {
+                <div style="border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin-bottom: 10px; background: #fff3cd;">
+                    <h4>@activity.Title</h4>
+                    <p><strong>Type:</strong> @activity.ActivityType | <strong>Views:</strong> @activity.ViewCount</p>
+                    <p>@activity.Description</p>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="test-section">
+        <div class="test-title">⚡ Quick Actions</div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/Test/Activities" class="btn btn-primary">🔄 Refresh Data</a>
+            <a href="/Test/SqlQuery" class="btn btn-info">🔍 Custom SQL Query</a>
+            <a href="/WProducts/hoat_dong" class="btn btn-success">👀 View Live Page</a>
+        </div>
+    </div>
+
+    <!-- Raw JSON Data -->
+    <div class="test-section">
+        <div class="test-title">📋 Raw JSON Data</div>
+        <details>
+            <summary>Click to view raw statistics JSON</summary>
+            <div class="json-display">@Html.Raw(System.Web.Helpers.Json.Encode(stats))</div>
+        </details>
+    </div>
+</div>
+
+<style>
+    .btn {
+        display: inline-block;
+        padding: 8px 16px;
+        margin: 4px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: bold;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-primary { background-color: #007bff; color: white; }
+    .btn-info { background-color: #17a2b8; color: white; }
+    .btn-success { background-color: #28a745; color: white; }
+    .btn:hover { opacity: 0.8; }
+</style>

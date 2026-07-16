@@ -1,0 +1,750 @@
+@model List<Cubetech.Website.Models.Project>
+@{
+    ViewBag.Title = "Quản lý Dự án";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; font-size: 16px; }
+        .admin-container { max-width: 1850px; margin: 0 auto; padding: 20px; }
+        .admin-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .header-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .header-content h1 { font-size: 1.5rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .header-actions { display: flex; gap: 15px; flex-wrap: wrap; }
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease; font-size: 14px; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn-secondary { background: #6b7280; color: white; }
+        .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .stat-number { font-size: 2rem; font-weight: 700; color: #1e293b; display: block; }
+        .stat-label { color: #64748b; font-size: 0.9rem; margin-top: 2px; }
+        .table-section { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden; }
+        .table-header { padding: 15px 20px; border-bottom: 1px solid #e2e8f0; }
+        .table-header h3 { font-size: 1.2rem; font-weight: 600; color: #1e293b; }
+        .projects-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .projects-table th { background: #f8fafc; padding: 12px 16px; text-align: left; font-weight: 600; color: #475569; border-bottom: 2px solid #e2e8f0; font-size: 0.95rem; }
+        .projects-table td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; word-wrap: break-word; vertical-align: top; line-height: 1.4; }
+        
+        /* Column width adjustments */
+        .projects-table th:nth-child(1) { width: 5%; }   /* ID */
+        .projects-table th:nth-child(2) { width: 15%; }  /* Tiêu đề - reduced from default */
+        .projects-table th:nth-child(3) { width: 12%; }  /* Danh mục - increased */
+        .projects-table th:nth-child(4) { width: 10%; }  /* Trạng thái */
+        .projects-table th:nth-child(5) { width: 8%; }   /* Tiến độ */
+        .projects-table th:nth-child(6) { width: 8%; }   /* Giá trị */
+        .projects-table th:nth-child(7) { width: 8%; }   /* Hình ảnh */
+        .projects-table th:nth-child(8) { width: 8%; }   /* Tài liệu */
+        .projects-table th:nth-child(9) { width: 8%; }   /* Nổi bật */
+        .projects-table th:nth-child(10) { width: 8%; }  /* Đã xuất bản */
+        .projects-table th:nth-child(11) { width: 10%; } /* Thao tác */
+        .projects-table tr:hover { background: #f8fafc; }
+        .badge { padding: 5px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; margin-left: 8px; }
+        .badge-featured { background: #fef3c7; color: #92400e; }
+        .badge-published { background: #d1fae5; color: #065f46; }
+        .project-status { padding: 8px 12px; border-radius: 16px; font-size: 0.85rem; font-weight: 500; }
+        .status-planning { background: #ddd6fe; color: #5b21b6; }
+        .status-in_progress { background: #bfdbfe; color: #1d4ed8; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-on_hold { background: #fed7d7; color: #c53030; }
+        .action-buttons { display: flex; gap: 6px; }
+        .btn-action { padding: 6px; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s ease; font-size: 12px; }
+        .btn-edit { background: #3b82f6; color: white; }
+        .btn-delete { background: #ef4444; color: white; }
+        .btn-action:hover { transform: scale(1.05); }
+        .no-data { text-align: center; padding: 60px 20px; color: #64748b; }
+        .no-data i { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+        .btn-view { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-view-image { background: #3b82f6; color: white; }
+        .btn-view-image:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3); }
+        .btn-view-document { background: #10b981; color: white; }
+        .btn-view-document:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); }
+        .no-media { color: #9ca3af; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; font-style: italic; }
+        .progress-container { display: flex; align-items: center; gap: 10px; }
+        .progress { width: 100px; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+        .progress-bar { height: 100%; transition: width 0.3s ease; }
+        .bg-success { background: #10b981; }
+        .bg-warning { background: #f59e0b; }
+        .bg-danger { background: #ef4444; }
+        .bg-info { background: #3b82f6; }
+        .filters-section { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .filters-row { display: flex; gap: 15px; align-items: end; flex-wrap: wrap; }
+        .filter-group { flex: 1; min-width: 200px; }
+        .filter-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #374151; font-size: 0.95rem; }
+        .form-control { width: 100%; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; height: 44px; line-height: 1.2; }
+        .form-control:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .filter-actions { display: flex; gap: 10px; }
+        .pagination-container { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .pagination-info { color: #64748b; font-size: 16px; }
+        .pagination { display: flex; gap: 5px; align-items: center; }
+        .page-btn { padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 6px; text-decoration: none; color: #374151; background: white; transition: all 0.2s ease; display: flex; align-items: center; gap: 5px; font-size: 16px; }
+        .page-btn:hover { background: #f3f4f6; border-color: #9ca3af; color: #1f2937; }
+        .page-btn.active { background: #3b82f6; border-color: #3b82f6; color: white; }
+        .page-btn.active:hover { background: #2563eb; }
+        .alert { padding: 16px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); animation: slideIn 0.3s ease-out; }
+        .alert-success { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46; border-left: 4px solid #10b981; }
+        .alert-error { background: linear-gradient(135deg, #fee2e2 0%, #fca5a5 100%); color: #991b1b; border-left: 4px solid #ef4444; }
+        .alert-close { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: inherit; opacity: 0.7; padding: 5px; border-radius: 4px; transition: all 0.2s ease; }
+        .alert-close:hover { opacity: 1; background: rgba(0,0,0,0.1); }
+        @@keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Filter Section Styles */
+        .filters-section { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .filters-form { width: 100%; }
+        .filters-row { display: grid; grid-template-columns: 2fr 1.5fr 1fr auto; gap: 15px; align-items: end; }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; }
+        .filter-group label { font-weight: 500; color: #374151; font-size: 14px; white-space: nowrap; }
+        .form-control { padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; transition: all 0.2s ease; background: white; width: 100%; min-width: 0; height: 44px; line-height: 1.2; }
+        .form-control:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .form-control::placeholder { color: #9ca3af; }
+        .filter-actions { display: flex; gap: 8px; }
+        .btn-filter { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease; white-space: nowrap; }
+        .btn-search { background: #3b82f6; color: white; }
+        .btn-search:hover { background: #2563eb; }
+        .btn-reset { background: #6b7280; color: white; }
+        .btn-reset:hover { background: #4b5563; }
+        .required { color: #ef4444; font-weight: 600; }
+        
+        /* Responsive Design */
+        @@media (max-width: 1024px) {
+            .filters-row { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .filter-actions { grid-column: 1 / -1; justify-content: flex-start; }
+        }
+        @@media (max-width: 640px) {
+            .filters-row { grid-template-columns: 1fr; }
+            .filters-section { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="header-content">
+                <h1><i class="fas fa-building"></i> Quản lý Dự án</h1>
+                <div class="header-actions">
+                    <a href="/admin/projects/manage-categories" class="btn btn-secondary">
+                        <i class="fas fa-tags"></i> Quản lý danh mục
+                    </a>
+                    <a href="/admin/projects/create" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Thêm dự án
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Alert Messages -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                @TempData["Success"]
+                <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        }
+        
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                @TempData["Error"]
+                <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        }
+
+        <!-- Search and Filter Form -->
+        <div class="filters-section">
+            <form method="get" class="filters-form">
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label>Tìm kiếm</label>
+                        <input type="text" name="search" placeholder="Tìm kiếm theo tiêu đề..." 
+                               value="@(ViewBag.Search ?? "")" class="form-control">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Danh mục dự án</label>
+                        <select name="category" class="form-control">
+                            <option value="">-- Chọn danh mục dự án --</option>
+                            @{
+                                string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+                                using (var connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                                {
+                                    var sql = @"SELECT CategoryCode, CategoryName 
+                                               FROM ProjectCategories 
+                                               WHERE IsActive = 1 
+                                               ORDER BY DisplayOrder";
+                                    
+                                    using (var command = new System.Data.SqlClient.SqlCommand(sql, connection))
+                                    {
+                                        connection.Open();
+                                        using (var reader = command.ExecuteReader())
+                                        {
+                                            while (reader.Read())
+                                            {
+                                                string categoryCode = reader.GetString(0);
+                                                string categoryName = reader.GetString(1);
+                                                string selected = (ViewBag.Category == categoryCode) ? "selected" : "";
+                                                <option value="@categoryCode" @selected>@categoryName</option>
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Trạng thái</label>
+                        <select name="status" class="form-control">
+                            <option value="">Tất cả</option>
+                            <option value="planning" @(ViewBag.Status == "planning" ? "selected" : "")>Lập kế hoạch</option>
+                            <option value="in_progress" @(ViewBag.Status == "in_progress" ? "selected" : "")>Đang thực hiện</option>
+                            <option value="completed" @(ViewBag.Status == "completed" ? "selected" : "")>Hoàn thành</option>
+                            <option value="on_hold" @(ViewBag.Status == "on_hold" ? "selected" : "")>Tạm dừng</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-filter btn-search">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                        <a href="/admin/projects" class="btn-filter btn-reset">
+                            <i class="fas fa-undo"></i> Đặt lại
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Alert Messages -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                @TempData["SuccessMessage"]
+            </div>
+        }
+        
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                @ViewBag.ErrorMessage
+                @if (ViewBag.DebugInfo != null)
+                {
+                    <details style="margin-top: 10px;">
+                        <summary>Chi tiết lỗi (Debug)</summary>
+                        <pre style="background: #f5f5f5; padding: 10px; margin-top: 5px; font-size: 12px; overflow-x: auto;">@ViewBag.DebugInfo</pre>
+                    </details>
+                }
+            </div>
+        }
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-number">@(ViewBag.StatsTotal ?? 0)</span>
+                <span class="stat-label">Tổng số dự án</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">@(ViewBag.StatsInProgress ?? 0)</span>
+                <span class="stat-label">Đang thực hiện</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">@(ViewBag.StatsCompleted ?? 0)</span>
+                <span class="stat-label">Hoàn thành</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">@(ViewBag.StatsTotalValue ?? 0)</span>
+                <span class="stat-label">Tổng giá trị (tỷ VND)</span>
+            </div>
+        </div>
+
+        <!-- Projects Table -->
+        <div class="table-section">
+            <div class="table-header">
+                <h3>Danh sách dự án (@(Model != null ? Model.Count : 0) kết quả)</h3>
+            </div>
+            
+            <div class="table-responsive">
+                @if (Model != null && Model.Any())
+                {
+                    <table class="projects-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tiêu đề</th>
+                                <th>Danh mục</th>
+                                <th>Trạng thái</th>
+                                <th>Tiến độ</th>
+                                <th>Giá trị</th>
+                                <th>Hình ảnh</th>
+                                <th>Tài liệu</th>
+                                <th>Nổi bật</th>
+                                <th>Đã xuất bản</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var project in Model)
+                            {
+                                <tr>
+                                    <td>@project.ProjectID</td>
+                                    <td>
+                                        <div>
+                                            @project.Title
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(project.Description))
+                                        {
+                                            <div style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">
+                                                @(project.Description.Length > 50 ? project.Description.Substring(0, 50) + "..." : project.Description)
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="project-status status-@project.Category">
+                                            @project.CategoryText
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="project-status status-@project.Status">
+                                            @project.StatusText
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress">
+                                                <div class="progress-bar bg-@project.ProgressColor" style="width: @project.Progress%"></div>
+                                            </div>
+                                            <span>@project.Progress%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>@project.FormattedValue</strong>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(project.ImageUrl))
+                                        {
+                                            <button class="btn-view btn-view-image" onclick="viewImage('@project.ImageUrl')" title="Click để xem hình ảnh">
+                                                <i class="fas fa-image"></i> Xem ảnh
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="no-media">
+                                                <i class="fas fa-image"></i> No image
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(project.DocumentUrl))
+                                        {
+                                            <button class="btn-view btn-view-document" onclick="downloadDocument('@project.DocumentUrl')" title="Click để tải xuống tài liệu">
+                                                <i class="fas fa-download"></i> Tải file
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="no-media">
+                                                <i class="fas fa-file-alt"></i> No file
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (project.IsFeatured)
+                                        {
+                                            <span class="badge badge-featured">
+                                                <i class="fas fa-star"></i> Nổi bật
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span style="color: #ccc;">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (project.IsPublished)
+                                        {
+                                            <span class="badge badge-published">
+                                                <i class="fas fa-check"></i> Đã xuất bản
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge" style="background: #fee2e2; color: #991b1b;">
+                                                <i class="fas fa-clock"></i> Bản nháp
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="/admin/projects/edit?id=@project.ProjectID" class="btn-action btn-edit" title="Chỉnh sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="post" action="/admin/projects/delete/@project.ProjectID" style="display: inline;" 
+                                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa dự án này?')">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn-action btn-delete" title="Xóa">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="no-data">
+                        <i class="fas fa-building"></i>
+                        <h3>Chưa có dự án nào</h3>
+                        <p>Hãy thêm dự án đầu tiên của bạn</p>
+                        <a href="/admin/projects/create" class="btn btn-primary" style="margin-top: 16px;">
+                            <i class="fas fa-plus"></i> Thêm dự án mới
+                        </a>
+                    </div>
+                }
+            </div>
+            
+            <!-- Pagination -->
+            @{
+                int currentPage = ViewBag.CurrentPage ?? 1;
+                int totalPages = ViewBag.TotalPages ?? 1;
+                int totalCount = ViewBag.TotalCount ?? 0;
+                string search = ViewBag.Search ?? "";
+                string category = ViewBag.Category ?? "";
+                string status = ViewBag.Status ?? "";
+            }
+            
+            @if (totalPages > 1)
+            {
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        Hiển thị @((currentPage - 1) * 10 + 1) - @Math.Min(currentPage * 10, totalCount) trong tổng số @totalCount kết quả
+                    </div>
+                    
+                    <div class="pagination">
+                        @if (currentPage > 1)
+                        {
+                            <a href="?page=@(currentPage - 1)&search=@Server.UrlEncode(search)&category=@Server.UrlEncode(category)&status=@Server.UrlEncode(status)" class="page-btn">
+                                <i class="fas fa-chevron-left"></i> Trước
+                            </a>
+                        }
+                        
+                        @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                        {
+                            <a href="?page=@i&search=@Server.UrlEncode(search)&category=@Server.UrlEncode(category)&status=@Server.UrlEncode(status)" 
+                               class="page-btn @(i == currentPage ? "active" : "")">
+                                @i
+                            </a>
+                        }
+                        
+                        @if (currentPage < totalPages)
+                        {
+                            <a href="?page=@(currentPage + 1)&search=@Server.UrlEncode(search)&category=@Server.UrlEncode(category)&status=@Server.UrlEncode(status)" class="page-btn">
+                                Sau <i class="fas fa-chevron-right"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Image Gallery Modal -->
+    <div id="imageModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9);">
+        <div class="modal-content" style="position: relative; margin: 2% auto; padding: 0; width: 95%; max-width: 1200px; height: 90%; background: transparent; border-radius: 8px;">
+            <div class="modal-header" style="position: absolute; top: 10px; right: 10px; z-index: 1001;">
+                <button class="modal-close" onclick="closeImageModal()" style="background: rgba(255,255,255,0.8); border: none; font-size: 30px; cursor: pointer; width: 50px; height: 50px; border-radius: 50%; color: #333;">&times;</button>
+            </div>
+            <div class="modal-body" style="height: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
+                <!-- Navigation arrows -->
+                <button id="prevBtn" onclick="changeImage(-1)" style="position: absolute; left: 20px; background: rgba(255,255,255,0.8); border: none; font-size: 24px; cursor: pointer; width: 50px; height: 50px; border-radius: 50%; z-index: 1001; display: none;">‹</button>
+                <button id="nextBtn" onclick="changeImage(1)" style="position: absolute; right: 20px; background: rgba(255,255,255,0.8); border: none; font-size: 24px; cursor: pointer; width: 50px; height: 50px; border-radius: 50%; z-index: 1001; display: none;">›</button>
+                
+                <!-- Main image -->
+                <img id="modalImage" src="" alt="Project Image" style="max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px;">
+                
+                <!-- Image counter -->
+                <div id="imageCounter" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; display: none;"></div>
+            </div>
+            
+            <!-- Thumbnail strip -->
+            <div id="thumbnailStrip" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 25px; max-width: 80%; overflow-x: auto; display: none;">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var currentImages = [];
+        var currentImageIndex = 0;
+
+        function viewImage(imageUrl) {
+            // Parse multiple images (separated by semicolon)
+            if (imageUrl && imageUrl.includes(';')) {
+                currentImages = imageUrl.split(';').filter(url => url.trim() !== '');
+            } else if (imageUrl) {
+                currentImages = [imageUrl];
+            } else {
+                return;
+            }
+            
+            currentImageIndex = 0;
+            showImageGallery();
+        }
+
+        function showImageGallery() {
+            if (currentImages.length === 0) return;
+            
+            // Show modal
+            document.getElementById('imageModal').style.display = 'block';
+            
+            // Show current image
+            document.getElementById('modalImage').src = currentImages[currentImageIndex];
+            
+            // Show/hide navigation buttons
+            var prevBtn = document.getElementById('prevBtn');
+            var nextBtn = document.getElementById('nextBtn');
+            var counter = document.getElementById('imageCounter');
+            var thumbnailStrip = document.getElementById('thumbnailStrip');
+            
+            if (currentImages.length > 1) {
+                prevBtn.style.display = 'block';
+                nextBtn.style.display = 'block';
+                counter.style.display = 'block';
+                thumbnailStrip.style.display = 'flex';
+                
+                // Update counter
+                counter.textContent = (currentImageIndex + 1) + ' / ' + currentImages.length;
+                
+                // Create thumbnails
+                thumbnailStrip.innerHTML = '';
+                currentImages.forEach(function(img, index) {
+                    var thumb = document.createElement('img');
+                    thumb.src = img;
+                    thumb.style.cssText = 'width: 60px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; opacity: ' + (index === currentImageIndex ? '1' : '0.6') + '; border: ' + (index === currentImageIndex ? '2px solid white' : '2px solid transparent') + ';';
+                    thumb.onclick = function() { 
+                        currentImageIndex = index; 
+                        showImageGallery(); 
+                    };
+                    thumbnailStrip.appendChild(thumb);
+                });
+            } else {
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+                counter.style.display = 'none';
+                thumbnailStrip.style.display = 'none';
+            }
+        }
+
+        function changeImage(direction) {
+            if (currentImages.length <= 1) return;
+            
+            currentImageIndex += direction;
+            
+            if (currentImageIndex >= currentImages.length) {
+                currentImageIndex = 0;
+            } else if (currentImageIndex < 0) {
+                currentImageIndex = currentImages.length - 1;
+            }
+            
+            showImageGallery();
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+            currentImages = [];
+            currentImageIndex = 0;
+        }
+
+        // ESC key to close modal
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && document.getElementById('imageModal').style.display === 'block') {
+                closeImageModal();
+            }
+        });
+
+        // Click outside modal to close
+        document.getElementById('imageModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeImageModal();
+            }
+        });
+
+        function downloadDocument(documentUrl) {
+            if (!documentUrl) {
+                alert('Không có tài liệu để tải xuống');
+                return;
+            }
+            
+            try {
+                var filename = documentUrl.split('/').pop() || 'document';
+                var link = document.createElement('a');
+                link.href = documentUrl;
+                link.download = filename;
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('Lỗi khi tải xuống tài liệu');
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            var imageModal = document.getElementById('imageModal');
+            if (event.target == imageModal) {
+                closeImageModal();
+            }
+        }
+    </script>
+</body>
+</html>
+
+@section Scripts {
+    <script src="~/Scripts/admin-projects.js"></script>
+    <script>
+        function changePageSize(size) {
+            var url = new URL(window.location);
+            url.searchParams.set('pageSize', size);
+            url.searchParams.set('page', '1');
+            window.location = url;
+        }
+
+        function viewImage(imageUrl, title) {
+            $('#modalImage').attr('src', imageUrl);
+            $('#modalImage').attr('alt', title);
+            $('#downloadImage').attr('href', imageUrl);
+            $('#imageModal').modal('show');
+        }
+
+        function viewDocument(documentUrl, title) {
+            $('#documentName').text(title);
+            $('#openDocument').attr('href', documentUrl);
+            $('#documentModal').modal('show');
+        }
+
+        function togglePublish(projectId) {
+            $.post('/admin/projects/toggle-publish/' + projectId, {
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            })
+            .done(function(response) {
+                if (response.success) {
+                    showToast('success', response.message);
+                } else {
+                    showToast('error', response.message);
+                    // Revert checkbox
+                    $('#publish-' + projectId).prop('checked', !$('#publish-' + projectId).prop('checked'));
+                }
+            })
+            .fail(function() {
+                showToast('error', 'Có lỗi xảy ra khi cập nhật trạng thái xuất bản');
+                $('#publish-' + projectId).prop('checked', !$('#publish-' + projectId).prop('checked'));
+            });
+        }
+
+        function toggleFeatured(projectId) {
+            $.post('/admin/projects/toggle-featured/' + projectId, {
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            })
+            .done(function(response) {
+                if (response.success) {
+                    showToast('success', response.message);
+                } else {
+                    showToast('error', response.message);
+                    $('#featured-' + projectId).prop('checked', !$('#featured-' + projectId).prop('checked'));
+                }
+            })
+            .fail(function() {
+                showToast('error', 'Có lỗi xảy ra khi cập nhật trạng thái nổi bật');
+                $('#featured-' + projectId).prop('checked', !$('#featured-' + projectId).prop('checked'));
+            });
+        }
+
+        function deleteProject(projectId) {
+            if (confirm('🗑️ Bạn có chắc chắn muốn xóa dự án này?\n\nDự án sẽ được chuyển vào thùng rác và có thể khôi phục sau này.')) {
+                // Direct redirect to delete - no AJAX, will show message on page reload
+                window.location.href = '/admin/projects/delete/' + projectId;
+            }
+        }
+
+        function showToast(type, message) {
+            // Simple toast notification
+            var toast = $('<div class="toast toast-' + type + '">' + message + '</div>');
+            $('body').append(toast);
+            toast.fadeIn().delay(3000).fadeOut(function() {
+                $(this).remove();
+            });
+        }
+
+        // Filter form handling
+        function clearFilters() {
+            document.querySelector('input[name="search"]').value = '';
+            document.querySelector('select[name="category"]').value = '';
+            document.querySelector('select[name="status"]').value = '';
+        }
+
+        // Auto-submit form when select changes
+        $(document).ready(function() {
+            // Auto-hide alert messages after 5 seconds
+            $('.alert').each(function() {
+                var alert = $(this);
+                setTimeout(function() {
+                    alert.fadeOut(500, function() {
+                        $(this).remove();
+                    });
+                }, 5000);
+            });
+
+            // Auto-submit form when select changes
+            $('.filters-form select').on('change', function() {
+                $(this).closest('form').submit();
+            });
+
+            // Submit form on Enter key in search input
+            $('.filters-form input[name="search"]').on('keypress', function(e) {
+                if (e.which === 13) { // Enter key
+                    $(this).closest('form').submit();
+                }
+            });
+
+            // Clear filters functionality
+            $('.btn-reset').on('click', function(e) {
+                e.preventDefault();
+                clearFilters();
+                window.location.href = '/admin/projects';
+            });
+        });
+    </script>
+}
+

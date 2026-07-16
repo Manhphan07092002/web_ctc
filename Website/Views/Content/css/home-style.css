@@ -1,0 +1,152 @@
+﻿/*.swiper-container {
+    height: 600px;
+    max-width: 1400px;
+}*/
+.body-content{
+    margin-top: 80px;
+}
+.swiper-container img {
+    width: 100%;
+}
+
+.whoarewe {
+    height: 700px;
+    background-image: url(../image/website/who-are-we.jpg);
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
+.whoarewe_content {
+    width: 400px;
+    text-align: justify;
+    color: #58595b;
+    padding-top: 130px;
+}
+
+    .whoarewe_content h3 {
+        text-transform: uppercase;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .whoarewe_content p {
+        font-size: 15px;
+        margin: 15px 0;
+    }
+
+.feature {
+    background: #f7f7f7;
+    color: #818286;
+    font-size: 15px;
+    padding: 50px 0;
+}
+
+    .feature .feature_item {
+        text-align: center;
+    }
+
+.feature_item .feature_image img {
+    width: 200px;
+}
+
+.top_blog_title {
+    text-align: center;
+    padding: 30px 0;
+    color: #58595b;
+}
+
+.top_blog_content {
+    margin-bottom: 30px;
+}
+
+.blog-item {
+    padding: 15px;
+    border: 1px solid #b6b6b8;
+}
+
+    .blog-item img {
+        width: 100%;
+    }
+
+    .blog-item .blog-item_title a h3 {
+        color: #58595b;
+        font-size: 17px;
+    }
+
+    .blog-item .blog-item_title a:hover {
+        text-decoration: none;
+    }
+
+.blog_item_content {
+    font-size: 15px;
+    color: #000;
+}
+
+.blog_view_more {
+    text-align: right;
+}
+
+    .blog_view_more a {
+        color: #3c5d7b;
+        font-size: 12px;
+    }
+
+.relatedCustomer {
+    width: 100%;
+    min-width: 320px;
+    height: 300px;
+    position: relative;
+    margin: 30px auto;
+    overflow: hidden;
+    background: transparent url(../image/website/bg-cus.jpg) no-repeat;
+    background-size: 100% 100%;
+}
+
+.relatedCustomer_title {
+    padding: 50px 0;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 24px;
+    color: #545557;
+}
+
+@media (max-width:767px) {
+    .relatedCustomer {
+        width: 100%;
+        min-width: 320px;
+        height: 300px;
+        position: relative;
+        margin: 30px auto;
+        overflow: hidden;
+        background: transparent url(../image/website/bg-cus.jpg) no-repeat;
+        background-size: auto 100%;
+    }
+
+    .whoarewe_content {
+        width: 100%;
+    }
+
+    .blog-item {
+        padding: 15px;
+        border: 1px solid #b6b6b8;
+        margin: 15px 0;
+    }
+}
+
+@media (max-width:414px) {
+    .whoarewe {
+        height: 500px;
+    }
+}
+
+@media (max-width:375px) {
+    .whoarewe {
+        height: 500px;
+    }
+}
+
+@media (max-width:360px) {
+    .whoarewe {
+        height: 500px;
+    }
+}

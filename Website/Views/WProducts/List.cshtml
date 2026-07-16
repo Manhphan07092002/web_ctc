@@ -1,0 +1,325 @@
+@{
+    // Lấy model dạng mạnh
+    Cubetech.Website.Models.DTO.WpSearchViewDTO model = Model as Cubetech.Website.Models.DTO.WpSearchViewDTO;
+
+    // Chọn layout nếu cần
+    string mode = model.Mode;
+    if (mode == "page")
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+    else
+    {
+        Layout = null;
+    }
+
+    // Các biến đầu vào
+    string category = model.SearchCategory;
+    string info = model.Info;
+
+    Cubetech.Website.Models.Category cate = model.Cate;
+    List<Cubetech.Website.Models.Category> lstSubCate = model.LstSubCate;
+    List<Cubetech.Website.Models.Category> lstParrentCate = model.LstParrentCate;
+
+    // Tính tiêu đề hiển thị
+    string title = "";
+
+    if (lstParrentCate != null && lstParrentCate.Count > 0)
+    {
+        // Có danh mục cha -> dùng tên danh mục hiện tại
+        title = (cate != null ? cate.Name : "");
+    }
+    else if (!string.IsNullOrEmpty(info))
+    {
+        // Đang search theo từ khóa
+        title = "Kết quả tìm kiếm \"" + info + "\"";
+    }
+    else if (category == "-2")
+    {
+        title = "Dịch vụ";
+    }
+    else if (category == "-4")
+    {
+        title = "Dự Án";
+    }
+    else if (category == "-6")
+    {
+        title = "Giới Thiệu";
+    }
+    else if (category == "-10")
+    {
+        title = "Hoạt Động";
+    }
+    else if (category == "-14")
+    {
+        title = "Liên Hệ";
+    }
+    else if (category == "-16")
+    {
+        title = "Chi Tiết Dự Án";
+    }
+    else if (category == "-18")
+    {
+        title = "Chi Tiết Hoạt Động";
+    }
+    else
+    {
+        title = "Sản phẩm tiêu biểu";
+    }
+
+    ViewBag.Title = title;
+
+    // Tên class + id động để JS và CSS target riêng theo category
+    string productcontainer = "product_list_container" + category;
+}
+
+<div class="list_product" data-search-url="@Url.Action("SmartSearchProducts", "WProducts")">
+    @if (mode == "page")
+    {
+        <h1 class="hidden">CTC</h1>
+    }
+
+    <h2 class="hidden">@title</h2>
+    <div class="clearfix" style="clear:both;"></div>
+
+    <div class="container">
+        <div id="main-column" class="row">
+
+            @if (category != "-2")
+            {
+                @* chỗ này có thể render sidebar/filter sau nếu cần *@
+            }
+
+            <div class="product_list @productcontainer">
+                <div>
+                    <div class="clearfix" style="clear:both"></div>
+
+                    @* --- ROUTING THEO CATEGORY --- *@
+                    @if (category == "-2")
+                    {
+                        <!-- Dịch vụ -->
+                        <div>
+                            @Html.Partial("~/Views/WProducts/_CategoryProducts.cshtml")
+                        </div>
+                    }
+                    else if (category == "-4")
+                    {
+                        <!-- Dự án -->
+                        <div>
+                            @Html.Partial("~/Views/WProducts/du_an.cshtml")
+                        </div>
+                    }
+                    else if (category == "-6")
+                    {
+                        <!-- Giới thiệu -->
+                        <div>
+                            @Html.Partial("~/Views/WProducts/gioi_thieu.cshtml")
+                        </div>
+                    }
+                    else if (category == "-10")
+                    {
+                        <!-- Hoạt động -->
+                        <div>
+                            @Html.Partial("~/Views/WProducts/hoat_dong.cshtml")
+                        </div>
+                    }
+                    else if (category == "-14")
+                    {
+                        <!-- Liên hệ -->
+                        <div>
+                            @Html.Partial("~/Views/WProducts/Lien_he.cshtml")
+                        </div>
+                    }
+                    else if (category == "-16")
+                    {
+                        <!-- Chi tiết dự án -->
+                        <div>
+                            @Html.Partial("~/Views/WProducts/du_an_chi_tiet.cshtml")
+                        </div>
+                    }
+                    else if (category == "-18")
+                    {
+                        <!-- Chi tiết hoạt động -->
+                        <div>
+                            @Html.Partial("~/Views/WProducts/hoat_dong_chi_tiet.cshtml")
+                        </div>
+                    }
+                    else
+                    {
+                        @* --- MẶC ĐỊNH: DANH SÁCH SẢN PHẨM + LOAD MORE --- *@
+                        <div style="position:relative;min-height:200px;">
+                            <div class="waiting-filter-product" style="display:none;">
+                                <img src="/Content/Image/loading.gif" alt="loading" />
+                            </div>
+
+                            <div class="clearfix" style="clear:both"></div>
+
+                            <input type="hidden" name="total_page" value="1" />
+                            <input type="hidden" name="hidden_cate" value="@category" />
+
+                            <div id="@productcontainer">
+                                @* Ajax sẽ append sản phẩm vào đây *@
+                            </div>
+
+                            <div class="clearfix"></div>
+
+                            <div class="btnLoadMoreContainer">
+                                <div class="btnLoad_@category">
+                                    <div class="btn btnLoadMore"
+                                         style="display:none"
+                                         id="btnLoadMore@(model.SearchCategory)"
+                                         data-loading-text="<i class='fa fa-spinner fa-spin '></i> Đang Xử Lý...">
+                                        Xem thêm 0 sản phẩm
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Html.Partial("~/Views/WProducts/_HiddenFormSmartSearch.cshtml")
+</div>
+
+<script>
+$(document).ready(function () {
+
+    // Lấy category từ model để sử dụng trong script JS
+    const searchCategory = @Html.Raw(Json.Encode(model.SearchCategory));
+
+    // Lấy URL từ data attribute, tránh hardcode
+    const searchUrl = $('.list_product').data('search-url');
+
+    // === HÀM LOAD MORE SẢN PHẨM ===
+    function loadMoreSmartSearch(cate) {
+        const $form = $("#smartsearch_form" + cate);
+        const $button = $('#btnLoadMore' + cate);
+        const $productContainerDiv = $(".product_list_container" + cate);
+        const $waitingSpinner = $productContainerDiv.find(".waiting-filter-product");
+
+        let currentPage = parseInt($form.find("[name=pageNo]").val(), 10) || 0;
+        currentPage++;
+        $form.find("[name=pageNo]").val(currentPage);
+
+        // Bootstrap button state
+        $button.button('loading');
+
+        // Spinner lớn chỉ lần đầu
+        if (currentPage === 1) {
+            $waitingSpinner.css("display", "block");
+        }
+
+        const formData = new FormData($form[0]);
+
+        $.ajax({
+            type: "POST",
+            url: searchUrl,
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                // append kết quả phần tử sản phẩm vào container động
+                $('#product_list_container' + cate).append(data);
+            },
+            error: function (xhr, status, error) {
+                console.error("Lỗi khi tải sản phẩm:", status, error);
+                alert("Không thể tải thêm sản phẩm. Vui lòng thử lại.");
+            },
+            complete: function () {
+                $waitingSpinner.css("display", "none");
+                $button.button('reset');
+            }
+        });
+    }
+
+    // === HÀM GOM FILTER + GÁN CLICK LOAD MORE ===
+    function setValueSmartSearch(cate) {
+        const $filterContainer = $('.product_filter' + cate);
+        if (!$filterContainer.length) return;
+
+        const arrCategory = [], arrColor = [], arrSize = [], arrPrice = [], arrOrderBy = [];
+
+        // helper dựng chip filter đang áp dụng
+        const createFilterTag = function (element, type, value) {
+            const title = element.attr("title");
+            const removeImage = "<img src='/Content/Image/WebImage/remove.png'/>";
+            const removeLink = "<a style=\"float:right;padding:8px 0;\" href=\"javascript:;\" onclick=\"DeleteFilter(this,'" + value + "','" + type + "','" + cate + "');\">" + removeImage + "</a>";
+
+            if (type === 'search_color') {
+                const color = element.attr("color");
+                return "<p class=\"crResult\">" +
+                        "<a class=\"lblSearchColor\" href=\"javascript:;\"><span style=\"background-color:" + color + "\">&nbsp;&nbsp;</span></a>" +
+                        removeLink +
+                    "</p>";
+            } else if (type === 'search_size') {
+                return "<p class=\"crResult\">" +
+                        "<a class=\"lblSearchBorder\" href=\"javascript:;\"><span>" + title + "</span></a>" +
+                        removeLink +
+                    "</p>";
+            } else {
+                // search_cate, search_price
+                return "<p class=\"crResult\">" +
+                        "<a class=\"lblSearchNo\" href=\"javascript:;\"><span>" + title + "</span></a>" +
+                        removeLink +
+                    "</p>";
+            }
+        };
+
+        // Danh mục
+        $filterContainer.find("input:radio[name=search_cate]:checked").each(function () {
+            const val = $(this).val();
+            arrCategory.push(val);
+        });
+
+        // Màu
+        $filterContainer.find("input:checkbox[name=search_color]:checked").each(function () {
+            const val = $(this).val();
+            arrColor.push(val);
+            const tag = createFilterTag($(this), 'search_color', val);
+            $(this).closest(".searchExtracontent_item").find(".result_search").append(tag);
+        });
+
+        // Size
+        $filterContainer.find("input:checkbox[name=search_size]:checked").each(function () {
+            const val = $(this).val();
+            arrSize.push(val);
+            const tag = createFilterTag($(this), 'search_size', val);
+            $(this).closest(".searchExtracontent_item").find(".result_search").append(tag);
+        });
+
+        // Giá
+        $filterContainer.find("input:checkbox[name=search_price]:checked").each(function () {
+            const val = $(this).val();
+            arrPrice.push(val);
+            const tag = createFilterTag($(this), 'search_price', val);
+            $(this).closest(".searchExtracontent_item").find(".result_search").append(tag);
+        });
+
+        // Sắp xếp
+        $filterContainer.find("input:radio[name=search_order]:checked").each(function () {
+            arrOrderBy.push($(this).val());
+        });
+
+        // set các giá trị này về form ẩn
+        const $form = $("#smartsearch_form" + cate);
+        $form.find("#Color").val(arrColor.join(','));
+        $form.find("#Size").val(arrSize.join(','));
+        $form.find("#Price").val(arrPrice.join(','));
+        $form.find("#OrderBy").val(arrOrderBy.join(','));
+
+        // Gán click "Xem thêm"
+        $('#btnLoadMore' + cate)
+            .off('click')
+            .on('click', function () {
+                loadMoreSmartSearch(cate);
+            });
+    }
+
+    // === KHỞI TẠO LÚC LOAD TRANG ===
+    setValueSmartSearch(searchCategory);
+    loadMoreSmartSearch(searchCategory);
+});
+</script>

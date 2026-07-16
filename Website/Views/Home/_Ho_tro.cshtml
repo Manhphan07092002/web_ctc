@@ -1,0 +1,136 @@
+<style>
+    .banner-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        width: 100%;
+        padding: 2rem 0;
+    }
+
+    .banner-card {
+        flex: 1 1 calc(33.333% - 20px);
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        height: 200px; /* 👈 Giảm chiều cao xuống còn 200px */
+        background-size: cover;
+        background-position: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+        cursor: pointer;
+    }
+
+    .banner-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+    }
+
+    .banner-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.15));
+        z-index: 1;
+    }
+
+    .banner-content {
+        position: absolute;
+        bottom: 16px;
+        left: 16px;
+        z-index: 2;
+        color: white;
+    }
+
+    .banner-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+    }
+
+    .banner-desc {
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+        opacity: 0.9;
+    }
+
+    .banner-button {
+        display: inline-block;
+        padding: 6px 16px;
+        background: #ffffff;
+        color: #007bff;
+        font-weight: 600;
+        border-radius: 999px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: background 0.3s, color 0.3s;
+    }
+
+    .banner-button:hover {
+        background: #007bff;
+        color: white;
+    }
+
+    @@media (max-width: 992px) {
+        .banner-card {
+            flex: 1 1 calc(50% - 20px);
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .banner-card {
+            flex: 1 1 100%;
+        }
+    }
+</style>
+
+<div class="banner-container">
+    <div class="banner-card" data-bg="@Url.Content("~/Image/2.jpg")" style="background-color: #f0f0f0;">
+    </div>
+    <div class="banner-card" data-bg="@Url.Content("~/Image/3.jpg")" style="background-color: #f0f0f0;">
+    </div>
+    <div class="banner-card" data-bg="@Url.Content("~/Image/4.jpg")" style="background-color: #f0f0f0;">
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+    
+    // Lazy load background images
+    if ('IntersectionObserver' in window) {
+        var bgObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    var card = entry.target;
+                    var bgUrl = card.getAttribute('data-bg');
+                    if (bgUrl) {
+                        // Preload image
+                        var img = new Image();
+                        img.onload = function() {
+                            card.style.backgroundImage = 'url(' + bgUrl + ')';
+                            card.style.backgroundSize = 'cover';
+                            card.style.backgroundPosition = 'center';
+                        };
+                        img.src = bgUrl;
+                        bgObserver.unobserve(card);
+                    }
+                }
+            });
+        }, { rootMargin: '50px' });
+        
+        document.querySelectorAll('.banner-card[data-bg]').forEach(function(card) {
+            bgObserver.observe(card);
+        });
+    } else {
+        // Fallback: load immediately
+        document.querySelectorAll('.banner-card[data-bg]').forEach(function(card) {
+            var bgUrl = card.getAttribute('data-bg');
+            if (bgUrl) {
+                card.style.backgroundImage = 'url(' + bgUrl + ')';
+                card.style.backgroundSize = 'cover';
+                card.style.backgroundPosition = 'center';
+            }
+        });
+    }
+})();
+</script>
+

@@ -1,0 +1,142 @@
+﻿
+@{
+    ViewBag.Title = "Danh mục bài viết";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<script src="@Url.Content("/Content/")plugins/tree-grid/jquery.treegrid.js"></script>
+<script src="@Url.Content("/Content/")plugins/tree-grid/jquery.treegrid.bootstrap3.js"></script>
+<link href="@Url.Content("/Content/")plugins/tree-grid/jquery.treegrid.css" rel="stylesheet" />
+
+<style>
+    .select2-container--default {
+        width: 100% !important;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 5px 10px;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    dt {
+        color: #444;
+        font-weight: 700;
+    }
+
+    th {
+        color: #444;
+    }
+
+    .select2-container {
+        width: 100% !important;
+    }
+</style>
+<div class="x_panel">
+    <div class="x_title">
+        <h2>Danh Mục Tin Tức</h2>
+        <div class="clearfix"></div>
+    </div>
+    <div class="x_content">
+
+
+
+
+        <div class="row">
+            <div class="col-md-12">
+                <table class="tree table tree-2 table-bordered table-striped table-condensed" id="tblBlogCate">
+                    <thead>
+                        <tr>
+                            <th>Tên Danh Mục</th>
+                            <th width="10%"><button class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalBlogCategory" onclick="showBlogCateModal(0)"><i class="glyphicon glyphicon-plus"></i> Thêm mới</button></th>
+                        </tr>
+
+
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<script src="~/Scripts/common.js"></script>
+<script>
+    $(document).ready(function () {
+        getList();
+
+    });
+
+    function getList() {
+        $.ajax({
+            url: "/Admin/GetListBlogCategory",
+            method: "POST",
+            success: function (data) {
+                var html = "";
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].ParentID == 0) {
+                        html += '<tr class="treegrid-' + data[i].ID + '">';
+                        html += '<td>' + data[i].BlogCategoryName + '</td>';
+                        html += '<td><button type="button"  style="margin-right: 10px;" class="btn btn-warning btn-xs" title="Cập Nhật"  onclick="showBlogCateModal(' + data[i].ID + ')"><i class="glyphicon glyphicon-edit"></i></button>' +
+                            '<button type="button" class="btn  btn-dark btn-xs" style="margin-right: 10px;" title="Xóa" onclick="Remove(' + data[i].ID + ')"><i class="glyphicon glyphicon-trash"></i></button></td>';
+                        html += '</tr>';
+                    }
+                    else {
+                        html += '<tr class="treegrid-' + data[i].ID + ' treegrid-parent-' + data[i].ParentID + '">';
+                        html += '<td>' + data[i].BlogCategoryName + '</td>';
+                        html += '<td><button type="button"  style="margin-right: 10px;" class="btn btn-warning btn-xs" title="Cập Nhật"  onclick="showBlogCateModal(' + data[i].ID + ')"><i class="glyphicon glyphicon-edit"></i></button>' +
+                        '<button type="button" class="btn  btn-dark btn-xs" style="margin-right: 10px;" title="Xóa" onclick="Remove(' + data[i].ID + ')"><i class="glyphicon glyphicon-trash"></i></button></td>';
+                        html += '</tr>';
+                    }
+                }
+                $('#tblBlogCate tbody').html(html);
+                $('.tree').treegrid();
+            }
+        });
+    }
+    function showBlogCateModal(id) {
+        $.ajax({
+            url: "/Admin/AddNewEditBlogCate",
+            method: "POST",
+            beforeSend: function () {
+                showSpinLoading();
+            },
+            data: {
+                id: id
+            },
+            success: function (data) {
+                hideSpinLoading();
+                $("#popupContainer1").html(data);
+                $("#modalBlogCategory").modal("show");
+            }
+        });
+    }
+
+    function Remove(id) {
+        showConfirm("", "Bạn có chắc chắn muốn xóa danh mục?",
+            function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Admin/DeleteBlogCate',
+                    data: { id: id },
+
+                }).success(function (data) {
+                    if (data.Code === 1) {
+                        getList();
+                        showSuccess('Thông báo', data.message);
+                    } else {
+                        showError('Lỗi', data.message);
+                    }
+                });
+
+            }, function () { }
+);
+    }
+</script>

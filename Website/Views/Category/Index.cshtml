@@ -1,0 +1,196 @@
+﻿@{
+    ViewBag.Title = "Danh mục Sản phẩm";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .search-top {
+        padding-top: 5px;
+    }
+</style>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-category list-panel" id="list-panel">
+            <div class="panel-heading list-panel-heading">
+                <div class="col-md-4 search-top">
+                    <div class="input-group input-group-sm pull-right">
+                        <input type="text" class="form-control" id="Info" name="Info" placeholder="Tên Danh mục, Nhân viên">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-success btn-flat" onclick="SearchList()">
+                                <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Tìm kiếm
+                            </button>
+                        </span>
+                    </div>
+
+                </div>
+                <div class="col-md-2 pull-right search-top">
+                    <button type="button" class="btn btn-danger   btn-sm refresh-button" id="refresh-button" onclick="UpdateCategory(0);">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Thêm mới
+                    </button>
+                </div>
+
+            </div>
+            <div class="panel-body">
+                <table id="tbCategory" class="table table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên Danh Mục</th>     
+                            <th>Hoạt động</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+
+        SearchList();
+    });
+    function SearchList() {
+        $("#Info").val($.trim($("#Info").val()));
+        var table = $('#tbCategory').DataTable({
+            "bDestroy": true,
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "/Category/ListCategory",
+                "type": "POST",
+                "data": function (d) {
+                    return $.extend({}, d, {
+                        'Info': $('#Info').val()
+                    })
+                }
+            },
+            "columns": [
+                 { "name": "ID", "data": "ID", "width": "10%", },
+                        { "name": "Name", "data": "Name", "width": "30%", },
+                        {
+
+                            "name": "IsActive", "data": "IsActive", 'width': '5%',
+                            'render': function (data, type, full, meta) {
+                                var html = "";
+                                if (full.IsActive) {
+                                    html += '<button type="button"  class="btn btn-success btn-xs" title="Cập Nhật"  onclick="updateIsActive(\'' + full.ID + '\')"><i class="fa fa-check" aria-hidden="true"></i></button>';
+                                }
+                                else {
+                                    html += '<button type="button"  class="btn btn-danger btn-xs" title="Cập Nhật"  onclick="updateIsActive(\'' + full.ID + '\')"><i class="fa fa-times" aria-hidden="true"></i></button>';
+                                }
+                                return html;
+                            }
+                        },
+                        {
+                            targets: 'no-sort',
+                            orderable: false,
+                            'class': 'text-center',
+                            'width': '10%',
+                            'render': function (data, type, full, meta) {
+                                var html = '<button type="button" style="margin-right: 10px;" class="btn btn-warning btn-xs" title="Cập Nhật"  onclick="UpdateCategory(' + full.ID + ')"><i class="glyphicon glyphicon-edit"></i></button>' +
+                                            '<button type="button" class="btn  btn-dark btn-xs" style="margin-right: 10px;" title="Xóa" onclick="Remove(' + full.ID + ')"><i class="glyphicon glyphicon-trash"></i></button> ';
+                                return html;
+                            }
+                        }
+            ],
+            "scrollCollapse": true,
+            "scrollX": true,
+            "paging": true,
+            "lengthChange": true,
+            "searching": false,
+            "ordering": true,
+            "info": false,
+            "autoWidth": false,
+            "dom": '<"top"i>rt<"bottom row"<"col-md-3"l><"col-md-9"<"pullright"p>>><"clear">'
+        });
+    }
+
+    function UpdateCategory(id) {
+        $.ajax({
+            url: "/Category/AddNewEditCategory",
+            method: "POST",
+            beforeSend: function () {
+                showSpinLoading();
+            },
+            data: {
+                id: id
+            },
+            success: function (data) {
+                hideSpinLoading();
+                $("#popupContainer1").html(data);
+                $("#modelCategory").modal("show");
+            }
+        });
+    }
+
+    function saveCategory() {
+        var fd = new FormData(document.getElementById("CategoryForm"));
+        $.ajax({
+            url: "/Category/UpdateCategory",
+            method: "POST",
+            beforeSend: function () {
+                showSpinLoading();
+            },
+            data: fd,
+            enctype: 'multipart/form-data',
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,   // tell jQuery not to set contentType
+            success: function (data) {
+                hideSpinLoading();
+                if (data.Code === 1) {
+                    $('#modelCategory').modal('hide');
+                    SearchList();
+                    showSuccess("Thành Công", data.message);
+                } else {
+                    showError('Lỗi', data.message);
+                }
+            }
+        });
+    }
+
+
+    function updateIsActive(id) {
+
+        $.ajax({
+            url: "/Category/UpdateIsActive",
+            method: "POST",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                SearchList();
+                showSuccess("Thành Công", data.message);
+
+            }
+        });
+    }
+
+
+    function Remove( id) {
+        showConfirm("", "Bạn có chắc chắn muốn xóa danh mục ?",
+            function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Category/DeleteCategory',
+                    data: { id: id },
+
+                }).success(function (data) {
+                    if (data.Code === 1) {
+                        SearchList();
+                        showSuccess('Thông báo', data.message);
+                    } else {
+                        showError('Lỗi', data.message);
+                    }
+                });
+
+            }, function () { }
+            );
+    }
+</script>

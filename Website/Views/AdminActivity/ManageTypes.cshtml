@@ -1,0 +1,347 @@
+@{
+    ViewBag.Title = "Quản lý Loại hoạt động";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; line-height: 1.6; font-size: 16px; }
+        .admin-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .admin-header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .header-content h1 { font-size: 2rem; font-weight: 600; display: flex; align-items: center; gap: 12px; }
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-size: 16px; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-secondary { background: #6b7280; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn:hover { transform: translateY(-2px); }
+        .table-section { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 24px; }
+        .table-header { padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .table-header h3 { font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+        .types-table { width: 100%; border-collapse: collapse; }
+        .types-table th { background: #f8fafc; padding: 16px 20px; text-align: left; font-weight: 600; color: #475569; border-bottom: 2px solid #e2e8f0; }
+        .types-table td { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; }
+        .types-table tr:hover { background: #f8fafc; }
+        .badge { padding: 6px 12px; border-radius: 6px; font-size: 0.875rem; font-weight: 500; }
+        .badge-active { background: #d1fae5; color: #065f46; }
+        .badge-inactive { background: #fee2e2; color: #991b1b; }
+        .action-buttons { display: flex; gap: 8px; }
+        .btn-action { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; font-size: 14px; }
+        .btn-edit { background: #3b82f6; color: white; }
+        .btn-delete { background: #ef4444; color: white; }
+        .btn-action:hover { transform: scale(1.05); }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { position: relative; margin: 10% auto; padding: 0; width: 90%; max-width: 600px; background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h4 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; }
+        .modal-close:hover { color: #1e293b; }
+        .modal-body { padding: 24px; }
+        .modal-footer { padding: 20px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 12px; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px; }
+        .required { color: #ef4444; }
+        .form-control { width: 100%; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 15px; transition: border-color 0.2s ease; }
+        .form-control:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .alert { padding: 16px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="header-content">
+                <h1><i class="fas fa-tags"></i> Quản lý Loại hoạt động</h1>
+                <div class="header-actions">
+                    <a href="/admin/activities" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <div id="alertContainer"></div>
+
+        <div class="table-section">
+            <div class="table-header">
+                <h3>Danh sách loại hoạt động</h3>
+                <button class="btn btn-success" onclick="showAddModal()">
+                    <i class="fas fa-plus"></i> Thêm loại mới
+                </button>
+            </div>
+            <table class="types-table" id="typesTable">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">ID</th>
+                        <th style="width: 150px;">Mã loại</th>
+                        <th>Tên loại</th>
+                        <th>Mô tả</th>
+                        <th style="width: 100px;">Thứ tự</th>
+                        <th style="width: 100px;">Trạng thái</th>
+                        <th style="width: 150px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="typesTableBody">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px;">
+                            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #3b82f6;"></i>
+                            <p style="margin-top: 10px; color: #64748b;">Đang tải dữ liệu...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Add/Edit -->
+    <div id="typeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="modalTitle">Thêm loại hoạt động</h4>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="typeForm">
+                    <input type="hidden" id="typeId" />
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            Mã loại <span class="required">*</span>
+                        </label>
+                        <input type="text" id="typeCode" class="form-control" placeholder="vd: news, events" required />
+                        <small style="color: #64748b; font-size: 12px;">Chỉ dùng chữ thường, không dấu, không khoảng trắng</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            Tên loại <span class="required">*</span>
+                        </label>
+                        <input type="text" id="typeName" class="form-control" placeholder="vd: Tin tức, Sự kiện" required />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Mô tả</label>
+                        <textarea id="typeDescription" class="form-control" rows="3" placeholder="Mô tả chi tiết về loại hoạt động này"></textarea>
+                    </div>
+                    
+                    <div class="form-group" style="display: none;">
+                        <label class="form-label">
+                            Thứ tự hiển thị <span class="required">*</span>
+                        </label>
+                        <input type="number" id="displayOrder" class="form-control" value="0" min="0" required />
+                        <small style="color: #64748b; font-size: 12px;">Tự động tính theo số lượng loại hiện có</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-wrapper" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" id="isActive" checked style="width: 20px; height: 20px; cursor: pointer;" />
+                            <span style="font-weight: 500;">Kích hoạt</span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+                <button class="btn btn-success" onclick="saveType()">
+                    <i class="fas fa-save"></i> Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadActivityTypes();
+        });
+
+        function loadActivityTypes() {
+            fetch('/admin/activities/api/activity-types')
+                .then(response => response.json())
+                .then(data => {
+                    renderTable(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Lỗi tải dữ liệu: ' + error.message, 'error');
+                });
+        }
+
+        function renderTable(types) {
+            const tbody = document.getElementById('typesTableBody');
+            
+            if (!types || types.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #64748b;">Chưa có dữ liệu</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = types.map(type => `
+                <tr>
+                    <td>${type.TypeID}</td>
+                    <td><code style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px;">${type.TypeCode}</code></td>
+                    <td><strong>${type.TypeName}</strong></td>
+                    <td>${type.Description || '<span style="color: #9ca3af;">-</span>'}</td>
+                    <td style="text-align: center;">${type.DisplayOrder}</td>
+                    <td>
+                        <span class="badge ${type.IsActive ? 'badge-active' : 'badge-inactive'}">
+                            ${type.IsActive ? 'Kích hoạt' : 'Tắt'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-action btn-edit" onclick="editType(${type.TypeID})" title="Sửa">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-action btn-delete" onclick="deleteType(${type.TypeID}, '${type.TypeName}')" title="Xóa">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showAddModal() {
+            document.getElementById('modalTitle').textContent = 'Thêm loại hoạt động';
+            document.getElementById('typeForm').reset();
+            document.getElementById('typeId').value = '';
+            document.getElementById('isActive').checked = true;
+            
+            // Auto-calculate display order (get max + 1)
+            fetch('/admin/activities/api/activity-types')
+                .then(response => response.json())
+                .then(types => {
+                    const maxOrder = types.length > 0 ? Math.max(...types.map(t => t.DisplayOrder)) : 0;
+                    document.getElementById('displayOrder').value = maxOrder + 1;
+                })
+                .catch(() => {
+                    document.getElementById('displayOrder').value = 1;
+                });
+            
+            document.getElementById('typeModal').style.display = 'block';
+        }
+
+        function editType(id) {
+            fetch(`/admin/activities/api/activity-types/${id}`)
+                .then(response => response.json())
+                .then(type => {
+                    document.getElementById('modalTitle').textContent = 'Sửa loại hoạt động';
+                    document.getElementById('typeId').value = type.TypeID;
+                    document.getElementById('typeCode').value = type.TypeCode;
+                    document.getElementById('typeName').value = type.TypeName;
+                    document.getElementById('typeDescription').value = type.Description || '';
+                    document.getElementById('displayOrder').value = type.DisplayOrder;
+                    document.getElementById('isActive').checked = type.IsActive;
+                    document.getElementById('typeModal').style.display = 'block';
+                })
+                .catch(error => {
+                    showAlert('Lỗi tải dữ liệu: ' + error.message, 'error');
+                });
+        }
+
+        function saveType() {
+            const id = document.getElementById('typeId').value;
+            const data = {
+                TypeID: id ? parseInt(id) : 0,
+                TypeCode: document.getElementById('typeCode').value.trim(),
+                TypeName: document.getElementById('typeName').value.trim(),
+                Description: document.getElementById('typeDescription').value.trim(),
+                DisplayOrder: parseInt(document.getElementById('displayOrder').value),
+                IsActive: document.getElementById('isActive').checked
+            };
+            
+            // Validation
+            if (!data.TypeCode || !data.TypeName) {
+                showAlert('Vui lòng nhập đầy đủ thông tin bắt buộc!', 'error');
+                return;
+            }
+            
+            const url = id ? `/admin/activities/api/activity-types/${id}` : '/admin/activities/api/activity-types';
+            const method = id ? 'PUT' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showAlert(id ? 'Cập nhật thành công!' : 'Thêm mới thành công!', 'success');
+                    closeModal();
+                    loadActivityTypes();
+                } else {
+                    showAlert('Lỗi: ' + result.message, 'error');
+                }
+            })
+            .catch(error => {
+                showAlert('Lỗi: ' + error.message, 'error');
+            });
+        }
+
+        function deleteType(id, name) {
+            if (!confirm(`Bạn có chắc muốn xóa loại "${name}"?\n\nLưu ý: Các hoạt động đang dùng loại này sẽ bị ảnh hưởng!`)) {
+                return;
+            }
+            
+            fetch(`/admin/activities/api/activity-types/${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showAlert('Xóa thành công!', 'success');
+                    loadActivityTypes();
+                } else {
+                    showAlert('Lỗi: ' + result.message, 'error');
+                }
+            })
+            .catch(error => {
+                showAlert('Lỗi: ' + error.message, 'error');
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('typeModal').style.display = 'none';
+        }
+
+        function showAlert(message, type) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+            const icon = type === 'success' ? 'check-circle' : 'exclamation-triangle';
+            
+            const alertHtml = `
+                <div class="alert ${alertClass}">
+                    <i class="fas fa-${icon}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            const container = document.getElementById('alertContainer');
+            container.innerHTML = alertHtml;
+            
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('typeModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

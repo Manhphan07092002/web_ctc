@@ -1,0 +1,1219 @@
+@{
+    Layout = null;
+    ViewBag.Title = (ViewBag.Title ?? "CTC Admin Control Panel");
+
+    // ====== LẤY THÔNG TIN USER + AVATAR MẶC ĐỊNH ======
+    string user = null;
+    Cubetech.Website.Models.User ext = null;
+
+    // Avatar mặc định
+    string userAvatarPath = Url.Content("~/Image/logo_rm_bgr.png");
+
+    try
+    {
+        user = Cubetech.Website.Common.Utility.GetLoginUser();
+        if (!string.IsNullOrEmpty(user))
+        {
+            Cubetech.Website.DAO.UserDAO uDAO = new Cubetech.Website.DAO.UserDAO();
+            ext = uDAO.getbyUserName(user);
+
+            // Nếu sau này có field avatar riêng thì bật lại đoạn dưới
+            // if (ext != null && !string.IsNullOrEmpty(ext.MyAvatarProperty)) {
+            //     userAvatarPath = Url.Content(ext.MyAvatarProperty);
+            // }
+        }
+    }
+    catch
+    {
+        user = "Guest";
+    }
+
+    var displayName = (ext != null && !string.IsNullOrEmpty(ext.Name)) ? ext.Name : (user ?? "Guest");
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Favicon dùng logo -->
+    <link rel="shortcut icon" href="@Url.Content("~/Image/logo_rm_bgr.png")" />
+    <link rel="icon" type="image/png" href="@Url.Content("~/Image/logo_rm_bgr.png")" />
+
+    <title>@ViewBag.Title</title>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>
+
+    <!-- Select2 -->
+    <link href='@Url.Content("/Content/")plugins/select2/select2.css' rel="stylesheet" />
+    <script src='@Url.Content("/Content/")plugins/select2/select2.js'></script>
+
+    <!-- SweetAlert2 -->
+    <script src="~/Content/plugins/sweetalert2/sweetalert2.js"></script>
+    <link href="~/Content/plugins/sweetalert2/sweetalert2.css" rel="stylesheet" />
+
+    <!-- Common -->
+    <link href="~/Content/css/common.css" rel="stylesheet" />
+    <script src="~/Scripts/common.js"></script>
+
+    <!-- Bootstrap -->
+    <link href='@Url.Content("~/Content/")plugins/gentelella-master/vendors/bootstrap/dist/css/bootstrap.min.css' rel="stylesheet" />
+    <!-- Font Awesome -->
+    <link href='@Url.Content("~/Content/")plugins/gentelella-master/vendors/font-awesome/css/font-awesome.min.css' rel="stylesheet" />
+    <!-- NProgress -->
+    <link href='@Url.Content("~/Content/")plugins/gentelella-master/vendors/nprogress/nprogress.css' rel="stylesheet" />
+    <!-- iCheck -->
+    <link href='@Url.Content("~/Content/")plugins/gentelella-master/vendors/iCheck/skins/flat/green.css' rel="stylesheet" />
+    <!-- bootstrap-progressbar -->
+    <link href='@Url.Content("~/Content/")plugins/gentelella-master/vendors/bootstrap-progressbar/css/bootstrap-progressbar-3.3.4.min.css' rel="stylesheet" />
+    <!-- JQVMap -->
+    <link href='@Url.Content("~/Content/")plugins/gentelella-master/vendors/jqvmap/dist/jqvmap.min.css' rel="stylesheet" />
+    <!-- bootstrap-daterangepicker -->
+    <link href='@Url.Content("~/Content/")plugins/gentelella-master/vendors/bootstrap-daterangepicker/daterangepicker.css' rel="stylesheet" />
+    <!-- Theme -->
+    <link href='@Url.Content("~/Content/")plugins/gentelella-master/build/css/custom.css' rel="stylesheet" />
+    <!-- Trang hoạt động -->
+    <link href='@Url.Content("~/Content/admin-activities.css")' rel="stylesheet" />
+
+<style>
+
+/* =========== BASE LAYOUT ========== */
+.wrapper {
+    height: 100%;
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.left_col {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.98) 100%) !important;
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(148, 163, 184, 0.1);
+    color: #fff;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+    width: 280px !important;
+    min-width: 280px !important;
+}
+
+/* =========== BRAND BLOCK SIDEBAR ========== */
+.nav_title {
+    background: transparent !important;
+    padding: 24px 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    margin-bottom: 8px;
+}
+
+.site_title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff !important;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    text-decoration: none !important;
+    transform-origin: left center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 8px;
+    border-radius: 12px;
+}
+
+.site_title:hover {
+    transform: translateX(4px);
+    background: rgba(56, 189, 248, 0.1);
+}
+
+.site_title img {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    object-fit: contain;
+    padding: 4px;
+    box-shadow: 0 8px 32px rgba(56, 189, 248, 0.3);
+    transition: all 0.3s ease;
+}
+
+.site_title:hover img {
+    transform: scale(1.05) rotate(-2deg);
+    box-shadow: 0 12px 40px rgba(56, 189, 248, 0.5);
+}
+
+.site_title span {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+}
+
+.brand-title-top {
+    font-size: 14px;
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.brand-title-sub {
+    font-size: 11px;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+/* =========== SIDEBAR MENU TEXT / ICON / HOVER ========== */
+#sidebar-menu .menu_section > ul.side-menu > li {
+    margin: 4px 12px;
+}
+
+#sidebar-menu .menu_section > ul.side-menu > li > a {
+    font-size: 13px;
+    font-weight: 600;
+    color: #cbd5e1;
+    background: transparent;
+    border-left: 3px solid transparent;
+    border-radius: 10px;
+    padding: 12px 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+#sidebar-menu .menu_section > ul.side-menu > li > a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(56, 189, 248, 0.2) 0%, transparent 100%);
+    transition: width 0.3s ease;
+    z-index: 0;
+}
+
+#sidebar-menu .menu_section > ul.side-menu > li > a:hover::before {
+    width: 100%;
+}
+
+#sidebar-menu .menu_section > ul.side-menu > li > a:hover {
+    background: rgba(56, 189, 248, 0.15);
+    color: #fff;
+    border-left: 3px solid #38bdf8;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+}
+
+#sidebar-menu .menu_section > ul.side-menu > li > a i {
+    transition: all 0.3s ease;
+}
+
+#sidebar-menu .menu_section > ul.side-menu > li > a:hover i {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.8));
+}
+
+/* Active state */
+#sidebar-menu .menu_section > ul.side-menu > li.active > a {
+    background: linear-gradient(90deg, rgba(56, 189, 248, 0.25) 0%, rgba(56, 189, 248, 0.1) 100%);
+    color: #fff;
+    border-left: 3px solid #38bdf8;
+}
+
+#sidebar-menu .child_menu {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 8px 0;
+    margin: 4px 12px 8px 12px;
+    border-radius: 8px;
+    border-left: 2px solid rgba(56, 189, 248, 0.3);
+    animation: submenuSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@@keyframes submenuSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 500px;
+    }
+}
+
+#sidebar-menu .child_menu li a {
+    font-size: 12px;
+    color: #94a3b8;
+    padding: 10px 16px 10px 36px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1.4;
+    border-radius: 6px;
+    margin: 2px 8px;
+    transition: all 0.2s ease;
+}
+
+#sidebar-menu .child_menu li a i.fa {
+    font-size: 11px;
+    width: 16px;
+    text-align: center;
+    color: #38bdf8;
+    opacity: 0.8;
+    transition: all 0.2s ease;
+}
+
+#sidebar-menu .child_menu li a:hover {
+    color: #fff;
+    background: rgba(56, 189, 248, 0.15);
+    transform: translateX(4px);
+    padding-left: 40px;
+}
+
+#sidebar-menu .child_menu li a:hover i.fa {
+    color: #fff;
+    opacity: 1;
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.8));
+}
+
+/* =========== TOP NAV BAR ========== */
+.top_nav {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+    margin-left: 280px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 1000;
+}
+
+.nav_menu {
+    background: transparent !important;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between !important;
+    padding: 0 16px !important;
+}
+
+.nav.toggle a {
+    color: #000000 !important;
+    font-size: 20px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.nav.toggle a i {
+    color: #000000 !important;
+}
+
+.nav.toggle a:hover {
+    background: rgba(56, 189, 248, 0.1);
+    color: #000000 !important;
+}
+
+.nav.toggle a:hover i {
+    color: #38bdf8 !important;
+}
+
+/* Menu mở rộng - 280px */
+body.nav-md .left_col,
+body:not(.nav-sm) .left_col {
+    width: 280px !important;
+    min-width: 280px !important;
+}
+
+body.nav-md .right_col,
+body.nav-md .top_nav,
+body.nav-md footer,
+body:not(.nav-sm) .right_col,
+body:not(.nav-sm) .top_nav,
+body:not(.nav-sm) footer {
+    margin-left: 280px !important;
+}
+
+/* Menu thu nhỏ - 70px (chỉ hiện icon) */
+body.nav-sm .left_col,
+.left_col.collapsed {
+    width: 70px !important;
+    min-width: 70px !important;
+    overflow: visible !important;
+}
+
+body.nav-sm .right_col,
+body.nav-sm .top_nav,
+body.nav-sm footer,
+.left_col.collapsed ~ .right_col,
+.left_col.collapsed ~ .top_nav,
+.left_col.collapsed ~ footer {
+    margin-left: 70px !important;
+}
+
+/* Ẩn TẤT CẢ text khi menu thu nhỏ - CHỈ GIỮ ICON */
+body.nav-sm .site_title span,
+body.nav-sm .site_title .brand-title-top,
+body.nav-sm .site_title .brand-title-sub,
+body.nav-sm #sidebar-menu li a span:not(.fa):not(.glyphicon):not(.icon),
+body.nav-sm #sidebar-menu span:not(.fa):not(.glyphicon):not(.icon),
+body.nav-sm #sidebar-menu .menu_section h3,
+body.nav-sm #sidebar-menu .menu_section span,
+body.nav-sm .profile_info,
+.left_col.collapsed .site_title span,
+.left_col.collapsed #sidebar-menu li a span:not(.fa):not(.glyphicon):not(.icon),
+.left_col.collapsed #sidebar-menu span:not(.fa):not(.glyphicon):not(.icon) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+}
+
+/* Căn giữa icon khi menu thu nhỏ */
+body.nav-sm #sidebar-menu li a,
+.left_col.collapsed #sidebar-menu li a {
+    text-align: center !important;
+    padding: 12px 10px !important;
+    justify-content: center !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+body.nav-sm #sidebar-menu li a i,
+.left_col.collapsed #sidebar-menu li a i {
+    margin: 0 auto !important;
+    width: auto !important;
+    display: inline-block !important;
+}
+
+body.nav-sm .site_title,
+.left_col.collapsed .site_title {
+    justify-content: center !important;
+}
+
+body.nav-sm .site_title img,
+.left_col.collapsed .site_title img {
+    margin: 0 auto !important;
+}
+
+body.nav-sm .nav_title,
+.left_col.collapsed .nav_title {
+    padding: 20px 10px !important;
+}
+
+/* Ẩn mũi tên dropdown khi menu thu nhỏ */
+body.nav-sm #sidebar-menu li a .fa-chevron-down,
+body.nav-sm #sidebar-menu li a .fa-angle-down,
+.left_col.collapsed #sidebar-menu li a .fa-chevron-down,
+.left_col.collapsed #sidebar-menu li a .fa-angle-down {
+    display: none !important;
+}
+
+/* Child menu hiển thị bên ngoài khi menu thu nhỏ */
+body.nav-sm .child_menu,
+.left_col.collapsed .child_menu {
+    position: absolute !important;
+    left: 70px !important;
+    top: 0 !important;
+    width: 200px !important;
+    background: rgba(30, 41, 59, 0.98) !important;
+    backdrop-filter: blur(20px) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3) !important;
+    margin: 0 !important;
+    border-radius: 0 8px 8px 0 !important;
+    z-index: 9999 !important;
+}
+
+/* =========== USER PROFILE (TOP RIGHT) ========== */
+.navbar-right {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    width: 100%;
+    position: relative;
+    z-index: 10000;
+}
+
+.navbar-right > li {
+    margin: 0 !important;
+    padding: 0 !important;
+    position: relative;
+    z-index: 10000;
+}
+
+.user-profile {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    color: #111827 !important;
+    font-weight: 600;
+    font-size: 13px;
+    background: transparent !important;
+    margin: 0 !important;
+    padding: 8px 12px !important;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.user-profile:hover {
+    background: rgba(56, 189, 248, 0.08) !important;
+}
+
+.user-avatar-wrapper {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2.5px solid #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    animation: pulseGlow 3s ease-in-out infinite;
+    transition: all 0.3s ease;
+}
+
+.user-profile:hover .user-avatar-wrapper {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2), 0 8px 16px rgba(56, 189, 248, 0.3);
+}
+
+@@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25), 0 0 20px rgba(56, 189, 248, 0.2);
+    }
+}
+
+.user-avatar-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #fff;
+}
+
+.user-info-block {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+    text-align: right;
+    min-width: 110px;
+}
+
+.user-info-name {
+    color: #111827 !important;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.user-info-role {
+    color: #64748b !important;
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 1px;
+}
+
+.top_nav .navbar-right > li > a {
+    color: #111827 !important;
+    background: transparent !important;
+    padding-right: 0 !important;
+}
+
+.top_nav .fa-angle-down {
+    color: #64748b !important;
+    font-size: 14px;
+    margin-left: 6px;
+    transition: all 0.2s ease;
+}
+
+.user-profile:hover .fa-angle-down {
+    transform: translateY(2px);
+    color: #38bdf8 !important;
+}
+
+.dropdown-usermenu {
+    min-width: 200px;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+    overflow: visible !important;
+    margin-top: 8px !important;
+    background: #ffffff !important;
+    z-index: 99999 !important;
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
+    display: none;
+}
+
+.navbar-right .open > .dropdown-usermenu {
+    display: block !important;
+}
+
+.navbar-right .dropdown.open .dropdown-menu {
+    z-index: 99999 !important;
+    display: block !important;
+}
+
+.navbar-right > li.open {
+    z-index: 99999 !important;
+    position: relative;
+}
+
+.dropdown-usermenu li {
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.dropdown-usermenu li:last-child {
+    border-bottom: none;
+}
+
+.dropdown-usermenu li a {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 20px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #334155;
+}
+
+.dropdown-usermenu li a i {
+    font-size: 14px;
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+.dropdown-usermenu li a:hover {
+    background: linear-gradient(90deg, rgba(56, 189, 248, 0.1) 0%, rgba(56, 189, 248, 0.05) 100%);
+    color: #38bdf8;
+    padding-left: 24px;
+}
+
+.dropdown-usermenu li a:hover i {
+    color: #38bdf8;
+    transform: scale(1.1);
+}
+
+/* =========== CONTENT AREA + FOOTER ========== */
+.right_col {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 24px 28px 48px;
+    margin-left: 280px;
+    min-height: calc(100vh - 64px);
+}
+
+footer {
+    background: linear-gradient(90deg, #0f172a 0%, #1e293b 100%);
+    border-top: 1px solid rgba(56, 189, 248, 0.1);
+    color: #94a3b8;
+    padding: 16px 28px;
+    margin-left: 280px;
+    font-size: 12px;
+    line-height: 1.6;
+    backdrop-filter: blur(10px);
+}
+
+footer a {
+    color: #38bdf8;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+footer a:hover {
+    color: #0ea5e9;
+    text-decoration: underline;
+}
+
+/* =========== MODAL WIDTH OVERRIDE ========== */
+@@media (min-width: 768px) {
+    .modal-small {
+        width: 60% !important;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .modal-medium {
+        width: 75% !important;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .modal-large {
+        width: 85% !important;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .modal-full {
+        width: 100% !important;
+    }
+    .modal-x-large {
+        width: 95% !important;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+}
+
+/* =========== SCROLLBAR STYLING ========== */
+.wrapper::-webkit-scrollbar,
+.left_col::-webkit-scrollbar {
+    width: 8px;
+}
+
+.wrapper::-webkit-scrollbar-track,
+.left_col::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.4);
+}
+
+.wrapper::-webkit-scrollbar-thumb,
+.left_col::-webkit-scrollbar-thumb {
+    background: rgba(56, 189, 248, 0.5);
+    border-radius: 4px;
+}
+
+.wrapper::-webkit-scrollbar-thumb:hover,
+.left_col::-webkit-scrollbar-thumb:hover {
+    background: rgba(56, 189, 248, 0.7);
+}
+
+/* =========== RESPONSIVE ADJUSTMENTS ========== */
+@@media (max-width: 991px) {
+    .top_nav {
+        margin-left: 0;
+    }
+    
+    .right_col {
+        margin-left: 0;
+    }
+    
+    footer {
+        margin-left: 0;
+    }
+}
+
+/* =========== MODAL ĐỔI MẬT KHẨU ========== */
+.modal-content {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+    border-bottom: none;
+    padding: 20px 24px;
+    position: relative;
+}
+
+.modal-header .modal-title {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-header .modal-title i {
+    font-size: 20px;
+}
+
+.modal-header .close {
+    color: #ffffff;
+    opacity: 0.9;
+    font-size: 28px;
+    font-weight: 300;
+    text-shadow: none;
+    transition: all 0.2s ease;
+}
+
+.modal-header .close:hover {
+    opacity: 1;
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 28px 24px;
+    background: #ffffff;
+}
+
+.modal-body .form-group {
+    margin-bottom: 20px;
+}
+
+.modal-body .form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.modal-body .form-group .form-control {
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 40px 12px 16px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+}
+
+.modal-body .form-group .form-control:focus {
+    border-color: #38bdf8;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+    outline: none;
+}
+
+.modal-body .form-group {
+    position: relative;
+}
+
+.modal-body .form-group .btn-link {
+    position: absolute;
+    right: 8px;
+    top: 38px;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+}
+
+.modal-body .form-group .btn-link:hover {
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
+}
+
+.modal-body .form-group .btn-link i {
+    font-size: 16px;
+}
+
+.modal-footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 16px 24px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.modal-footer .btn {
+    border-radius: 10px;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.modal-footer .btn-default {
+    background: #ffffff;
+    color: #64748b;
+    border: 2px solid #e2e8f0;
+}
+
+.modal-footer .btn-default:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #334155;
+    transform: translateY(-1px);
+}
+
+.modal-footer .btn-primary,
+.modal-footer .btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.modal-footer .btn-primary:hover,
+.modal-footer .btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+    transform: translateY(-2px);
+}
+
+.modal-footer .btn-success {
+    background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+}
+
+.modal-footer .btn-success:hover {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Icon trong button */
+.modal-footer .btn i {
+    margin-right: 6px;
+}
+
+</style>
+
+    @RenderSection("Styles", required: false)
+   
+</head>
+
+<body class="nav-md">
+    <div class="wrapper">
+        <div class="container body">
+            <div class="main_container">
+
+                <!-- ========== SIDEBAR LEFT ========== -->
+                <div class="col-md-3 left_col">
+                    <div class="left_col scroll-view">
+
+                        <!-- BRAND BLOCK -->
+                        <div class="navbar nav_title" style="border:0;">
+                            <a href="/" class="site_title">
+                                <img src="~/Image/logo_rm_bgr.png" alt="CTC Logo" />
+                                <span>
+                                    <span class="brand-title-top">CTC Admin</span>
+                                    <span class="brand-title-sub">Control Panel</span>
+                                </span>
+                            </a>
+                        </div>
+                        <div class="clearfix"></div>
+
+                        <br />
+
+                        <!-- MENU -->
+                        <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+                            <div class="menu_section">
+                                <ul class="nav side-menu">
+                                    <li>
+                                        <a><i class="fa fa-home"></i> Tổng quan <span class="fa fa-chevron-down"></span></a>
+                                        <ul class="nav child_menu">
+                                            <li>
+                                                <a href="/Admin/Dashboard">
+                                                    <i class="fa fa-tachometer"></i> Bảng điều khiển
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/Admin/PageInfo">
+                                                    <i class="fa fa-search"></i> Thông tin SEO
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+
+                                    <li>
+                                        <a><i class="fa fa-archive"></i> Sản phẩm <span class="fa fa-chevron-down"></span></a>
+                                        <ul class="nav child_menu">
+                                            <li>
+                                                <a href="/Product">
+                                                    <i class="fa fa-cube"></i> Sản phẩm
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/Category">
+                                                    <i class="fa fa-list-alt"></i> Danh mục sản phẩm
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/Unit">
+                                                    <i class="fa fa-balance-scale"></i> Đơn vị
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/ProductStandard">
+                                                    <i class="fa fa-check-square-o"></i> Tiêu chuẩn sản phẩm
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+
+                                    <li>
+                                        <a><i class="fa fa-clone"></i> Giao diện website <span class="fa fa-chevron-down"></span></a>
+                                        <ul class="nav child_menu">
+                                            <li>
+                                                <a href="/Admin/Menu">
+                                                    <i class="fa fa-bars"></i> Thiết lập Menu
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/Admin/Slide">
+                                                    <i class="fa fa-picture-o"></i> Thiết lập Slide
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+
+                                    <li>
+                                        <a><i class="fa fa-pencil-square-o"></i> Nội dung <span class="fa fa-chevron-down"></span></a>
+                                        <ul class="nav child_menu">
+                                            <li>
+                                                <a href="/Admin/BlogCategory">
+                                                    <i class="fa fa-folder-open-o"></i> Danh mục Blog
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/Admin/Blog">
+                                                    <i class="fa fa-newspaper-o"></i> Blog
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/admin/activities">
+                                                    <i class="fa fa-calendar-check-o"></i> Quản lý Hoạt động
+                                                </a>
+                                            </li>
+                                             <li>
+                                                <a href="/admin/projects">
+                                                    <i class="fas fa-project-diagram"></i> Quản lý Dự án
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/OurCustomer">
+                                                    <i class="fa fa-heart"></i> Khách hàng tiêu biểu
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/Product/RecommendProduct">
+                                                    <i class="fa fa-star"></i> Sản phẩm tiêu biểu
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/StaticPage">
+                                                    <i class="fa fa-file-text-o"></i> Trang tĩnh
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+
+                                    <li>
+                                        <a><i class="fa fa-users"></i> Tài khoản &amp; Phân quyền <span class="fa fa-chevron-down"></span></a>
+                                        <ul class="nav child_menu">
+                                            <li>
+                                                <a href="/User">
+                                                    <i class="fa fa-user-circle"></i> Người dùng / Admin
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- /sidebar menu -->
+
+                    </div>
+                </div>
+                <!-- /SIDEBAR LEFT -->
+
+                <!-- ========== TOP NAV ========== -->
+                <div class="top_nav">
+                    <div class="nav_menu">
+                        <nav>
+                            <div class="nav toggle">
+                                <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+                            </div>
+
+<!-- Thay thế phần user profile trong TOP NAV -->
+<ul class="nav navbar-nav navbar-right">
+    <li class="">
+        <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+            <div class="user-avatar-wrapper">
+                <img src="@userAvatarPath" alt="@displayName" />
+            </div>
+            <div class="user-info-block">
+                <span class="user-info-name">@displayName</span>
+                <span class="user-info-role">@(ext != null && !string.IsNullOrEmpty(ext.Role) ? ext.Role : "Administrator")</span>
+            </div>
+            <i class="fa fa-angle-down"></i>
+        </a>
+
+        <ul class="dropdown-menu dropdown-usermenu pull-right">
+            <li>
+                <a href="#" data-toggle="modal" data-target="#modelChangePass">
+                    <i class="fa fa-key pull-right"></i> Đổi mật khẩu
+                </a>
+            </li>
+            <li>
+                <a href="/Login">
+                    <i class="fa fa-sign-out pull-right"></i> Đăng xuất
+                </a>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+                <!-- /TOP NAV -->
+
+                <!-- ========== PAGE CONTENT ========== -->
+                <div class="right_col" role="main">
+                    <div>
+                        @RenderBody()
+                    </div>
+                </div>
+                <!-- /PAGE CONTENT -->
+
+                <!-- ========== FOOTER ========== -->
+                <footer>
+                    <div class="pull-right">
+                        CTC Admin Control Panel · Powered by <a href="https://ctcdn.vn">CTC</a>
+                    </div>
+                    <div class="clearfix"></div>
+                </footer>
+                <!-- /FOOTER -->
+
+            </div>
+        </div>
+    </div>
+
+    <!-- POPUP CONTAINERS -->
+    <div id="popupContainer1"></div>
+    <div id="popupContainer2"></div>
+    <div id="popupContainer3"></div>
+    <div id="popupContainer4"></div>
+
+    <!-- MODAL CHỌN ẢNH -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="popupSelectImage">
+        <div class="modal-dialog modal-large" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Chọn File</h4>
+                </div>
+                <div class="modal-body" style="overflow-x:hidden">
+                    <iframe style="width:100%; min-height:500px;" id="ifSelectIMG" frameborder="0"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @RenderPage("~/Views/User/_ChangePassword.cshtml")
+
+    <!-- LOADING SPINNER -->
+    <div class="waiting-spin-content-web">
+        <img src="~/Content/Image/loading.gif" />
+    </div>
+
+    <!-- jQuery UI -->
+    <script src='@Url.Content("~/Content/")plugins/jQueryUI/jquery-ui.js'></script>
+    <link href='@Url.Content("~/Content/")plugins/jQueryUI/jquery-ui.css' rel="stylesheet" />
+
+    <!-- Bootstrap -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/bootstrap/dist/js/bootstrap.min.js'></script>
+
+    <!-- FastClick -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/fastclick/lib/fastclick.js'></script>
+
+    <!-- NProgress -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/nprogress/nprogress.js'></script>
+
+    <!-- Chart.js -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/Chart.js/dist/Chart.min.js'></script>
+
+    <!-- gauge.js -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/gauge.js/dist/gauge.min.js'></script>
+
+    <!-- bootstrap-progressbar -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/bootstrap-progressbar/bootstrap-progressbar.min.js'></script>
+
+    <!-- iCheck -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/iCheck/icheck.min.js'></script>
+
+    <!-- Skycons -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/skycons/skycons.js'></script>
+
+    <!-- Flot -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/Flot/jquery.flot.js'></script>
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/Flot/jquery.flot.pie.js'></script>
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/Flot/jquery.flot.time.js'></script>
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/Flot/jquery.flot.stack.js'></script>
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/Flot/jquery.flot.resize.js'></script>
+
+    <!-- Flot plugins -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/flot.orderbars/js/jquery.flot.orderBars.js'></script>
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/flot-spline/js/jquery.flot.spline.min.js'></script>
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/flot.curvedlines/curvedLines.js'></script>
+
+    <!-- DateJS -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/DateJS/build/date.js'></script>
+
+    <!-- JQVMap -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/jqvmap/dist/jquery.vmap.js'></script>
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/jqvmap/dist/maps/jquery.vmap.world.js'></script>
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/jqvmap/examples/js/jquery.vmap.sampledata.js'></script>
+
+    <!-- bootstrap-daterangepicker -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/moment/min/moment.min.js'></script>
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/bootstrap-daterangepicker/daterangepicker.js'></script>
+
+    <!-- Custom Theme Scripts -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/build/js/custom.js'></script>
+
+    <!-- TinyMCE -->
+    <script src='@Url.Content("~/Content/")plugins/tinymce/tinymce.min.js'></script>
+
+    <!-- Tokenfield -->
+    <link href='@Url.Content("~/Content/")plugins/tokenfield/css/bootstrap-tokenfield.min.css' rel="stylesheet" />
+    <link href='@Url.Content("~/Content/")plugins/tokenfield/css/tokenfield-typeahead.min.css' rel="stylesheet" />
+    <script src='@Url.Content("~/Content/")plugins/tokenfield/typeahead.bundle.min.js'></script>
+    <script src='@Url.Content("~/Content/")plugins/tokenfield/bootstrap-tokenfield.min.js'></script>
+    <script src='@Url.Content("~/Content/")plugins/tokenfield/bootstrap-tokenfield.js'></script>
+
+    <!-- DataTables -->
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/datatables.net/js/jquery.dataTables.js'></script>
+    <script src='@Url.Content("~/Content/")plugins/gentelella-master/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js'></script>
+    <link href='@Url.Content("~/Content/")plugins/gentelella-master/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css' rel="stylesheet" />
+
+    <!-- Numeric -->
+    <script src='@Url.Content("~/Content/")plugins/numberic/autoNumeric.min.js'></script>
+
+    <!-- Helpers cho image picker -->
+    <script src="~/Scripts/jquery.serializeObject.min.js"></script>
+    <script>
+        var imageCallBack = ";";
+        function openSelectImage(callback) {
+            var url = '@Url.Content("/filepicker/index?callback=")severImageSelectCallBack&tinymce=0';
+            $("#ifSelectIMG").attr("src", url);
+            $("#popupSelectImage").modal("show");
+            imageCallBack = callback;
+        }
+        var severImageSelectCallBack = function (url) {
+            imageCallBack(url);
+            $("#popupSelectImage").modal("hide");
+        }
+        function selectIMG(hiden, display) {
+            openSelectImage(function (url) {
+                $(hiden).val(url);
+                $(display).attr("src", url);
+            });
+        }
+        function deleteImageDetail(inputDisplay, inputValue) {
+            $('#' + inputValue).val('');
+            $('#' + inputDisplay).removeAttr("src");
+            $("#" + inputDisplay).css('width', '100%');
+        }
+    </script>
+    
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

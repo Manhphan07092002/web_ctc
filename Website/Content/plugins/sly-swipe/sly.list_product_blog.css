@@ -1,0 +1,17 @@
+.wrap{position:relative;margin:0 0;}
+
+
+/*////////////////*/
+
+#basic_customer{text-align:center;margin:0 auto;}
+#basic_customer ul{list-style:none;margin:0 auto;padding:0;height:100%;}
+#basic_customer{overflow-x:hidden !important;text-align:center;margin:0 auto 25px;}
+#basic_customer ul{list-style:none;margin:0 auto;padding:0;}
+#basic_customer ul li{float:left;width:220px;height:auto;text-align:center;cursor:pointer;position:relative;}
+
+
+.list-slide{position:relative;}
+.list-slide .prevPage{position:absolute;top:33%;left:-30px;border:none;padding:10px 5px;background-color:#E0E0E0;    border-radius: 3px;}
+.list-slide .nextPage{position:absolute;top:33%;right:-30px;border:none;padding:10px 5px;background-color:#E0E0E0;    border-radius: 3px;}
+
+/*////////////////*/

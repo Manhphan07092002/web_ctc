@@ -1,0 +1,191 @@
+@{
+    ViewBag.Title = "Giới Thiệu Công Ty";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Giả sử bạn dùng layout chung
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<div class="about-us-page">
+    <div class="container">
+        <div class="page-header">
+            <h1>Giới Thiệu Về Chúng Tôi</h1>
+            <p>Đối tác tin cậy trong lĩnh vực xây lắp và hạ tầng viễn thông</p>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="about-section">
+                    <h3>Về Công Ty Cổ Phần Xây Lắp Bưu Điện Miền Trung</h3>
+                    <p>
+                        Được thành lập với sứ mệnh tiên phong, **CÔNG TY CỔ PHẦN XÂY LẮP BƯU ĐIỆN MIỀN TRUNG (CTC)** đã và đang khẳng định vị thế là một trong những đơn vị hàng đầu trong lĩnh vực xây lắp, phát triển hạ tầng bưu chính, viễn thông và công nghệ thông tin tại khu vực Miền Trung và trên cả nước.
+                    </p>
+                    <p>
+                        Với đội ngũ kỹ sư, chuyên gia giàu kinh nghiệm và tâm huyết, chúng tôi tự hào mang đến cho khách hàng và đối tác những công trình chất lượng, giải pháp công nghệ tiên tiến và dịch vụ chuyên nghiệp, đáp ứng những tiêu chuẩn kỹ thuật khắt khe nhất.
+                    </p>
+                </div>
+
+                <div class="about-section">
+                    <h3>Năng lực cốt lõi</h3>
+                    <div class="core-competencies">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="competency-item">
+                                    <i class="fas fa-broadcast-tower"></i>
+                                    <h5>Hạ tầng Viễn thông</h5>
+                                    <p>Thi công trạm BTS, tuyến cáp quang, đảm bảo kết nối thông suốt.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="competency-item">
+                                    <i class="fas fa-bolt"></i>
+                                    <h5>Công trình Điện</h5>
+                                    <p>Xây dựng, lắp đặt đường dây và trạm biến áp đến 110kV.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="competency-item">
+                                    <i class="fas fa-hard-hat"></i>
+                                    <h5>Xây dựng Dân dụng & Công nghiệp</h5>
+                                    <p>Tổng thầu thi công các công trình nhà văn phòng, khu công nghiệp.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="competency-item">
+                                    <i class="fas fa-cogs"></i>
+                                    <h5>Hệ thống Cơ điện (M&E)</h5>
+                                    <p>Lắp đặt hệ thống cơ điện M&E cho toà nhà, nhà máy, đảm bảo vận hành.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="contact-card">
+                    <h4>Thông tin liên hệ</h4>
+                    <ul class="contact-details">
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>50B Nguyễn Du, P. Hải Châu, TP. Đà Nẵng</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone-alt"></i>
+                            <span><a href="tel:0915059666">0915 059 666</a> (Mr. Đạt)</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span><a href="mailto:contact@ctcdn.vn">contact@ctcdn.vn</a></span>
+                        </li>
+                    </ul>
+                    <hr />
+                    <div class="map-container">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3834.110553733075!2d108.22033681533269!3d16.0597280439097!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31421833d5964959%3A0x429324c424c56e3a!2zQ8O0bmcgVHkgQ-G7lSBQaOG6p24gWMOgeSBM4bqvbiBCxrB1IMSQaeG7h24gTWnhu4FuIFRydW5n!5e0!3m2!1svi!2s!4v1672889988777!5m2!1svi!2s" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style type="text/css">
+    .about-us-page {
+        padding: 60px 0;
+        background-color: #f8f9fa;
+        font-family: 'Roboto', sans-serif;
+    }
+    .page-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    .page-header h1 {
+        font-size: 36px;
+        font-weight: 700;
+        color: #212529;
+        margin-bottom: 10px;
+    }
+    .page-header p {
+        font-size: 18px;
+        color: #6c757d;
+    }
+    .about-section {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+    }
+    .about-section h3 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #007bff;
+        margin-bottom: 20px;
+    }
+    .about-section p {
+        font-size: 16px;
+        line-height: 1.8;
+        color: #5a5a5a;
+    }
+    .core-competencies .competency-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .core-competencies .competency-item i {
+        font-size: 40px;
+        color: #007bff;
+        margin-bottom: 15px;
+    }
+    .core-competencies .competency-item h5 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 10px;
+    }
+    .core-competencies .competency-item p {
+        font-size: 14px;
+        color: #6c757d;
+    }
+    .contact-card {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    }
+    .contact-card h4 {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    .contact-details {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .contact-details li {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 15px;
+        font-size: 15px;
+    }
+    .contact-details i {
+        color: #007bff;
+        margin-right: 15px;
+        margin-top: 4px;
+    }
+    .contact-details a {
+        color: #212529;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+    .contact-details a:hover {
+        color: #007bff;
+    }
+    .map-container {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+</style>

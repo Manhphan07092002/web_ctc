@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Endpoints</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button { padding: 8px 16px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug FilePicker Endpoints</h1>
+    
+    <button onclick="testAll()">Test All Endpoints</button>
+    <button onclick="clearResults()">Clear Results</button>
+    
+    <div id="results"></div>
+    
+    <script>
+        function addResult(title, status, content) {
+            const div = document.createElement('div');
+            div.className = 'result ' + status;
+            div.innerHTML = `<strong>${title}</strong><br>${content}`;
+            document.getElementById('results').appendChild(div);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function testAll() {
+            clearResults();
+            addResult('🧪 Starting Tests', 'info', 'Testing all FilePicker endpoints...');
+            
+            // Test 1: /filepicker/test (lowercase)
+            await testEndpoint('Test (lowercase)', '/filepicker/test');
+            
+            // Test 2: /FilePicker/Test (proper case)
+            await testEndpoint('Test (proper case)', '/FilePicker/Test');
+            
+            // Test 3: /filepicker/index
+            await testEndpoint('Index', '/filepicker/index?callback=test&tinymce=0');
+            
+            // Test 4: /filepicker/List (POST)
+            await testListEndpoint();
+            
+            addResult('✅ Tests Complete', 'info', 'All endpoint tests finished.');
+        }
+        
+        async function testEndpoint(name, url) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const contentType = response.headers.get('content-type');
+                    let content;
+                    
+                    if (contentType && contentType.includes('application/json')) {
+                        content = JSON.stringify(await response.json(), null, 2);
+                    } else {
+                        const text = await response.text();
+                        content = text.length > 500 ? text.substring(0, 500) + '...' : text;
+                    }
+                    
+                    addResult(`✅ ${name}`, 'success', `Status: ${response.status}<br><pre>${content}</pre>`);
+                } else {
+                    addResult(`❌ ${name}`, 'error', `HTTP ${response.status}: ${response.statusText}<br>URL: ${response.url}`);
+                }
+            } catch (error) {
+                addResult(`❌ ${name}`, 'error', `Network error: ${error.message}`);
+            }
+        }
+        
+        async function testListEndpoint() {
+            try {
+                const response = await fetch('/filepicker/List', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'path=&text='
+                });
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    const preview = html.length > 1000 ? html.substring(0, 1000) + '...' : html;
+                    
+                    if (html.includes('❌')) {
+                        addResult('⚠️ List (POST)', 'error', `Returned error in HTML:<br><pre>${preview}</pre>`);
+                    } else {
+                        addResult('✅ List (POST)', 'success', `Status: ${response.status}<br>Length: ${html.length} chars<br><pre>${preview}</pre>`);
+                    }
+                } else {
+                    const errorText = await response.text();
+                    addResult('❌ List (POST)', 'error', `HTTP ${response.status}: ${response.statusText}<br><pre>${errorText}</pre>`);
+                }
+            } catch (error) {
+                addResult('❌ List (POST)', 'error', `Network error: ${error.message}`);
+            }
+        }
+        
+        // Auto-run on load
+        window.onload = () => setTimeout(testAll, 500);
+    </script>
+</body>
+</html>

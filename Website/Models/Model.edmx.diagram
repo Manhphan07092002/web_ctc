@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="f94ce3913f7547b9a1579dc7a4b16d73" Name="Diagram1" ZoomLevel="64">
+        <EntityTypeShape EntityType="Model.Blog" Width="1.5" PointX="0.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Model.BlogCategory" Width="1.5" PointX="2.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Model.Category" Width="1.5" PointX="4.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Model.Menu" Width="1.5" PointX="0.75" PointY="5.75" />
+        <EntityTypeShape EntityType="Model.MenuType" Width="1.5" PointX="2.75" PointY="5.75" />
+        <EntityTypeShape EntityType="Model.OurCustomer" Width="1.5" PointX="4.75" PointY="5.75" />
+        <EntityTypeShape EntityType="Model.PageInfo" Width="1.5" PointX="6.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Model.Product" Width="1.5" PointX="6.75" PointY="4.75" />
+        <EntityTypeShape EntityType="Model.ProductStandard" Width="1.5" PointX="8.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Model.ProductStandardDetail" Width="1.5" PointX="8.75" PointY="3.75" />
+        <EntityTypeShape EntityType="Model.ProductStandardValue" Width="1.5" PointX="8.75" PointY="6.75" />
+        <EntityTypeShape EntityType="Model.ProductUpdateLog" Width="1.5" PointX="8.75" PointY="9.75" />
+        <EntityTypeShape EntityType="Model.RecommendProduct" Width="1.5" PointX="10.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Model.Role" Width="1.5" PointX="0.75" PointY="10.75" />
+        <EntityTypeShape EntityType="Model.Slide" Width="1.5" PointX="2.75" PointY="10.75" />
+        <EntityTypeShape EntityType="Model.StaticPage" Width="1.5" PointX="10.75" PointY="3.75" />
+        <EntityTypeShape EntityType="Model.StaticUrl" Width="1.5" PointX="10.75" PointY="8.75" />
+        <EntityTypeShape EntityType="Model.Unit" Width="1.5" PointX="12.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Model.User" Width="1.5" PointX="12.75" PointY="3.75" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

@@ -1,0 +1,194 @@
+/* =================================================== */
+/* == CSS cho Phần Tính năng Nổi bật (FeaturesSection) == */
+/* ==      (Phiên bản Căn đều chiều cao)             == */
+/* =================================================== */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    overflow-x: hidden;
+}
+
+.features-container {
+    display: flex;
+    justify-content: space-around;
+    /* THAY ĐỔI: Sử dụng 'stretch' để các item dãn bằng nhau theo chiều cao */
+    align-items: stretch;
+    flex-wrap: wrap;
+    padding: 50px 15px;
+    text-align: center;
+    gap: 20px; /* Thêm khoảng cách giữa các item */
+}
+
+.feature-item {
+    width: 23%;
+    min-width: 250px;
+    margin-bottom: 0; /* Bỏ margin, dùng gap */
+    padding: 25px 20px;
+    box-sizing: border-box;
+    position: relative;
+    background-color: #fff;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+    /* THÊM: Sử dụng flexbox column để nội dung dãn ra */
+    display: flex;
+    flex-direction: column;
+}
+
+/* THÊM: Khối nội dung có thể dãn ra */
+.feature-content {
+    flex-grow: 1; /* Cho phép khối này dãn ra để lấp đầy */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Căn nội dung lên trên */
+}
+
+
+.feature-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.circle-wrapper {
+    height: 140px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0; /* Ngăn không cho vòng tròn bị co lại */
+}
+
+.circle-shape {
+    width: 116px;
+    height: 116px;
+    background-color: #007bff;
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4);
+}
+
+.feature-item:hover .circle-shape {
+    transform: scale(1.1);
+    background-color: #0056b3;
+}
+
+.icon-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-content i {
+    color: white;
+    font-size: 48px;
+    transition: transform 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+}
+
+.feature-item:hover .icon-content i {
+    transform: scale(1.15);
+}
+
+.feature-item h3 {
+    font-size: 19px;
+    font-weight: 700;
+    color: #343a40;
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+    text-align: center;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feature-item:hover h3 {
+    color: #007bff;
+}
+
+.feature-item hr {
+    width: 50px;
+    border: none;
+    border-top: 2px solid #dee2e6;
+    margin: 0 auto 15px auto;
+    transition: width 0.3s ease;
+}
+
+.feature-item:hover hr {
+    width: 70px;
+    border-top-color: #007bff;
+}
+
+.feature-item p, .modal-content p, .modal-content li {
+    font-size: 15px;
+    color: #5a6268;
+    line-height: 1.7;
+    margin-bottom: 10px;
+    text-align: justify;
+}
+
+.feature-item p { margin: 0; }
+.feature-item[data-target-modal] { cursor: pointer; }
+
+/* Modal Styles & Animations */
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.65); padding-top: 60px; animation: fadeInOverlay 0.4s ease-out; }
+.modal-content { background-color: #fefefe; margin: 5% auto 10% auto; padding: 35px 40px; border: none; width: 80%; max-width: 960px; position: relative; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideDownFade 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; }
+.close-button { color: #aaa; position: absolute; top: 15px; right: 20px; font-size: 32px; font-weight: bold; line-height: 1; transition: transform 0.2s ease, color 0.2s ease; }
+.close-button:hover, .close-button:focus { color: #dc3545; text-decoration: none; cursor: pointer; transform: rotate(90deg) scale(1.1); }
+.modal-content h4 { font-size: 24px; color: #007bff; margin-top: 0; margin-bottom: 25px; border-bottom: 1px solid #dee2e6; padding-bottom: 15px; font-weight: 600; }
+
+/* UL / LI Styles */
+.modal-content ul { list-style: none; padding-left: 0; margin-top: 10px; }
+.modal-content li { text-align: left; margin-bottom: 10px; }
+.modal-content ul ul { list-style: circle; padding-left: 25px; margin-top: 5px; margin-bottom: 10px; }
+.modal-content ul ul li { margin-bottom: 5px; }
+#hsnlModal .modal-content li { list-style: disc; padding-left: 5px; margin-left: 15px; }
+#bctcModal .modal-content li { margin-bottom: 30px; }
+
+/* Báo cáo tài chính section */
+.report-year-section { border-top: 1px solid #e9ecef; padding: 25px 15px 15px 15px; margin-top: 20px; text-align: left; background-color: #fff; border: 1px solid #e9ecef; border-radius: 8px; transition: box-shadow 0.3s ease; }
+.report-year-section:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); }
+.report-year-section:first-of-type { border-top: 1px solid #e9ecef; margin-top: 10px; padding-top: 25px; }
+.report-year-section h5 { font-size: 18px; color: #343a40; margin-bottom: 10px; font-weight: 600; }
+.report-year-section p { font-size: 15px; color: #5a6268; line-height: 1.6; margin-bottom: 15px; text-align: justify; }
+
+/* Nút Tải xuống */
+.download-button { display: inline-block; background-color: #007bff; color: #fff !important; padding: 12px 25px; border-radius: 25px; text-decoration: none; transition: all 0.3s ease; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 123, 255, 0.35); }
+.download-button:hover { background-color: #0056b3; color: #fff !important; text-decoration: none; transform: translateY(-3px) scale(1.03); box-shadow: 0 6px 15px rgba(0, 123, 255, 0.45); }
+.download-button i { margin-right: 10px; }
+
+/* Keyframes Animations */
+@keyframes fadeInOverlay { from { background-color: rgba(0,0,0,0); } to { background-color: rgba(0,0,0,0.65); } }
+@keyframes slideDownFade { from { transform: translateY(-60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* Responsive */
+@media (max-width: 1200px) { /* Thêm breakpoint cho 4 cột */
+    .feature-item {
+        width: 48%; /* 2 cột */
+        margin-bottom: 20px; /* Thêm margin khi wrap */
+    }
+     .features-container {
+        gap: 20px;
+    }
+}
+@media (max-width: 767px) {
+    .feature-item {
+        width: 95%; /* 1 cột */
+        min-width: unset;
+        margin-bottom: 20px;
+    }
+     .modal-content {
+        width: 90%; padding: 20px; margin-top: 10%;
+    }
+}

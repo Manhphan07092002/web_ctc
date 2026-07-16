@@ -1,0 +1,65 @@
+﻿
+@{
+Layout = null;
+    int id = (int)ViewData["id"];
+    Cubetech.Website.DAO.BaseWebDAO dao = new Cubetech.Website.DAO.BaseWebDAO();
+    var lstVal = dao.Model.ProductStandardValues.Where(f => f.ProductStandardID == id && f.IsDelete==false).Select(f => f.Name).ToList();
+    var index = 0;
+    string array = "";
+    foreach (var item in lstVal)
+    {
+        if (index > 0)
+        {
+            array += ",";
+        }
+        array += "'" + item + "'";
+        index++;
+    }
+
+
+}
+
+
+
+<input type="text" class="form-control standardVal" name="standard_@id" value="@ViewData["val"]" />
+<script>
+    $(document).ready(function () {
+        $('[name=standard_@id]').tokenfield({
+            autocomplete: {
+                source: [@Html.Raw(array)],
+                delay: 100
+            },
+            showAutocompleteOnFocus: true,
+
+        });
+        $('[name=standard_@id]').on('tokenfield:createtoken', function (e) {
+            console.log('tokenfield:createtoken');
+            var existingTokens = $(this).tokenfield('getTokens');
+            console.log(e);
+            $.each(existingTokens, function (index, token) {
+                if (token.value === e.attrs.value) {
+                    e.preventDefault();
+                    showError("Lỗi", "Giá trị này đã tồn tại vui lòng nhập giá trị khác");
+                    return;
+                }
+
+            });
+        })
+
+      .on('tokenfield:createdtoken', function (e) {
+          console.log('tokenfield:createdtoken');
+          genarateSubItem();
+      })
+
+      .on('tokenfield:edittoken', function (e) {
+          console.log('tokenfield:edittoken');
+          //genarateSubItem();
+      })
+
+      .on('tokenfield:removedtoken', function (e) {
+          console.log('tokenfield:removedtoken');
+          genarateSubItem();
+      });
+    });
+</script>
+

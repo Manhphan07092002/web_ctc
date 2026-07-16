@@ -1,0 +1,127 @@
+﻿
+@{
+    ViewBag.Title = ViewData["Title"];
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    Cubetech.Website.Models.StaticPage stpage = ViewData["obj"] as Cubetech.Website.Models.StaticPage;
+    Cubetech.Website.DAO.BaseWebDAO dao = new Cubetech.Website.DAO.BaseWebDAO();
+
+
+}
+<style>
+    .select2-container--default {
+        width: 100% !important;
+    }
+
+    .fileupload-item img {
+        float: left;
+        height: 70px;
+    }
+
+    .fileupload-item .fa-trash-o {
+        padding: 0 14px !important;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-master list-panel" id="list-panel">
+            <div class="panel-heading list-panel-heading">
+                <h4 class="modal-title">@ViewData["Title"]</h4>
+            </div>
+            <form id="StaticPageForm">
+                <div class="panel-body" style="padding:10px;width:800px; margin:0 auto">
+                    <input type="hidden" name="mode" id="mode" value="@ViewData["Mode"]" />
+                    <input type="hidden" name="ID" id="ID" value="@stpage.ID" />
+
+                    <div class="form-group">
+                        <label for="FullName">Tên</label>
+                        <input type="text" class="form-control" id="Name" name="Name" placeholder="Tên" tabindex="1" value="@stpage.Name" autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="FullName">Url</label>
+                        <input type="text" class="form-control" id="Url" name="Url" placeholder="Link bài viết" tabindex="1" value="@stpage.Url" autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="FullName">SEO Title</label>
+                        <input type="text" class="form-control" id="SEOTitle" name="SEOTitle" placeholder="SEOTitle" tabindex="1" value="@stpage.SEOTitle" autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="FullName">SEO Keyword</label>
+                        <input type="text" class="form-control" id="SEOKeywords" name="SEOKeywords" placeholder="Từ khóa" tabindex="1" value="@stpage.SEOKeywords">
+                    </div>
+                    <div class="form-group">
+                        <label for="FullName">SEO Description</label>
+                        <input type="text" class="form-control" id="SEODescriptions" name="SEODescriptions" placeholder="Mô tả tìm kiếm" tabindex="1" value="@stpage.SEODescriptions">
+                    </div>
+                    <div class="form-group">
+                        <label for="pwd">Hình Đại Diện:</label>
+
+                        <div class="fileupload-item">
+
+                            <img id="imageDisplay" src="@stpage.Image" />
+                            <button type="button" class="btn btn-danger pull-right btn-sm btn-flat" onclick="deleteImageDetail('imageDisplay','Image')"><i class="fa fa-trash-o" aria-hidden="true"></i></button><br /><br />
+                            <label type="button" class="btn btn-success pull-right btn-sm btn-flat" onclick="selectIMG( '#Image','#imageDisplay')">
+                                <i class="fa fa-camera" aria-hidden="true"></i> Ảnh
+                            </label>
+                            <input type="hidden" name="Image" id="Image" value="@stpage.Image" />
+                        </div><hr style="margin-top:36px" />
+                    </div>
+                    <div class="form-group">
+                        <label for="FullName">Nội Dung</label>
+                        <textarea id="Content">@stpage.Content</textarea>
+                        <input type="hidden" value="" id="htmlContent" name="htmlContent" />
+                    </div>
+
+
+                    <div class="form-group">
+                        <button type="button" class="btn btn-danger pull-right" onclick="saveStaticPage()"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Lưu</button>
+                        <button class="btn btn-dark pull-right" aria-hidden="true" style="margin-right:10px">
+                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hủy
+                        </button>
+                    </div>
+
+
+
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="@Url.Content("~/Scripts/")common.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+
+        tinymce.init(tinymceOption('#Content'));
+
+    });
+
+
+    function saveStaticPage() {
+        var fd = new FormData(document.getElementById("StaticPageForm"));
+        fd.append("htmlContent", encodeURIComponent(tinyMCE.get('Content').getContent()));
+
+        $.ajax({
+            url: "/StaticPage/UpdateStaticPage",
+            type: "POST",
+            data: fd,
+            enctype: 'multipart/form-data',
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,   // tell jQuery not to set contentType
+            success: function (data) {
+                if (data.Code == 1) {
+                    showSuccess("Thành công", "Lưu trang thành công");
+                    window.location = "/Staticpage";
+                }
+                else
+                {
+                    showError('Lỗi', data.message);
+                }
+            }
+        });
+    }
+
+</script>

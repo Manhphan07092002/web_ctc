@@ -1,0 +1,46 @@
+﻿@{
+    Cubetech.Website.DAO.BaseWebDAO dao = new Cubetech.Website.DAO.BaseWebDAO();
+    var lst = dao.Model.Blogs.Where(f => f.IsDelete == false).OrderByDescending(f => f.ID).Take(3).ToList();
+    var lstsp = dao.Model.Blogs.Where(f => f.IsDelete == false).OrderByDescending(f => f.ID).ToList();
+    var pageinfo = dao.Model.PageInfoes.FirstOrDefault();
+
+}
+<div class="container">
+    <div class="top_blog">
+        <h3 class="top_blog_title">Tin Tức</h3>
+
+        <div class="top_blog_content">
+            <div class="row">
+                @foreach (var item in lst)
+                {
+                    if (string.IsNullOrEmpty(item.Image))
+                    {
+                        item.Image = "/Content/Image/noimage.png";
+                    }
+                    <div class="col-sm-4">
+                        <div class="blog-item">
+
+                            <a href="@Url.Content("/" + Cubetech.Website.Controllers.WNewsController.GetBlogUrl(item))">
+
+                                <div class="blog-item_img">
+                                    <img style="height:245px" src="@Cubetech.Website.Controllers.FilePickerController.GetFileNameAndSize(item.Image, 430)" alt="@pageinfo.SEOTitle" title="@pageinfo.SEOTitle" />
+
+                                </div>
+                            </a>
+                            <div class="blog-item_title"><a href="@Url.Content("/" +"blog"+"/"+ Cubetech.Website.Controllers.WNewsController.GetBlogUrl(item))"><h3>@item.Name</h3></a></div>
+                            <div class="blog_item_content">
+                                @item.SEODescriptions
+                            </div>
+                            <div class="blog_view_more">
+                                <a href="@Url.Content("/" + Cubetech.Website.Controllers.WNewsController.GetBlogUrl(item))">
+                                    Xem tiếp >>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</div>

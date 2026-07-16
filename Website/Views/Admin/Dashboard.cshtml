@@ -1,0 +1,1466 @@
+﻿@{
+    ViewBag.Title = "Dashboard - Quản trị hệ thống";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- Modern Dashboard CSS -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --secondary-color: #7c3aed;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --dark-color: #1f2937;
+        --light-bg: #f9fafb;
+        --card-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background-attachment: fixed;
+        color: #374151;
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    /* Glassmorphism background overlay */
+    .dashboard-container::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        z-index: -1;
+    }
+
+    .dashboard-container {
+        padding: 25px 50px;
+        max-width: 100%;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .page-header {
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .page-header h1 {
+        font-size: 32px;
+        background: linear-gradient(135deg, #1f2937, #374151);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+        font-weight: 800;
+        animation: slideInLeft 0.8s ease-out;
+    }
+
+    .page-header p {
+        color: #4b5563;
+        font-size: 16px;
+        font-weight: 500;
+        animation: slideInLeft 1s ease-out;
+    }
+
+    .header-right {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .date-badge {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 12px 24px;
+        border-radius: 16px;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        animation: slideInRight 0.8s ease-out;
+        transition: all 0.3s ease;
+    }
+
+    .date-badge:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+
+    /* Keyframe Animations */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 35px;
+        margin-bottom: 35px;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        padding: 32px;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        background: rgba(255, 255, 255, 0.98);
+    }
+
+    .stat-card:hover::before {
+        opacity: 1;
+    }
+
+    .stat-card.blue::before { background: linear-gradient(90deg, var(--primary-color), #3b82f6); }
+    .stat-card.purple::before { background: linear-gradient(90deg, var(--secondary-color), #8b5cf6); }
+    .stat-card.green::before { background: linear-gradient(90deg, var(--success-color), #059669); }
+    .stat-card.orange::before { background: linear-gradient(90deg, var(--warning-color), #d97706); }
+
+    .stat-card.blue { border-left-color: var(--primary-color); }
+    .stat-card.purple { border-left-color: var(--secondary-color); }
+    .stat-card.green { border-left-color: var(--success-color); }
+    .stat-card.orange { border-left-color: var(--warning-color); }
+
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        transition: all 0.3s ease;
+        animation: pulse 2s infinite;
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: rotate(10deg) scale(1.1);
+        animation: none;
+    }
+
+    .stat-card.blue .stat-icon { background: rgba(37, 99, 235, 0.1); color: var(--primary-color); }
+    .stat-card.purple .stat-icon { background: rgba(124, 58, 237, 0.1); color: var(--secondary-color); }
+    .stat-card.green .stat-icon { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+    .stat-card.orange .stat-icon { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+
+    .stat-value {
+        font-size: 40px;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--dark-color), #4b5563);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover .stat-value {
+        transform: scale(1.05);
+    }
+
+    /* Staggered animation delays */
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .stat-label {
+        color: #6b7280;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .stat-change {
+        font-size: 13px;
+        margin-top: 10px;
+        font-weight: 500;
+    }
+
+    .stat-change.up { color: var(--success-color); }
+    .stat-change.down { color: var(--danger-color); }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1.8fr 1.2fr;
+        gap: 35px;
+        margin-bottom: 35px;
+    }
+
+    .chart-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        padding: 32px;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .chart-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+        background: rgba(255, 255, 255, 0.98);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #f3f4f6;
+    }
+
+    .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+
+    .chart-container {
+        height: 300px;
+        position: relative;
+    }
+
+    .chart-container.small {
+        height: 250px;
+    }
+
+    .activity-list {
+        list-style: none;
+    }
+
+    .activity-item {
+        display: flex;
+        gap: 12px;
+        padding: 16px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 18px;
+    }
+
+    .activity-icon.blue { background: rgba(37, 99, 235, 0.1); color: var(--primary-color); }
+    .activity-icon.green { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+    .activity-icon.orange { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+    .activity-icon.red { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+    .activity-icon.purple { background: rgba(124, 58, 237, 0.1); color: var(--secondary-color); }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        color: var(--dark-color);
+        font-size: 14px;
+        margin-bottom: 4px;
+    }
+
+    .activity-desc {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .activity-time {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-top: 4px;
+    }
+
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 35px;
+    }
+
+    .project-card {
+        background: white;
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .project-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+
+    .project-header {
+        margin-bottom: 16px;
+    }
+
+    .project-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 8px;
+    }
+
+    .project-location {
+        font-size: 13px;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .project-progress {
+        margin: 16px 0;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 13px;
+    }
+
+    .progress-bar-bg {
+        width: 100%;
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        border-radius: 4px;
+        transition: width 0.3s;
+    }
+
+    .project-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #f3f4f6;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .status-badge.active {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+    }
+
+    .status-badge.pending {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-color);
+    }
+
+    .status-badge.completed {
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--primary-color);
+    }
+
+    .status-badge.new {
+        background: rgba(124, 58, 237, 0.1);
+        color: var(--secondary-color);
+    }
+
+    /* Calendar Events */
+    .events-section {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 35px;
+        margin-bottom: 35px;
+    }
+
+    .event-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        transition: transform 0.2s;
+    }
+
+    .event-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .event-card.holiday {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .event-card.merger {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .event-card.anniversary {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .event-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .event-icon {
+        font-size: 32px;
+    }
+
+    .event-date {
+        background: rgba(255,255,255,0.2);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .event-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .event-desc {
+        font-size: 14px;
+        opacity: 0.9;
+        line-height: 1.5;
+    }
+
+    .charts-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 35px;
+        margin-bottom: 35px;
+    }
+
+    .alert-box {
+        background: #d1fae5;
+        border-left: 5px solid var(--success-color);
+        padding: 20px 24px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .alert-box.info {
+        background: #dbeafe;
+        border-left-color: var(--primary-color);
+    }
+
+    .alert-box.success {
+        background: #d1fae5;
+        border-left-color: var(--success-color);
+    }
+
+    .alert-icon {
+        font-size: 28px;
+    }
+
+    .alert-content h4 {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: var(--dark-color);
+    }
+
+    .alert-content p {
+        font-size: 14px;
+        color: #4b5563;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e5e7eb;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-bottom: 30px;
+    }
+
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: -26px;
+        top: 0;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid var(--primary-color);
+    }
+
+    .timeline-dot.green {
+        border-color: var(--success-color);
+    }
+
+    .timeline-dot.orange {
+        border-color: var(--warning-color);
+    }
+
+    .timeline-dot.purple {
+        border-color: var(--secondary-color);
+    }
+
+    .timeline-content {
+        background: #f9fafb;
+        padding: 12px 16px;
+        border-radius: 8px;
+    }
+
+    .timeline-title {
+        font-weight: 600;
+        color: var(--dark-color);
+        font-size: 14px;
+        margin-bottom: 4px;
+    }
+
+    .timeline-desc {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .timeline-time {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-top: 4px;
+    }
+
+    @@media (max-width: 1200px) {
+        .charts-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 1024px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .dashboard-container {
+            padding: 20px;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .projects-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1>🏗️ Dashboard - Công ty Xây lắp Bưu điện Miền Trung</h1>
+            <p>Tổng quan hoạt động và dự án đang triển khai</p>
+        </div>
+        <div class="header-right">
+            <div class="date-badge">
+                📅 Chủ nhật, 26 tháng 10, 2025
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Boxes -->
+    <div class="alert-box success">
+        <div class="alert-icon">🎉</div>
+        <div class="alert-content">
+            <h4>Thông báo quan trọng: Hoàn thành sáp nhập tổ chức</h4>
+            <p>Từ ngày 01/07/2025, công ty đã chính thức sáp nhập chi nhánh tại 7 tỉnh miền Trung (Quảng Trị, Thừa Thiên Huế, Quảng Nam, Quảng Ngãi, Bình Định, Phú Yên, Khánh Hòa), nâng tổng số chi nhánh lên 12 đơn vị với 342 nhân viên</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card blue">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-value">38</div>
+                    <div class="stat-label">Dự án đang thực hiện</div>
+                </div>
+                <div class="stat-icon">📊</div>
+            </div>
+            <div class="stat-change up">↑ 14 dự án mới từ 7 tỉnh</div>
+        </div>
+
+        <div class="stat-card purple">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-value">342</div>
+                    <div class="stat-label">Nhân viên (sau sáp nhập)</div>
+                </div>
+                <div class="stat-icon">👥</div>
+            </div>
+            <div class="stat-change up">↑ 186 người từ 7 tỉnh</div>
+        </div>
+
+        <div class="stat-card green">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Chi nhánh toàn miền Trung</div>
+                </div>
+                <div class="stat-icon">🏢</div>
+            </div>
+            <div class="stat-change up">↑ 7 chi nhánh mới sáp nhập</div>
+        </div>
+
+        <div class="stat-card orange">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-value">425 tỷ</div>
+                    <div class="stat-label">Doanh thu 10 tháng 2025</div>
+                </div>
+                <div class="stat-icon">💰</div>
+            </div>
+            <div class="stat-change up">↑ 35% so với cùng kỳ 2024</div>
+        </div>
+    </div>
+
+    <!-- Events Section -->
+    <div class="events-section">
+        <div class="event-card holiday">
+            <div class="event-header">
+                <div class="event-icon">🎊</div>
+                <div class="event-date">30/04/2025</div>
+            </div>
+            <div class="event-title">Nghỉ lễ 30/4 - 01/5</div>
+            <div class="event-desc">Kỷ niệm 50 năm ngày Giải phóng miền Nam, thống nhất đất nước. Toàn công ty nghỉ 4 ngày từ 30/4 đến 03/5/2025</div>
+        </div>
+
+        <div class="event-card merger">
+            <div class="event-header">
+                <div class="event-icon">🤝</div>
+                <div class="event-date">01/07/2025</div>
+            </div>
+            <div class="event-title">Hoàn thành sáp nhập 7 tỉnh</div>
+            <div class="event-desc">Chính thức sáp nhập chi nhánh tại Quảng Trị, Thừa Thiên Huế, Quảng Nam, Quảng Ngãi, Bình Định, Phú Yên, Khánh Hòa</div>
+        </div>
+
+        <div class="event-card holiday">
+            <div class="event-header">
+                <div class="event-icon">🎆</div>
+                <div class="event-date">02/09/2025</div>
+            </div>
+            <div class="event-title">Quốc khánh 02/9</div>
+            <div class="event-desc">Kỷ niệm Quốc khánh nước Cộng hòa Xã hội Chủ nghĩa Việt Nam. Nghỉ 3 ngày từ 01-03/9/2025</div>
+        </div>
+
+        <div class="event-card anniversary">
+            <div class="event-header">
+                <div class="event-icon">🎉</div>
+                <div class="event-date">15/11/2025</div>
+            </div>
+            <div class="event-title">Kỷ niệm 25 năm thành lập</div>
+            <div class="event-desc">Lễ kỷ niệm 25 năm thành lập công ty và tri ân nhân viên gắn bó lâu năm. Tổ chức tại Hội trường lớn</div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="content-grid">
+        <div class="chart-card">
+            <div class="card-header">
+                <h2 class="card-title">📈 Doanh thu theo tháng (2025)</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="card-header">
+                <h2 class="card-title">🔔 Hoạt động gần đây</h2>
+            </div>
+            <div style="max-height: 300px; overflow-y: auto;">
+                <ul class="activity-list">
+                    <li class="activity-item">
+                        <div class="activity-icon purple">🤝</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Hoàn thành sáp nhập 7 tỉnh</div>
+                            <div class="activity-desc">Tích hợp thành công 186 nhân viên và 14 dự án mới</div>
+                            <div class="activity-time">01/07/2025</div>
+                        </div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon blue">📄</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Hợp đồng mới từ Khánh Hòa</div>
+                            <div class="activity-desc">Dự án hạ tầng 5G Nha Trang - 45 tỷ VNĐ</div>
+                            <div class="activity-time">2 giờ trước</div>
+                        </div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon green">✓</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Dự án hoàn thành Huế</div>
+                            <div class="activity-desc">Trạm BTS Thừa Thiên Huế - Đạt 98% chất lượng</div>
+                            <div class="activity-time">5 giờ trước</div>
+                        </div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon orange">📋</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Đào tạo hội nhập nhân sự mới</div>
+                            <div class="activity-desc">Khóa đào tạo 2 tuần cho 186 nhân viên từ 7 tỉnh</div>
+                            <div class="activity-time">3 ngày trước</div>
+                        </div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon blue">🎓</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Hội thảo công nghệ 5G</div>
+                            <div class="activity-desc">250 kỹ sư tham dự tại 12 chi nhánh</div>
+                            <div class="activity-time">5 ngày trước</div>
+                        </div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon green">🏆</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Giải thưởng Quảng Nam</div>
+                            <div class="activity-desc">Dự án cáp quang đạt giải A toàn ngành Bưu điện</div>
+                            <div class="activity-time">1 tuần trước</div>
+                        </div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon purple">🌐</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Ra mắt website mới</div>
+                            <div class="activity-desc">Cổng thông tin tích hợp 12 chi nhánh</div>
+                            <div class="activity-time">2 tuần trước</div>
+                        </div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon orange">⚠️</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Cập nhật quy trình mới</div>
+                            <div class="activity-desc">Áp dụng chuẩn ISO 9001:2015 cho 12 chi nhánh</div>
+                            <div class="activity-time">3 tuần trước</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="card-header">
+                <h2 class="card-title">🏢 Phân bổ dự án theo 12 chi nhánh</h2>
+            </div>
+            <div class="chart-container small">
+                <canvas id="provinceChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="card-header">
+                <h2 class="card-title">👷 Cơ cấu nhân sự 342 người</h2>
+            </div>
+            <div class="chart-container small">
+                <canvas id="employeeChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 3 -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="card-header">
+                <h2 class="card-title">📊 Tiến độ dự án theo quý 2025</h2>
+            </div>
+            <div class="chart-container small">
+                <canvas id="quarterChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="card-header">
+                <h2 class="card-title">💰 So sánh doanh thu 2024-2025</h2>
+            </div>
+            <div class="chart-container small">
+                <canvas id="compareChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 4 -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="card-header">
+                <h2 class="card-title">📈 Tăng trưởng sau sáp nhập</h2>
+            </div>
+            <div class="chart-container small">
+                <canvas id="growthChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="card-header">
+                <h2 class="card-title">⏰ Timeline sự kiện 2025</h2>
+            </div>
+            <div style="max-height: 250px; overflow-y: auto; padding-right: 10px;">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot purple"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">Kỷ niệm 25 năm thành lập</div>
+                            <div class="timeline-desc">Gala dinner và trao giải thưởng nhân viên xuất sắc</div>
+                            <div class="timeline-time">15/11/2025</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot orange"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">Nghỉ Quốc khánh 2/9</div>
+                            <div class="timeline-desc">Nghỉ 3 ngày từ 01-03/9/2025</div>
+                            <div class="timeline-time">02/09/2025</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot green"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">Hoàn tất sáp nhập 7 tỉnh</div>
+                            <div class="timeline-desc">Tích hợp thành công 186 nhân viên, 14 dự án, 7 chi nhánh</div>
+                            <div class="timeline-time">01/07/2025</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot orange"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">Nghỉ lễ 30/4-01/5</div>
+                            <div class="timeline-desc">Kỷ niệm 50 năm Giải phóng miền Nam - Nghỉ 4 ngày</div>
+                            <div class="timeline-time">30/04/2025</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot green"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">Ký hợp đồng 150 tỷ</div>
+                            <div class="timeline-desc">Dự án hạ tầng 5G toàn miền Trung</div>
+                            <div class="timeline-time">15/03/2025</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot orange"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">Nghỉ Tết Nguyên đán</div>
+                            <div class="timeline-desc">Tết Ất Tỵ 2025 - Nghỉ 9 ngày</div>
+                            <div class="timeline-time">26/01/2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projects Section -->
+    <div class="chart-card" style="margin-bottom: 20px;">
+        <div class="card-header">
+            <h2 class="card-title">🏗️ Dự án tiêu biểu tại 12 chi nhánh</h2>
+        </div>
+        <div class="projects-grid">
+            <!-- Chi nhánh cũ -->
+            <div class="project-card">
+                <div class="project-header">
+                    <div class="project-name">Trạm BTS Đắk Lắk</div>
+                    <div class="project-location">📍 Đắk Lắk</div>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Tiến độ</span>
+                        <span style="font-weight: 600; color: var(--primary-color);">85%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 85%"></div>
+                    </div>
+                </div>
+                <div class="project-meta">
+                    <span>⏰ Hạn: 30/11/2025</span>
+                    <span class="status-badge active">Đang thực hiện</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-header">
+                    <div class="project-name">Hệ thống cáp quang Gia Lai</div>
+                    <div class="project-location">📍 Gia Lai</div>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Tiến độ</span>
+                        <span style="font-weight: 600; color: var(--primary-color);">72%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 72%"></div>
+                    </div>
+                </div>
+                <div class="project-meta">
+                    <span>⏰ Hạn: 15/12/2025</span>
+                    <span class="status-badge active">Đang thực hiện</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-header">
+                    <div class="project-name">Trạm viễn thông Kon Tum</div>
+                    <div class="project-location">📍 Kon Tum</div>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Tiến độ</span>
+                        <span style="font-weight: 600; color: var(--warning-color);">58%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 58%"></div>
+                    </div>
+                </div>
+                <div class="project-meta">
+                    <span>⏰ Hạn: 20/01/2026</span>
+                    <span class="status-badge pending">Chờ vật tư</span>
+                </div>
+            </div>
+
+            <!-- 7 chi nhánh mới sáp nhập từ 01/07/2025 -->
+            <div class="project-card">
+                <div class="project-header">
+                    <div class="project-name">Hạ tầng 5G Nha Trang</div>
+                    <div class="project-location">📍 Khánh Hòa <span class="status-badge new">Mới</span></div>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Tiến độ</span>
+                        <span style="font-weight: 600; color: var(--primary-color);">45%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 45%"></div>
+                    </div>
+                </div>
+                <div class="project-meta">
+                    <span>⏰ Hạn: 28/02/2026</span>
+                    <span class="status-badge active">Đang thực hiện</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-header">
+                    <div class="project-name">Trạm BTS Huế</div>
+                    <div class="project-location">📍 Thừa Thiên Huế <span class="status-badge new">Mới</span></div>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Tiến độ</span>
+                        <span style="font-weight: 600; color: var(--success-color);">100%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="project-meta">
+                    <span>⏰ Hoàn thành: 20/10/2025</span>
+                    <span class="status-badge completed">Đã hoàn thành</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-header">
+                    <div class="project-name">Cáp quang Quảng Nam</div>
+                    <div class="project-location">📍 Quảng Nam <span class="status-badge new">Mới</span></div>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Tiến độ</span>
+                        <span style="font-weight: 600; color: var(--primary-color);">68%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 68%"></div>
+                    </div>
+                </div>
+                <div class="project-meta">
+                    <span>⏰ Hạn: 10/01/2026</span>
+                    <span class="status-badge active">Đang thực hiện</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-header">
+                    <div class="project-name">Hệ thống mạng Quảng Ngãi</div>
+                    <div class="project-location">📍 Quảng Ngãi <span class="status-badge new">Mới</span></div>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Tiến độ</span>
+                        <span style="font-weight: 600; color: var(--primary-color);">82%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 82%"></div>
+                    </div>
+                </div>
+                <div class="project-meta">
+                    <span>⏰ Hạn: 05/12/2025</span>
+                    <span class="status-badge active">Đang thực hiện</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-header">
+                    <div class="project-name">Nâng cấp trạm Bình Định</div>
+                    <div class="project-location">📍 Bình Định <span class="status-badge new">Mới</span></div>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Tiến độ</span>
+                        <span style="font-weight: 600; color: var(--primary-color);">55%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 55%"></div>
+                    </div>
+                </div>
+                <div class="project-meta">
+                    <span>⏰ Hạn: 25/12/2025</span>
+                    <span class="status-badge active">Đang thực hiện</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-header">
+                    <div class="project-name">Trạm viễn thông Phú Yên</div>
+                    <div class="project-location">📍 Phú Yên <span class="status-badge new">Mới</span></div>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Tiến độ</span>
+                        <span style="font-weight: 600; color: var(--warning-color);">38%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 38%"></div>
+                    </div>
+                </div>
+                <div class="project-meta">
+                    <span>⏰ Hạn: 15/02/2026</span>
+                    <span class="status-badge pending">Chuẩn bị vật tư</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-header">
+                    <div class="project-name">Mạng lưới Quảng Trị</div>
+                    <div class="project-location">📍 Quảng Trị <span class="status-badge new">Mới</span></div>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Tiến độ</span>
+                        <span style="font-weight: 600; color: var(--primary-color);">62%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 62%"></div>
+                    </div>
+                </div>
+                <div class="project-meta">
+                    <span>⏰ Hạn: 18/01/2026</span>
+                    <span class="status-badge active">Đang thực hiện</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-header">
+                    <div class="project-name">Mở rộng trạm Pleiku</div>
+                    <div class="project-location">📍 Gia Lai</div>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Tiến độ</span>
+                        <span style="font-weight: 600; color: var(--success-color);">100%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="project-meta">
+                    <span>⏰ Hoàn thành: 15/10/2025</span>
+                    <span class="status-badge completed">Đã hoàn thành</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+    // 1. Revenue Chart - Biểu đồ doanh thu
+    const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+    const gradientRevenue = ctxRevenue.createLinearGradient(0, 0, 0, 300);
+    gradientRevenue.addColorStop(0, 'rgba(37, 99, 235, 0.3)');
+    gradientRevenue.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
+
+    new Chart(ctxRevenue, {
+        type: 'line',
+        data: {
+            labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10'],
+            datasets: [{
+                label: 'Doanh thu (tỷ VNĐ)',
+                data: [28, 32, 35, 38, 42, 45, 52, 48, 55, 50],
+                borderColor: '#2563eb',
+                backgroundColor: gradientRevenue,
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#2563eb',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1f2937',
+                    padding: 12,
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.y + ' tỷ VNĐ';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f3f4f6' },
+                    ticks: {
+                        callback: function(value) {
+                            return value + ' tỷ';
+                        }
+                    }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 2. Province Chart - Phân bổ dự án theo 12 chi nhánh
+    const ctxProvince = document.getElementById('provinceChart').getContext('2d');
+    new Chart(ctxProvince, {
+        type: 'bar',
+        data: {
+            labels: ['Đắk Lắk', 'Gia Lai', 'Kon Tum', 'Khánh Hòa', 'TT Huế', 'Quảng Nam', 'Quảng Ngãi', 'Bình Định', 'Phú Yên', 'Quảng Trị', 'Quảng Bình', 'Hà Tĩnh'],
+            datasets: [{
+                label: 'Số dự án',
+                data: [5, 4, 3, 4, 3, 3, 2, 3, 2, 3, 3, 3],
+                backgroundColor: [
+                    '#2563eb', '#7c3aed', '#10b981', '#f59e0b',
+                    '#ef4444', '#06b6d4', '#8b5cf6', '#ec4899',
+                    '#14b8a6', '#f97316', '#6366f1', '#84cc16'
+                ],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f3f4f6' },
+                    ticks: { stepSize: 1 }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 3. Employee Chart - Cơ cấu nhân sự
+    const ctxEmployee = document.getElementById('employeeChart').getContext('2d');
+    new Chart(ctxEmployee, {
+        type: 'doughnut',
+        data: {
+            labels: ['Kỹ sư', 'Kỹ thuật viên', 'Quản lý', 'Hành chính', 'Tài chính'],
+            datasets: [{
+                data: [142, 98, 45, 32, 25],
+                backgroundColor: ['#2563eb', '#7c3aed', '#10b981', '#f59e0b', '#ef4444'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 15, font: { size: 12 } }
+                }
+            }
+        }
+    });
+
+    // 4. Quarter Chart - Tiến độ theo quý
+    const ctxQuarter = document.getElementById('quarterChart').getContext('2d');
+    new Chart(ctxQuarter, {
+        type: 'bar',
+        data: {
+            labels: ['Q1 2025', 'Q2 2025', 'Q3 2025', 'Q4 2025 (Dự kiến)'],
+            datasets: [{
+                label: 'Dự án hoàn thành',
+                data: [12, 15, 18, 14],
+                backgroundColor: '#10b981',
+                borderRadius: 6
+            }, {
+                label: 'Dự án đang thực hiện',
+                data: [8, 10, 12, 24],
+                backgroundColor: '#f59e0b',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 10, font: { size: 11 } }
+                }
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 5. Compare Chart - So sánh 2024-2025
+    const ctxCompare = document.getElementById('compareChart').getContext('2d');
+    new Chart(ctxCompare, {
+        type: 'line',
+        data: {
+            labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10'],
+            datasets: [{
+                label: '2024',
+                data: [22, 25, 27, 29, 31, 28, 32, 30, 35, 33],
+                borderColor: '#9ca3af',
+                backgroundColor: 'rgba(156, 163, 175, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 2
+            }, {
+                label: '2025',
+                data: [28, 32, 35, 38, 42, 45, 52, 48, 55, 50],
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 10, font: { size: 11 } }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f3f4f6' },
+                    ticks: {
+                        callback: function(value) {
+                            return value + ' tỷ';
+                        }
+                    }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 6. Growth Chart - Tăng trưởng sau sáp nhập
+    const ctxGrowth = document.getElementById('growthChart').getContext('2d');
+    new Chart(ctxGrowth, {
+        type: 'bar',
+        data: {
+            labels: ['Nhân sự', 'Chi nhánh', 'Dự án', 'Doanh thu'],
+            datasets: [{
+                label: 'Trước sáp nhập',
+                data: [156, 5, 24, 315],
+                backgroundColor: '#9ca3af',
+                borderRadius: 6
+            }, {
+                label: 'Sau sáp nhập (01/07/2025)',
+                data: [342, 12, 38, 425],
+                backgroundColor: '#10b981',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 10, font: { size: 11 } }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            var label = context.dataset.label || '';
+                            if (context.datasetIndex === 3) {
+                                return label + ': ' + context.parsed.y + ' tỷ VNĐ';
+                            }
+                            return label + ': ' + context.parsed.y;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+</script>

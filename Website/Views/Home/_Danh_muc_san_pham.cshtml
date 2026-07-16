@@ -1,0 +1,509 @@
+@using System.Data.SqlClient
+@using System.Configuration
+@using System.Collections.Generic
+@using System.Data.Entity.Core.EntityClient
+
+@{
+    Layout = null;
+
+    var lstCate = new List<dynamic>();
+    try
+    {
+        string efConnectionString = ConfigurationManager.ConnectionStrings["CubeTechWebEntities"].ConnectionString;
+        var builder = new EntityConnectionStringBuilder(efConnectionString);
+        string sqlProviderConnectionString = builder.ProviderConnectionString;
+        // Optimized: Only select needed columns and limit results
+        string sqlQuery = "SELECT TOP 20 ID, Name, Image FROM [dbo].[Categories] WHERE ParentID = 9 AND IsActive = 1 ORDER BY [Rank]";
+
+        if (!string.IsNullOrEmpty(sqlProviderConnectionString))
+        {
+            using (SqlConnection connection = new SqlConnection(sqlProviderConnectionString))
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand(sqlQuery, connection))
+                {
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lstCate.Add(new
+                            {
+                                ID = (int)reader["ID"],
+                                Name = reader["Name"].ToString(),
+                                Image = reader["Image"] != DBNull.Value ? reader["Image"].ToString() : "/images/default-product.png"
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    }
+    catch (Exception ex) { }
+}
+
+<!-- Preconnect to Google Fonts for faster loading -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<style>
+    /* Font will be loaded asynchronously via link tag above */
+    
+    :root {
+        --heading-color: #0f172a;
+        --text-color: #475569;
+        --text-light: #64748b;
+        --bg-section: #fafafa;
+        --bg-card: #ffffff;
+        --primary-color: #6366f1;
+        --primary-light: #a5b4fc;
+        --accent-color: #f59e0b;
+        --success-color: #10b981;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+        --shadow-normal: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --shadow-hover: 0 12px 40px rgba(99, 102, 241, 0.15);
+        --shadow-active: 0 20px 60px rgba(99, 102, 241, 0.25);
+        --border-radius: 24px;
+        --border-radius-sm: 16px;
+        --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+
+    .product-category-section {
+        font-family: var(--font-main);
+        background: var(--gradient-bg);
+        padding: 80px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .product-category-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+    }
+
+    .section-container {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 40px 24px;
+        
+    }
+
+    .section-title {
+        font-size: clamp(20px, 3vw, 26px);
+        text-align: center;
+        margin-bottom: 60px;
+        color: #2563eb;
+        font-weight: 900;
+        letter-spacing: -0.025em;
+        position: relative;
+        text-transform: uppercase;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -16px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+    }
+
+    .category-lane-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 20px 0;
+        margin: 0 -24px;
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    .category-lane {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 32px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        padding-bottom: 20px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-light) transparent;
+    }
+
+    .category-lane::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .category-lane::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+    }
+
+    .category-lane::-webkit-scrollbar-thumb {
+        background: var(--primary-light);
+        border-radius: 3px;
+    }
+
+    .category-lane::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-color);
+    }
+
+
+    .category-card {
+        flex: 0 0 auto;
+        width: 320px;
+        background: var(--bg-card);
+        border-radius: var(--border-radius);
+        text-align: center;
+        padding: 40px 24px;
+        box-shadow: var(--shadow-normal);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        color: inherit;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .category-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--gradient-primary);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .category-card:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: var(--shadow-hover);
+        text-decoration: none;
+        border-color: var(--primary-color);
+    }
+
+    .category-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .category-card:hover .card-name {
+        color: var(--primary-color);
+    }
+
+    .category-card:hover .card-icon-wrapper {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    }
+
+    .category-card.active {
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-active);
+        transform: translateY(-8px) scale(1.05);
+        z-index: 2;
+    }
+
+    .category-card.active::before {
+        transform: scaleX(1);
+    }
+
+    .card-icon-wrapper {
+        width: 220px;
+        height: 220px;
+        margin: 0 auto 24px;
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        border-radius: var(--border-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .card-icon-wrapper::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+        border-radius: var(--border-radius-sm);
+    }
+
+    .card-icon-wrapper img {
+        width: 90%;
+        height: 90%;
+        object-fit: contain;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+    }
+
+    .category-card:hover .card-icon-wrapper img {
+        transform: scale(1.1) rotate(2deg);
+        filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
+    }
+
+    .no-image-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 90%;
+        height: 90%;
+        color: var(--text-light);
+        font-size: 14px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .no-image-icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 8px;
+        opacity: 0.6;
+    }
+
+    .card-name {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-top: 8px;
+        line-height: 1.3;
+        transition: color 0.3s ease;
+    }
+
+    .no-categories-message {
+        text-align: center;
+        color: var(--text-light);
+        font-size: 18px;
+        font-weight: 500;
+        padding: 60px 20px;
+        background: var(--bg-card);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-sm);
+        margin: 0 auto;
+        max-width: 400px;
+    }
+
+    @@media screen and (max-width: 1024px) {
+        .category-card {
+            width: 280px;
+            padding: 32px 20px;
+        }
+
+        .card-icon-wrapper {
+            width: 180px;
+            height: 180px;
+        }
+    }
+
+    @@media screen and (max-width: 768px) {
+        .product-category-section {
+            padding: 60px 0;
+        }
+
+        .section-container {
+            padding: 0 16px;
+        }
+
+        .category-lane-container {
+            margin: 0 -16px;
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .category-card {
+            width: 240px;
+            padding: 24px 16px;
+        }
+
+        .card-icon-wrapper {
+            width: 160px;
+            height: 160px;
+        }
+
+        .card-name {
+            font-size: 18px;
+        }
+
+        .section-title {
+            margin-bottom: 40px;
+        }
+    }
+
+    @@media screen and (max-width: 480px) {
+        .category-lane {
+            gap: 20px;
+        }
+
+        .category-card {
+            width: 200px;
+            padding: 20px 12px;
+        }
+
+        .card-icon-wrapper {
+            width: 140px;
+            height: 140px;
+        }
+    }
+
+    /* Loading animation for images */
+    @@keyframes shimmer {
+        0% { background-position: -200px 0; }
+        100% { background-position: calc(200px + 100%) 0; }
+    }
+
+    .card-icon-wrapper.loading {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200px 100%;
+        animation: shimmer 1.5s infinite;
+    }
+</style>
+
+<div class="product-category-section">
+    <div class="section-container">
+        <h3 class="section-title">DANH MỤC SẢN PHẨM</h3>
+        <div class="category-lane-container">
+            <div class="category-lane" id="category-lane">
+                @if (lstCate.Any())
+                {
+                    int index = 0;
+                    foreach (var category in lstCate)
+                    {
+                        <a href="/san-pham?categoryId=@category.ID" class="category-card">
+                            <div class="card-icon-wrapper">
+                                @if (!string.IsNullOrEmpty(category.Image) && category.Image != "/images/default-product.png")
+                                {
+                                    var categoryImageUrl = category.Image.StartsWith("~") 
+                                        ? Url.Content(category.Image)
+                                        : (category.Image.StartsWith("/") 
+                                            ? Url.Content("~" + category.Image)
+                                            : (category.Image.StartsWith("Content/") || category.Image.StartsWith("Image/")
+                                                ? Url.Content("~/" + category.Image)
+                                                : Url.Content("~/Image/" + category.Image)));
+                                    <img src="@categoryImageUrl" 
+                                         alt="@category.Name" 
+                                         loading="@(index < 5 ? "eager" : "lazy")"
+                                         decoding="async"
+                                         width="200"
+                                         height="200"
+                                         data-fallback="@Url.Content("~/Content/Image/noimage.png")"
+                                         onload="this.style.opacity='1';" 
+                                         onerror="if(this.src!==this.getAttribute('data-fallback')){this.src=this.getAttribute('data-fallback');}else{showNoImagePlaceholder(this);}" 
+                                         style="opacity: 0; transition: opacity 0.3s ease;" />
+                                    <div class="no-image-placeholder" style="display: none;">
+                                        <svg class="no-image-icon" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                                        </svg>
+                                        <span>No Images</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <img src="@Url.Content("~/Content/Image/noimage.png")" 
+                                         alt="@category.Name" 
+                                         loading="eager"
+                                         width="200"
+                                         height="200"
+                                         style="opacity: 1;" />
+                                }
+                            </div>
+                            <div class="card-name">@category.Name</div>
+                        </a>
+                        index++;
+                    }
+                }
+                else
+                {
+                    <div class="no-categories-message">
+                        <svg width="48" height="48" fill="currentColor" viewBox="0 0 24 24" style="margin-bottom: 16px; opacity: 0.6;">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
+                        <div>Không tìm thấy danh mục sản phẩm nào.</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showNoImagePlaceholder(img) {
+        img.style.display = 'none';
+        const placeholder = img.nextElementSibling;
+        if (placeholder && placeholder.classList.contains('no-image-placeholder')) {
+            placeholder.style.display = 'flex';
+        }
+    }
+
+    // Optimized: Use requestAnimationFrame for smoother scrolling
+    (function() {
+        'use strict';
+        
+        function initCarousel() {
+            const lane = document.getElementById('category-lane');
+            if (!lane) return;
+
+            let scrollInterval;
+            let isPaused = false;
+            const scrollAmount = 352; // 320px card + 32px gap
+            const scrollSpeed = 3000; // 3 seconds
+
+            function startScrolling() {
+                if (isPaused) return;
+                clearInterval(scrollInterval);
+                scrollInterval = setInterval(() => {
+                    if (isPaused) return;
+                    
+                    // Use requestAnimationFrame for smoother scrolling
+                    requestAnimationFrame(() => {
+                        if (lane.scrollLeft + lane.clientWidth >= lane.scrollWidth) {
+                            lane.scrollTo({ left: 0, behavior: 'smooth' });
+                        } else {
+                            lane.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                        }
+                    });
+                }, scrollSpeed);
+            }
+
+            function stopScrolling() {
+                isPaused = true;
+                clearInterval(scrollInterval);
+            }
+
+            function resumeScrolling() {
+                isPaused = false;
+                startScrolling();
+            }
+
+            // Pause scrolling on hover - optimized with passive listeners
+            lane.addEventListener('mouseenter', stopScrolling, { passive: true });
+            lane.addEventListener('mouseleave', resumeScrolling, { passive: true });
+            
+            // Pause when tab is not visible
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    stopScrolling();
+                } else {
+                    resumeScrolling();
+                }
+            }, { passive: true });
+
+            // Start auto-scrolling
+            startScrolling();
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initCarousel);
+        } else {
+            initCarousel();
+        }
+    })();
+</script>

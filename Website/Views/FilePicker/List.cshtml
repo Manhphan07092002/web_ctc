@@ -1,0 +1,448 @@
+@using System.IO
+@{
+    Layout = null;
+
+        string path = Request["path"] ?? "";
+        string text = Request["text"] ?? "";
+        string rootPath = "/Image";
+        
+        // Check for errors from controller
+        if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">
+                <h4>❌ Controller Error</h4>
+                <p>@ViewBag.Error</p>
+                @if (ViewBag.ErrorDetails != null)
+                {
+                    <details>
+                        <summary>Technical Details</summary>
+                        <pre>@ViewBag.ErrorDetails</pre>
+                    </details>
+                }
+            </div>
+            return;
+        }
+    
+    // Sanitize path input
+    path = path.Trim().Replace("\\", "/").Trim('/');
+    if (path.Contains(".."))
+    {
+        path = ""; // Security: prevent directory traversal
+    }
+    
+    string fullPath = rootPath + (string.IsNullOrEmpty(path) ? "" : "/" + path);
+    string physicalPath = Server.MapPath(fullPath);
+    
+    // Security check: ensure path is within allowed directory
+    string rootPhysical = Server.MapPath(rootPath).ToLower();
+    if (!physicalPath.ToLower().StartsWith(rootPhysical))
+    {
+        path = "";
+        fullPath = rootPath;
+        physicalPath = Server.MapPath(rootPath);
+    }
+    
+    // Ensure root directory exists
+    try
+    {
+        if (!Directory.Exists(physicalPath))
+        {
+            Directory.CreateDirectory(physicalPath);
+        }
+    }
+    catch (Exception ex)
+    {
+        // If can't create directory, use a safe fallback
+        physicalPath = Server.MapPath("~/Content/uploads/");
+        if (!Directory.Exists(physicalPath))
+        {
+            Directory.CreateDirectory(physicalPath);
+        }
+    }
+    
+    var pathArray = string.IsNullOrEmpty(path) ? new string[0] : path.Split('/');
+    string breadcrumbPath = "";
+    
+    // Get current user for security
+    string currentUser = "";
+    try
+    {
+        currentUser = Cubetech.Website.Common.Utility.GetLoginUser() ?? "";
+    }
+    catch
+    {
+        currentUser = "anonymous"; // Safe fallback if method doesn't exist
+    }
+}
+
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a href="#" onclick="loadPicker('')" title="Về thư mục gốc">
+            <i class="fa fa-home"></i> Home
+        </a>
+    </li>
+    @foreach (var item in pathArray)
+    {
+        if (string.IsNullOrEmpty(item))
+        {
+            continue;
+        }
+        breadcrumbPath += "/" + item;
+        if (pathArray.Last().Equals(item))
+        {
+            <li class="breadcrumb-item active">
+                <i class="fa fa-folder-open"></i> @item
+            </li>
+        }
+        else
+        {
+            <li class="breadcrumb-item">
+                <a href="#" onclick="loadPicker('@breadcrumbPath')" title="Chuyển đến @item">
+                    <i class="fa fa-folder"></i> @item
+                </a>
+            </li>
+        }
+    }
+    @if (!string.IsNullOrEmpty(path))
+    {
+        <li class="breadcrumb-item">
+            <a href="#" onclick="goBack()" title="Quay lại thư mục cha" class="btn btn-sm btn-outline-secondary">
+                <i class="fa fa-arrow-left"></i> Quay lại
+            </a>
+        </li>
+    }
+</ol>
+
+<script>
+    path = '@path';
+</script>
+
+<div class="row">
+    @{
+        DirectoryInfo[] directories = null;
+        try
+        {
+            var directoryInfo = new DirectoryInfo(physicalPath);
+            if (directoryInfo.Exists)
+            {
+                if (!string.IsNullOrEmpty(text))
+                {
+                    directories = directoryInfo.GetDirectories("*" + text + "*", SearchOption.TopDirectoryOnly);
+                }
+                else
+                {
+                    directories = directoryInfo.GetDirectories();
+                }
+            }
+            else
+            {
+                directories = new DirectoryInfo[0];
+            }
+        }
+        catch (Exception ex)
+        {
+            directories = new DirectoryInfo[0];
+            // Log error if needed
+        }
+    }
+    @if (directories != null)
+    {
+        foreach (var folder in directories.OrderByDescending(d => d.LastWriteTime))
+        {
+            try
+            {
+                var folderPath = folder.FullName.ToLower().Replace(rootPhysical, "").Replace("\\", "/").TrimStart('/');
+                var displayName = folder.Name;
+                var folderTimeAgo = GetTimeAgo(folder.LastWriteTime);
+                
+                // Security: validate folder name
+                if (displayName.Length > 100 || displayName.Contains(".."))
+                {
+                    continue;
+                }
+                
+                <div class="col-lg-2 col-sm-3 col-md-3 col-xs-6" style="padding: 10px;">
+                    <div class="file-item folder-item" style="text-align: center; position: relative; border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: #f9f9f9; transition: all 0.3s;">
+                        <div ondblclick="loadPicker('@folderPath')" style="cursor: pointer;">
+                            <i class="fa fa-folder" style="font-size: 48px; color: #ffc107; margin-bottom: 10px;"></i>
+                            <p style="margin-bottom: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;" 
+                               title="@displayName">@displayName</p>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger" 
+                                style="position: absolute; top: 5px; right: 5px; z-index: 10; opacity: 0.8;" 
+                                onclick="removeFolder('@folderPath')" 
+                                title="Xóa thư mục @displayName">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+            catch (Exception ex)
+            {
+                // Skip problematic folders
+                continue;
+            }
+        }
+    }
+</div>
+
+<div class="row">
+    @{
+        var validFiles = new List<FileInfo>();
+        FileInfo[] allFiles = null;
+        
+        try
+        {
+            var directoryInfo = new DirectoryInfo(physicalPath);
+            if (directoryInfo.Exists)
+            {
+                if (!string.IsNullOrEmpty(text))
+                {
+                    try
+                    {
+                        // Try using utility search if available
+                        allFiles = Cubetech.Website.Common.Utility.SearchFile(directoryInfo, text);
+                    }
+                    catch
+                    {
+                        // Fallback to basic search
+                        allFiles = directoryInfo.GetFiles("*" + text + "*", SearchOption.TopDirectoryOnly);
+                    }
+                }
+                else
+                {
+                    allFiles = directoryInfo.GetFiles();
+                }
+                
+                // Filter valid files
+                foreach (var file in allFiles)
+                {
+                    try
+                    {
+                        // Skip thumbnail/size files and validate
+                        if (!IsSizeFile(file.Name) && 
+                            file.Name.Length <= 255 && 
+                            !file.Name.Contains(".."))
+                        {
+                            validFiles.Add(file);
+                        }
+                    }
+                    catch
+                    {
+                        continue; // Skip problematic files
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            validFiles = new List<FileInfo>();
+        }
+    }
+    
+    @if (validFiles.Count == 0 && directories != null && directories.Length == 0)
+    {
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="alert alert-info text-center" style="margin: 20px;">
+                <i class="fa fa-folder-open" style="font-size: 48px; color: #17a2b8; margin-bottom: 15px;"></i>
+                <h5>Thư mục trống</h5>
+                <p>Không có file hoặc thư mục nào trong thư mục này.</p>
+            </div>
+        </div>
+    }
+    
+    @foreach (var file in validFiles.OrderByDescending(f => f.LastWriteTime))
+    {
+        try
+        {
+            var relativePath = file.FullName.ToLower().Replace(rootPhysical, "").Replace("\\", "/").TrimStart('/');
+            var webPath = rootPath + "/" + relativePath;
+            var fileName = file.Name;
+            var fileExtension = Path.GetExtension(fileName).ToLower();
+            var isImage = IsImageFile(fileName);
+            var fileSize = file.Length;
+            var fileSizeText = FormatFileSize(fileSize);
+            var timeAgo = GetTimeAgo(file.LastWriteTime);
+            
+            <div class="col-lg-2 col-sm-3 col-md-4 col-xs-6" style="padding: 10px;">
+                <div class="file-item" style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: white; position: relative; transition: all 0.3s; height: 200px;">
+                    
+                    <!-- File Preview -->
+                    <div style="height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; background: #f8f9fa; border-radius: 4px;">
+                        @if (isImage)
+                        {
+                            <img src="@webPath" 
+                                 style="max-height: 100%; max-width: 100%; object-fit: contain;" 
+                                 alt="@fileName"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                            <div style="display: none; text-align: center;">
+                                <i class="fa fa-file-image-o" style="font-size: 48px; color: #6c757d;"></i>
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="text-align: center;">
+                                @if (fileExtension == ".pdf")
+                                {
+                                    <i class="fa fa-file-pdf-o" style="font-size: 48px; color: #dc3545;"></i>
+                                }
+                                else if (fileExtension == ".doc" || fileExtension == ".docx")
+                                {
+                                    <i class="fa fa-file-word-o" style="font-size: 48px; color: #007bff;"></i>
+                                }
+                                else if (fileExtension == ".xls" || fileExtension == ".xlsx")
+                                {
+                                    <i class="fa fa-file-excel-o" style="font-size: 48px; color: #28a745;"></i>
+                                }
+                                else if (fileExtension == ".ppt" || fileExtension == ".pptx")
+                                {
+                                    <i class="fa fa-file-powerpoint-o" style="font-size: 48px; color: #fd7e14;"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa fa-file-o" style="font-size: 48px; color: #6c757d;"></i>
+                                }
+                            </div>
+                        }
+                    </div>
+                    
+                    <!-- File Info -->
+                    <div style="text-align: center;">
+                        <p style="margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; font-size: 12px;" 
+                           title="@fileName">@GetDisplayName(fileName)</p>
+                        <small style="color: #6c757d; display: block;">@fileSizeText</small>
+                        <small style="color: #28a745; display: block; font-weight: bold; font-size: 10px;">@timeAgo</small>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div style="position: absolute; bottom: 10px; left: 10px; right: 10px;">
+                        <button type="button" class="btn btn-success btn-sm btn-block" 
+                                onclick="onFileSelect('@webPath')" 
+                                title="Chọn file @fileName">
+                            <i class="fa fa-check"></i> Chọn
+                        </button>
+                    </div>
+                    
+                    <!-- Delete Button -->
+                    <button type="button" class="btn btn-sm btn-danger" 
+                            style="position: absolute; top: 5px; right: 5px; z-index: 10; opacity: 0.8;" 
+                            onclick="removeFile('@webPath')" 
+                            title="Xóa file @fileName">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        }
+        catch (Exception ex)
+        {
+            continue; // Skip problematic files
+        }
+    }
+</div>
+
+@functions {
+    public static string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return string.Format("{0:0.##} {1}", len, sizes[order]);
+    }
+    
+    public static bool IsImageFile(string fileName)
+    {
+        string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" };
+        string extension = Path.GetExtension(fileName).ToLower();
+        return imageExtensions.Contains(extension);
+    }
+    
+    public static bool IsSizeFile(string fileName)
+    {
+        // Check if file is a thumbnail or size variant (to exclude from listing)
+        return fileName.Contains("_thumb") || fileName.Contains("_small") || fileName.Contains("_medium");
+    }
+    
+    public static string GetTimeAgo(DateTime dateTime)
+    {
+        var timeSpan = DateTime.Now - dateTime;
+        
+        if (timeSpan.TotalMinutes < 1) return "Vừa xong";
+        if (timeSpan.TotalMinutes < 60) return Math.Floor(timeSpan.TotalMinutes) + " phút trước";
+        if (timeSpan.TotalHours < 24) return Math.Floor(timeSpan.TotalHours) + " giờ trước";
+        if (timeSpan.TotalDays < 7) return Math.Floor(timeSpan.TotalDays) + " ngày trước";
+        if (timeSpan.TotalDays < 30) return Math.Floor(timeSpan.TotalDays / 7) + " tuần trước";
+        if (timeSpan.TotalDays < 365) return Math.Floor(timeSpan.TotalDays / 30) + " tháng trước";
+        return Math.Floor(timeSpan.TotalDays / 365) + " năm trước";
+    }
+    
+    public static string GetDisplayName(string fileName)
+    {
+        if (string.IsNullOrEmpty(fileName)) return "Unknown";
+        
+        // Remove long hash-like patterns (32+ characters of numbers/letters)
+        var nameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
+        var extension = Path.GetExtension(fileName);
+        
+        // If filename is very long hash-like string, create a prettier name
+        if (nameWithoutExt.Length > 30 && IsHashLike(nameWithoutExt))
+        {
+            var fileType = GetFileTypeFromExtension(extension);
+            var timestamp = DateTime.Now.ToString("HH:mm");
+            return fileType + "_" + timestamp + extension;
+        }
+        
+        // If filename is too long, truncate it nicely
+        if (nameWithoutExt.Length > 20)
+        {
+            return nameWithoutExt.Substring(0, 15) + "..." + extension;
+        }
+        
+        return fileName;
+    }
+    
+    private static bool IsHashLike(string text)
+    {
+        // Check if string looks like a hash (mostly numbers and letters, no spaces)
+        if (text.Length < 20) return false;
+        
+        int alphanumericCount = 0;
+        foreach (char c in text)
+        {
+            if (char.IsLetterOrDigit(c)) alphanumericCount++;
+        }
+        
+        // If more than 80% is alphanumeric, consider it hash-like
+        return (double)alphanumericCount / text.Length > 0.8;
+    }
+    
+    private static string GetFileTypeFromExtension(string extension)
+    {
+        switch (extension.ToLower())
+        {
+            case ".jpg":
+            case ".jpeg":
+            case ".png":
+            case ".gif":
+            case ".webp":
+                return "Hình ảnh";
+            case ".pdf":
+                return "PDF";
+            case ".doc":
+            case ".docx":
+                return "Word";
+            case ".xls":
+            case ".xlsx":
+                return "Excel";
+            case ".ppt":
+            case ".pptx":
+                return "PowerPoint";
+            default:
+                return "File";
+        }
+    }
+}

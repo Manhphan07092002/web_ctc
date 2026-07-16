@@ -1,0 +1,73 @@
+﻿
+@{
+    Layout = null;
+
+    var slide = ViewData["obj"] as Cubetech.Website.Models.Slide;
+}
+<div id="modalSlide" class="modal" data-easein="bounceIn" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="glyphicon glyphicon-remove"></i></button>
+                <h4 class="modal-title"><i class="glyphicon glyphicon-edit"></i></h4>
+            </div>
+            <form  id="SlideForm">
+                <div class="modal-body">
+                    <input type="hidden" name="mode" id="mode" value="@ViewData["Mode"]" />
+                    <input type="hidden" name="ID" id="ID" value="@slide.ID" />
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Mô tả slide</label>
+                        <input type="text" class="form-control" id="Name" name="Name" placeholder="Mô tả slide" autofocus value="@slide.Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Url</label>
+                        <input type="text" class="form-control" id="Url" name="Url" placeholder="Url" autofocus value="@slide.Url">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Loại</label>
+                        @{
+                            var lstType = new List<object>();
+                            lstType.Add(new { ID = "", Name = "--Chọn Loại--" });
+                            lstType.Add(new { ID = "SLIDE", Name = "SLIDE" });
+                            lstType.Add(new { ID = "BANNER", Name = "BANNER" });
+                            lstType.Add(new { ID = "SLIDELIST", Name = "SLIDELIST" });
+                            lstType.Add(new { ID = "BANNERLIST", Name = "BANNERLIST" });
+                        }
+                        @Html.DropDownList("Type", new SelectList(lstType, "ID", "Name",slide.Type), new { @class = "form-control" })
+                    </div>
+                    <div class="form-group" id="ViDeoDisplay" style="display:none">
+                        <label for="PhoneNumber">Video</label>
+
+                        <input type="checkbox" id="cbkIsVideo" class="flat" @if (slide.IsVideo) { ViewContext.Writer.Write("checked"); } />
+                        <input type="hidden" name="IsVideo" id="IsVideo" value="@slide.IsVideo.ToString()" />
+
+                    </div>
+                    <div class="form-group">
+                        <label for="pwd">Hình Ảnh:</label>
+
+                        <div class="fileupload-item">
+
+                            <img id="imageDisplay" style="max-width:100%;" src="@slide.Image" />
+                            <button type="button" class="btn btn-dark pull-right btn-sm btn-flat" onclick="deleteImageDetail('imageDisplay', 'Image')"><i class="fa fa-trash-o" aria-hidden="true"></i></button><br /><br />
+                            <label class="btn btn-success pull-right btn-sm btn-flat" onclick="selectIMG('#Image', '#imageDisplay')">
+                                <i class="fa fa-camera" aria-hidden="true"></i> Ảnh
+                            </label>
+                            <input type="hidden" name="Image" id="Image" value="@slide.Image" />
+                        </div><hr style="margin-top:36px" />
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="modal-footer" style="margin-top:10px">
+                        <button type="button" class="btn btn-dark" data-dismiss="modal" aria-hidden="true">
+                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hủy
+                        </button>
+                        <button type="button" onclick="fnSaveSlide()" class="btn btn-danger"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Lưu</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    setIcheck("#cbkIsVideo", "[name=IsVideo]", "true", "false", function (e) { });
+</script>

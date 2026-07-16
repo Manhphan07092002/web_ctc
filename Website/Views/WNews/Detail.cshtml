@@ -1,0 +1,56 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Cubetech.Website.DAO.WNewBlogDAO dao = new Cubetech.Website.DAO.WNewBlogDAO();
+
+    var blogitem = ViewData["Blog"] as Cubetech.Website.Models.Blog;
+    ViewBag.Title = blogitem.Name;
+}
+<div class="clearfix" style="clear:both;"></div>
+<div class="blog_container">
+    <div class="container">
+        <div class="col-sm-9">
+            <div class="blog-title">
+                <a style="color: #949599;" href="/">Trang chủ </a>
+                @{
+                    var lstParrentCate = dao.GetListParentCategory(blogitem.BlogCategoryID ?? 0);
+                }
+                @if (lstParrentCate.Count > 0)
+                {
+
+                    foreach (var item in lstParrentCate)
+                    {
+                        <span class="fa fa-caret-right" style="color: #949599; padding: 0px 5px"></span>
+                        <a href="@Url.Content("/" +Cubetech.Website.Controllers.WNewsController.GetBlogCategoryUrl(item))" @if (blogitem.BlogCategoryID == item.ID) { ViewContext.Writer.Write("class='active_cate'"); }>@item.BlogCategoryName</a>
+                    }
+                }
+
+
+
+            </div>
+
+
+            <div class="blog_name">
+
+                @blogitem.Name
+            </div>
+            <div class="blog_time">
+                <span class="blog_time_content">
+                    @blogitem.CreateDate.ToString("HH:mm tt")
+
+                </span>
+                <span class="blog_date_content">
+                    ngày @blogitem.CreateDate.ToString("dd") tháng @blogitem.CreateDate.ToString("MM") năm @blogitem.CreateDate.ToString("yyyy")
+                </span>
+
+            </div>
+            <div class="blog_content">
+                @Html.Raw(blogitem.Content)
+            </div>
+        </div>
+        <div class="col-sm-3">
+            @Html.Partial("~/Views/WNews/_BlogLeft.cshtml")
+        </div>
+    </div>
+
+</div>

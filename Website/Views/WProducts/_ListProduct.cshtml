@@ -1,0 +1,1767 @@
+﻿@* Liên kết Font Awesome (bắt buộc để hiển thị icon) *@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+@{
+    //====================================================================================
+    // KHỐI CODE C# RAZOR - ĐÃ ĐƯỢC TỐI GIẢN ĐỂ BỎ PHÂN TRANG
+    //====================================================================================
+    // LƯU Ý QUAN TRỌNG:
+    // Biến `lstProducts` này phải chứa TẤT CẢ sản phẩm được tải từ Controller.
+    // Bạn cần phải chỉnh sửa Controller để không còn phân trang nữa.
+    var lstProducts = ViewData["LstProducts"] as List<Cubetech.Website.Models.Product>;
+
+    // Các phần khác giữ nguyên
+    var lstCriteo = lstProducts != null ? lstProducts.Take(3) : new List<Cubetech.Website.Models.Product>();
+    string lstIDs = string.Join(",", lstCriteo.Select(x => "'" + x.ID + "'").ToList());
+    var totalProduct = int.Parse(ViewData["TotalProducts"].ToString());
+    Cubetech.Website.DAO.CategoryDAO catedao = new Cubetech.Website.DAO.CategoryDAO();
+    var lstCate = catedao.GetAll();
+}
+
+<div class="product-page-v2">
+    <div class="row">
+        @* =============================================================== *@
+        @* KHỐI DANH MỤC SẢN PHẨM (BÊN TRÁI) - GIỮ NGUYÊN *@
+        @* =============================================================== *@
+        <div class="col-lg-3 category-sidebar-v2">
+            <div class="category-header-v2">
+                <h2>
+                    <i class="fas fa-stream"></i>
+                    Danh mục
+                </h2>
+            </div>
+            <div class="category-body-v2">
+                @if (lstCate != null && lstCate.Any())
+                {
+                    <a href="?" class="category-link-v2 all-items">
+                        <i class="fas fa-th-large"></i>
+                        <span>Tất cả sản phẩm</span>
+                    </a>
+                    foreach (var category in lstCate)
+                    {
+                        if (category.ParentID == 9)
+                        {
+                            // NƠI TÙY CHỈNH ICON CHO TỪNG DANH MỤC
+                            string iconClass = "fa-tags";
+                            if (category.ID == 10) { iconClass = "fa-building"; }
+                            if (category.Name.ToLower().Contains("dự án")) { iconClass = "fa-city"; }
+                            if (category.Name.ToLower().Contains("nội thất")) { iconClass = "fa-couch"; }
+                            if (category.Name.ToLower().Contains("công nghệ")) { iconClass = "fa-laptop-code"; }
+
+                            <a href="?categoryId=@category.ID" class="category-link-v2">
+                                <i class="fas @iconClass"></i>
+                                <span>@category.Name</span>
+                            </a>
+                        }
+                    }
+                }
+            </div>
+            
+            @* =============================================================== *@
+            @* KHỐI TÌM KIẾM VÀ LỌC SẢN PHẨM *@
+            @* =============================================================== *@
+            <div class="filter-section-v2">
+                <div class="filter-header-v2">
+                    <h3>
+                        <i class="fas fa-search"></i>
+                        Tìm kiếm & Lọc
+                    </h3>
+                </div>
+                <div class="filter-body-v2">
+                    @* Tìm kiếm theo tên *@
+                    <div class="search-box-v2">
+                        <label for="product-search">Tìm sản phẩm:</label>
+                        <div class="search-input-wrapper">
+                            <input type="text" id="product-search" placeholder="Nhập tên sản phẩm..." class="form-control">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                    </div>
+                    
+                    @* Lọc theo giá *@
+                    <div class="price-filter-v2">
+                        <label>Khoảng giá:</label>
+                        <div class="price-range-container">
+                            <div class="price-inputs">
+                                <input type="number" id="min-price" placeholder="Từ" class="form-control price-input">
+                                <span class="price-separator">-</span>
+                                <input type="number" id="max-price" placeholder="Đến" class="form-control price-input">
+                            </div>
+                            <div class="price-range-slider">
+                                <input type="range" id="price-range-min" min="0" max="50000000" value="0" class="range-slider">
+                                <input type="range" id="price-range-max" min="0" max="50000000" value="50000000" class="range-slider">
+                            </div>
+                            <div class="price-labels">
+                                <span>0đ</span>
+                                <span>50,000,000đ</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    @* Nút reset filter *@
+                    <div class="filter-actions">
+                        <button type="button" id="reset-filters" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-undo"></i> Xóa bộ lọc
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* =============================================================== *@
+        @* KHỐI HIỂN THỊ SẢN PHẨM (BÊN PHẢI) - GIỮ NGUYÊN *@
+        @* =============================================================== *@
+        <div class="col-lg-9 product-list-container-v2">
+            @* =============================================================== *@
+            @* KHỐI VIEW MODE TOGGLE - ĐẦU TRANG *@
+            @* =============================================================== *@
+            <div class="view-controls-container-v2">
+                <div class="view-mode-header">
+                    <h4>Hiển thị sản phẩm</h4>
+                </div>
+                <div class="view-mode-toggle-v2">
+                    <button type="button" id="grid-view-btn" class="view-btn active" title="Dạng ô">
+                        <i class="fas fa-th-large"></i>
+                        <span>Dạng ô</span>
+                    </button>
+                    <button type="button" id="list-view-btn" class="view-btn" title="Dạng danh sách">
+                        <i class="fas fa-list"></i>
+                        <span>Dạng danh sách</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="row product-grid-row-v2">
+                @if (lstProducts != null && lstProducts.Count > 0)
+                {
+                    foreach (var product in lstProducts)
+                    {
+                        // LOGIC TÍNH TOÁN - GIỮ NGUYÊN
+                        string imgProduct = string.IsNullOrEmpty(product.Image1)
+                            ? Url.Content("~/Content/Image/noimage.png")
+                            : Url.Content(product.Image1);
+                        
+                        // Thử sử dụng version resize, nếu không có thì dùng ảnh gốc
+                        string resizedImg = Cubetech.Website.Controllers.FilePickerController.GetFileNameAndSize(imgProduct, 800);
+                        
+                        // Kiểm tra xem file resize có tồn tại không bằng cách thêm onerror fallback
+                        imgProduct = resizedImg;
+                        decimal salePercent = 0;
+                        if (product.PriceSale > 0 && product.PriceSale2 > 0 && product.PriceSale != 0)
+                        {
+                            salePercent = Math.Round(100 - (product.PriceSale2 / product.PriceSale * 100), 0);
+                        }
+                        var productUrl = Url.Content("/" + Cubetech.Website.Controllers.WProductsController.GetProductUrl(product));
+                        if (productUrl == "/")
+                        {
+                            productUrl = "/Wproducts/Detail?id=" + product.ID;
+                        }
+                        string priceDisplay;
+                        if (product.PriceSale2 > 0) {
+                            priceDisplay = string.Format("{0:N0} đ", product.PriceSale2);
+                            if (product.PriceSale > product.PriceSale2) {
+                                priceDisplay += string.Format(" <del>{0:N0} đ</del>", product.PriceSale);
+                            } else if (product.Price > product.PriceSale2) {
+                                priceDisplay += string.Format(" <del>{0:N0} đ</del>", product.Price);
+                            }
+                        } else if (product.PriceSale > 0) {
+                            priceDisplay = string.Format("{0:N0} đ", product.PriceSale);
+                            if (product.Price > product.PriceSale) {
+                                priceDisplay += string.Format(" <del>{0:N0} đ</del>", product.Price);
+                            }
+                        } else if (product.Price > 0) {
+                            priceDisplay = string.Format("{0:N0} đ", product.Price);
+                        } else {
+                            priceDisplay = "Liên hệ";
+                        }
+
+                        // CẤU TRÚC HTML SẢN PHẨM V2 - GIỮ NGUYÊN
+                        <div class="col-sm-6 col-md-4 product-item" data-cate-id="@product.CategoryID">
+                            <div class="product-card-v2">
+                                <div class="product-image-wrapper-v2">
+                                    <img class="product-image-v2" src="@imgProduct" alt="@product.Name" loading="lazy" 
+                                         onerror="handleImageError(this, '@Url.Content(product.Image1 ?? "~/Content/Image/noimage.png")', '@Url.Content("~/Content/Image/noimage.png")')">
+                                     @if (salePercent > 0)
+                                    {
+                                        <span class="sale-badge-v2">-@salePercent%</span>
+                                    }
+                                    <div class="action-overlay-v2">
+                                        <a href="@productUrl" class="btn-view-detail">Xem Chi Tiết</a>
+                                    </div>
+                                </div>
+                                <div class="product-card-body-v2">
+                                    <h3 class="product-name-v2"><a href="@productUrl">@product.Name</a></h3>
+                                    <div class="product-price-v2 @(product.CategoryID == 10 ? "project" : "")">
+                                        @Html.Raw(priceDisplay)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+            
+            
+            @* =============================================================== *@
+            @* KHỐI PHÂN TRANG HIỆN ĐẠI *@
+            @* =============================================================== *@
+            <div class="pagination-container-v2">
+                <div class="pagination-header-v2">
+                    <div class="pagination-info-v2">
+                        <div class="info-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="info-content">
+                            <span class="info-label">Kết quả tìm kiếm</span>
+                            <span id="pagination-info" class="info-details">
+                                Hiển thị <strong id="current-range">1-12</strong> của <strong id="total-products">0</strong> sản phẩm
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="items-per-page-v2">
+                        <div class="items-label">
+                            <i class="fas fa-th-list"></i>
+                            <span>Hiển thị</span>
+                        </div>
+                        <div class="items-selector">
+                            <select id="items-per-page" class="form-control-modern">
+                                <option value="12">12</option>
+                                <option value="24">24</option>
+                                <option value="36">36</option>
+                                <option value="48">48</option>
+                            </select>
+                            <span class="items-suffix">sản phẩm</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pagination-navigation-v2">
+                    <nav aria-label="Product pagination">
+                        <ul class="pagination pagination-v2" id="pagination-nav">
+                            <!-- Pagination sẽ được tạo bằng JavaScript -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* MODERN UI VARIABLES */
+    :root {
+        --primary-color: #007bff;
+        --primary-dark: #0056b3;
+        --primary-light: #66b3ff;
+        --accent-color: #e67e22;
+        --accent-light: #f39c12;
+        --white-color: #ffffff;
+        --light-bg: #f8f9fa;
+        --lighter-bg: #fafbfc;
+        --border-color: #e9ecef;
+        --border-light: #f1f3f4;
+        --text-dark: #2c3e50;
+        --text-light: #6c757d;
+        --text-muted: #95a5a6;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        --card-shadow-hover: 0 8px 30px rgba(0,0,0,0.12);
+        --card-shadow-active: 0 2px 10px rgba(0,0,0,0.15);
+        --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        --gradient-accent: linear-gradient(135deg, var(--accent-color), var(--accent-light));
+        --border-radius: 12px;
+        --border-radius-sm: 8px;
+        --border-radius-lg: 16px;
+        --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .product-page-v2 a,
+    .product-page-v2 a:hover { text-decoration: none !important; }
+    .product-page-v2 { font-family: var(--font-family); background-color: var(--background-light); }
+    .product-grid-row-v2 { display: flex; flex-wrap: wrap; }
+    /* MODERN CATEGORY SIDEBAR */
+    .category-sidebar-v2 { 
+        background: var(--white-color); 
+        border-radius: var(--border-radius); 
+        box-shadow: var(--card-shadow); 
+        padding: 0; 
+        overflow: hidden; 
+        align-self: flex-start;
+        transform: translateY(0);
+        transition: var(--transition-smooth);
+        animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .category-sidebar-v2:hover {
+        box-shadow: var(--card-shadow-hover);
+        transform: translateY(-2px);
+    }
+    
+    .category-header-v2 h2 { 
+        background: var(--gradient-primary); 
+        color: var(--white-color); 
+        padding: 20px 25px; 
+        font-size: 18px; 
+        font-weight: 700; 
+        margin: 0; 
+        text-transform: uppercase; 
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .category-header-v2 h2::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .category-header-v2:hover h2::before {
+        left: 100%;
+    }
+    
+    .category-header-v2 h2 i { 
+        margin-right: 12px; 
+        font-size: 16px;
+        animation: pulse 2s infinite;
+    }
+    
+    .category-body-v2 { 
+        padding: 8px 0; 
+    }
+    
+    .category-link-v2 { 
+        display: flex; 
+        align-items: center; 
+        padding: 16px 25px; 
+        color: var(--text-dark); 
+        font-size: 15px; 
+        font-weight: 500; 
+        transition: var(--transition-smooth); 
+        border-left: 4px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .category-link-v2::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 0;
+        height: 100%;
+        background: linear-gradient(90deg, rgba(0,123,255,0.1), rgba(0,123,255,0.05));
+        transition: width 0.3s ease;
+        z-index: 0;
+    }
+    .category-link-v2 i { 
+        color: var(--primary-color); 
+        width: 30px; 
+        text-align: center; 
+        margin-right: 10px; 
+        font-size: 18px; 
+        transition: var(--transition-smooth);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .category-link-v2:hover { 
+        color: var(--primary-dark); 
+        border-left-color: var(--primary-color);
+        transform: translateX(5px);
+    }
+    
+    .category-link-v2:hover::before {
+        width: 100%;
+    }
+    
+    .category-link-v2:hover i { 
+        transform: scale(1.15) rotate(5deg); 
+        color: var(--primary-color);
+    }
+    
+    .category-link-v2.active { 
+        color: var(--primary-dark); 
+        border-left-color: var(--primary-color);
+        font-weight: 600;
+        background: linear-gradient(90deg, rgba(0,123,255,0.1), transparent);
+    }
+    
+    .category-link-v2.active::before {
+        width: 100%;
+    }
+    
+    .category-link-v2.all-items { font-weight: 700; }
+    
+    /* MODERN PRODUCT CARDS */
+    .product-item { 
+        padding: 0 15px; 
+        margin-bottom: 30px; 
+        display: flex;
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .product-item:nth-child(1) { animation-delay: 0.1s; }
+    .product-item:nth-child(2) { animation-delay: 0.2s; }
+    .product-item:nth-child(3) { animation-delay: 0.3s; }
+    .product-item:nth-child(4) { animation-delay: 0.4s; }
+    
+    .product-card-v2 { 
+        width: 100%; 
+        background: var(--white-color); 
+        border-radius: var(--border-radius); 
+        box-shadow: var(--card-shadow); 
+        transition: var(--transition-smooth); 
+        overflow: hidden;
+        position: relative;
+        border: 1px solid var(--border-light);
+    }
+    
+    .product-card-v2::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(0,123,255,0.05), rgba(0,123,255,0.02));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1;
+        pointer-events: none;
+    }
+    
+    .product-card-v2:hover { 
+        transform: translateY(-10px) scale(1.02); 
+        box-shadow: var(--card-shadow-hover);
+        border-color: var(--primary-color);
+    }
+    
+    .product-card-v2:hover::before {
+        opacity: 1;
+    }
+    
+    .product-image-wrapper-v2 { 
+        position: relative; 
+        overflow: hidden;
+        border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+    }
+    
+    .product-image-v2 { 
+        width: 100%; 
+        height: 250px; 
+        object-fit: cover; 
+        display: block; 
+        transition: var(--transition-slow);
+        filter: brightness(1) saturate(1);
+    }
+    .product-card-v2:hover .product-image-v2 { 
+        transform: scale(1.1); 
+        filter: brightness(1.1) saturate(1.2);
+    }
+    
+    .product-image-wrapper-v2::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+        transform: translateX(-100%);
+        transition: transform 0.6s ease;
+    }
+    
+    .product-card-v2:hover .product-image-wrapper-v2::after {
+        transform: translateX(100%);
+    }
+    
+    .action-overlay-v2 { 
+        position: absolute; 
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        bottom: 0; 
+        background: rgba(0,0,0,0.3); 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        opacity: 0; 
+        transition: var(--transition-smooth);
+    }
+    
+    .product-card-v2:hover .action-overlay-v2 { 
+        opacity: 1; 
+    }
+    
+    .btn-view-detail { 
+        background: linear-gradient(135deg, var(--accent-color), var(--accent-light)); 
+        color: var(--white-color); 
+        padding: 14px 28px; 
+        border-radius: 25px; 
+        font-weight: 600; 
+        font-size: 14px;
+        transform: translateY(20px) scale(0.9); 
+        transition: var(--transition-smooth);
+        border: 2px solid transparent;
+        box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+        position: relative;
+        z-index: 2;
+        overflow: hidden;
+    }
+    
+    .btn-view-detail::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .product-card-v2:hover .btn-view-detail { 
+        transform: translateY(0) scale(1); 
+        background: linear-gradient(135deg, var(--accent-light), var(--accent-color));
+        box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4);
+    }
+    
+    .btn-view-detail:hover::before {
+        left: 100%;
+    }
+    
+    .sale-badge-v2 { 
+        position: absolute; 
+        top: 15px; 
+        left: 15px; 
+        background: linear-gradient(135deg, var(--danger-color), #c82333); 
+        color: var(--white-color); 
+        padding: 6px 12px; 
+        font-size: 12px; 
+        font-weight: 700; 
+        border-radius: var(--border-radius-sm); 
+        z-index: 3;
+        animation: pulse 2s infinite;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+    }
+    
+    .product-card-body-v2 { 
+        padding: 24px 20px; 
+        text-align: left;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .product-name-v2 { 
+        font-size: 17px; 
+        font-weight: 600; 
+        color: var(--text-dark); 
+        line-height: 1.4; 
+        margin: 0 0 15px 0; 
+        height: calc(17px * 1.4 * 2); 
+        overflow: hidden; 
+        display: -webkit-box; 
+        -webkit-line-clamp: 2; 
+        -webkit-box-orient: vertical;
+        transition: var(--transition-fast);
+    }
+    
+    .product-name-v2 a { 
+        color: inherit; 
+        transition: var(--transition-fast);
+    }
+    
+    .product-name-v2 a:hover { 
+        color: var(--primary-color);
+        text-shadow: 0 1px 3px rgba(0,123,255,0.2);
+    }
+    .product-price-v2 { 
+        font-size: 20px; 
+        font-weight: 700; 
+        color: var(--accent-color);
+        margin-bottom: 8px;
+        position: relative;
+        display: inline-block;
+        transition: var(--transition-fast);
+    }
+    
+    .product-price-v2::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--accent-color), var(--accent-light));
+        transition: width 0.3s ease;
+    }
+    
+    .product-card-v2:hover .product-price-v2::after {
+        width: 100%;
+    }
+    
+    .product-price-v2.project { 
+        color: var(--primary-dark);
+        background: linear-gradient(135deg, rgba(0,123,255,0.1), rgba(0,123,255,0.05));
+        padding: 4px 8px;
+        border-radius: var(--border-radius-sm);
+    }
+    
+    .product-price-v2 del { 
+        font-size: 14px; 
+        font-weight: 400; 
+        color: var(--text-muted); 
+        margin-left: 10px;
+        text-decoration-color: var(--danger-color);
+    }
+    @@media (max-width: 1199.98px) { .product-name-v2 { font-size: 16px; } .product-price-v2 { font-size: 20px; } }
+    @@media (max-width: 991.98px) { .category-sidebar-v2 { margin-bottom: 30px; } .product-item { width: 50%; } }
+    @@media (max-width: 767.98px) { .product-image-v2 { height: 200px; } .btn-view-detail { padding: 10px 20px; font-size: 14px; } .product-item { width: 100%; padding: 0 10px; } .product-grid-row-v2 { gap: 20px 0; } }
+    @@media (max-width: 575.98px) { .category-link-v2 { font-size: 15px; padding: 10px 20px; } .category-header-v2 h2 { font-size: 18px; padding: 14px 20px; } .product-name-v2 { font-size: 15px; } .product-price-v2 { font-size: 18px; } }
+    
+    /* =============================================================== */
+    /* KEYFRAME ANIMATIONS */
+    /* =============================================================== */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @@keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @@keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+    
+    @@keyframes shimmer {
+        0% {
+            background-position: -200px 0;
+        }
+        100% {
+            background-position: calc(200px + 100%) 0;
+        }
+    }
+    
+    @@keyframes bounce {
+        0%, 20%, 53%, 80%, 100% {
+            transform: translate3d(0,0,0);
+        }
+        40%, 43% {
+            transform: translate3d(0, -8px, 0);
+        }
+        70% {
+            transform: translate3d(0, -4px, 0);
+        }
+        90% {
+            transform: translate3d(0, -2px, 0);
+        }
+    }
+    
+    /* =============================================================== */
+    /* CSS CHO FILTER VÀ SEARCH - MODERN DESIGN */
+    /* =============================================================== */
+    .filter-section-v2 {
+        background: var(--white-color);
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        margin-top: 20px;
+        overflow: hidden;
+        border: 1px solid var(--border-light);
+        animation: slideInLeft 0.8s ease-out;
+        transition: var(--transition-smooth);
+    }
+    
+    .filter-section-v2:hover {
+        box-shadow: var(--card-shadow-hover);
+        transform: translateY(-2px);
+    }
+    
+    .filter-header-v2 h3 {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: var(--white-color);
+        padding: 15px 20px;
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .filter-header-v2 h3 i {
+        margin-right: 10px;
+    }
+    
+    .filter-body-v2 {
+        padding: 20px;
+    }
+    
+    .search-box-v2 {
+        margin-bottom: 25px;
+    }
+    
+    .search-box-v2 label {
+        display: block;
+        color: var(--text-dark);
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+    
+    .search-input-wrapper {
+        position: relative;
+    }
+    
+    .search-input-wrapper input {
+        padding-right: 40px;
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius-sm);
+        font-size: 14px;
+        transition: var(--transition-smooth);
+        background: var(--white-color);
+        position: relative;
+    }
+    
+    .search-input-wrapper input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15);
+        transform: translateY(-1px);
+        background: linear-gradient(135deg, var(--white-color), var(--lighter-bg));
+    }
+    
+    .search-input-wrapper input:focus + .search-icon {
+        color: var(--primary-color);
+        animation: bounce 0.6s ease;
+    }
+    
+    .search-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+        font-size: 14px;
+    }
+    
+    .price-filter-v2 {
+        margin-bottom: 25px;
+    }
+    
+    .price-filter-v2 label {
+        display: block;
+        color: var(--text-dark);
+        font-weight: 600;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+    
+    .price-inputs {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .price-input {
+        flex: 1;
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius-sm);
+        padding: 10px 12px;
+        font-size: 13px;
+        text-align: center;
+        transition: var(--transition-smooth);
+        background: var(--white-color);
+    }
+    
+    .price-input:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        transform: translateY(-1px);
+        background: linear-gradient(135deg, var(--white-color), var(--lighter-bg));
+    }
+    
+    .price-separator {
+        color: var(--text-light);
+        font-weight: 600;
+    }
+    
+    .price-range-slider {
+        position: relative;
+        height: 6px;
+        background: var(--border-color);
+        border-radius: 3px;
+        margin: 15px 0;
+    }
+    
+    .range-slider {
+        position: absolute;
+        width: 100%;
+        height: 6px;
+        background: transparent;
+        outline: none;
+        -webkit-appearance: none;
+        pointer-events: none;
+    }
+    
+    .range-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        border-radius: 50%;
+        cursor: pointer;
+        pointer-events: all;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+        transition: var(--transition-smooth);
+        border: 2px solid var(--white-color);
+    }
+    
+    .range-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 6px 16px rgba(0, 123, 255, 0.5);
+    }
+    
+    .range-slider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        border-radius: 50%;
+        cursor: pointer;
+        pointer-events: all;
+        border: 2px solid var(--white-color);
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+        transition: var(--transition-smooth);
+    }
+    
+    .range-slider::-moz-range-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 6px 16px rgba(0, 123, 255, 0.5);
+    }
+    
+    .price-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--text-light);
+        margin-top: 5px;
+    }
+    
+    .filter-actions {
+        text-align: center;
+    }
+    
+    .filter-actions button {
+        border-radius: 25px;
+        padding: 10px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: var(--transition-smooth);
+        border: 2px solid var(--border-color);
+        background: var(--white-color);
+        color: var(--text-dark);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .filter-actions button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0,123,255,0.1), transparent);
+        transition: left 0.5s;
+    }
+    
+    .filter-actions button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,123,255,0.2);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+    
+    .filter-actions button:hover::before {
+        left: 100%;
+    }
+    
+    /* Responsive cho filter */
+    @@media (max-width: 991.98px) {
+        .filter-section-v2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+    }
+    
+    /* =============================================================== */
+    /* CSS CHO VIEW MODE TOGGLE */
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .view-mode-header h4::before {
+        content: '';
+        width: 4px;
+        height: 20px;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+    }
+    
+    .view-mode-toggle-v2 {
+        display: flex;
+        background-color: var(--light-bg);
+        border-radius: 6px;
+        padding: 3px;
+        gap: 2px;
+    }
+    
+    .view-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border: none;
+        background: transparent;
+        color: var(--text-light);
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+    
+    .view-btn:hover {
+        color: var(--primary-color);
+        background-color: rgba(52, 152, 219, 0.1);
+    }
+    
+    .view-btn.active {
+        background-color: var(--primary-color);
+        color: var(--white-color);
+        box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+    }
+    
+    .view-btn i {
+        font-size: 14px;
+    }
+    
+    /* =============================================================== */
+    /* CSS CHO LIST VIEW */
+    /* =============================================================== */
+    .product-grid-row-v2.list-view {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .product-grid-row-v2.list-view .product-item {
+        width: 100%;
+        max-width: none;
+        padding: 0;
+    }
+    
+    .product-grid-row-v2.list-view .product-card-v2 {
+        display: flex;
+        flex-direction: row;
+        height: auto;
+        min-height: 150px;
+    }
+    
+    .product-grid-row-v2.list-view .product-image-v2 {
+        width: 200px;
+        height: 150px;
+        flex-shrink: 0;
+        border-radius: 8px 0 0 8px;
+    }
+    
+    .product-grid-row-v2.list-view .product-content-v2 {
+        flex: 1;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .product-grid-row-v2.list-view .product-name-v2 {
+        font-size: 18px;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+    
+    .product-grid-row-v2.list-view .product-price-v2 {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+    
+    .product-grid-row-v2.list-view .btn-view-detail {
+        align-self: flex-start;
+        margin-top: auto;
+    }
+    
+    /* Responsive cho list view */
+    @@media (max-width: 767.98px) {
+        .view-btn span {
+            display: none;
+        }
+        
+        .view-controls-container-v2 {
+            padding: 10px 15px;
+        }
+        
+        .product-grid-row-v2.list-view .product-card-v2 {
+            flex-direction: column;
+        }
+        
+        .product-grid-row-v2.list-view .product-image-v2 {
+            width: 100%;
+            height: 200px;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .product-grid-row-v2.list-view .product-content-v2 {
+            padding: 15px;
+        }
+    }
+    
+    /* =============================================================== */
+    /* CSS CHO PHÂN TRANG HIỆN ĐẠI */
+    /* =============================================================== */
+    .pagination-container-v2 {
+        margin-top: 40px;
+        background: var(--white-color);
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-light);
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease-out;
+        transition: var(--transition-smooth);
+    }
+    
+    .pagination-container-v2:hover {
+        box-shadow: var(--card-shadow-hover);
+        transform: translateY(-2px);
+    }
+    
+    .pagination-header-v2 {
+        padding: 25px 30px;
+        background: linear-gradient(135deg, var(--lighter-bg), var(--white-color));
+        border-bottom: 1px solid var(--border-light);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .pagination-info-v2 {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .info-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--gradient-primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white-color);
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+    
+    .info-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .info-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .info-details {
+        font-size: 15px;
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+    
+    .info-details strong {
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 14px;
+    }
+    
+    .pagination-v2 {
+        margin: 0;
+        display: flex;
+        gap: 5px;
+    }
+    
+    .pagination-v2 .page-item .page-link {
+        padding: 12px 18px;
+        border: 2px solid var(--border-light);
+        color: var(--text-dark);
+        background: var(--white-color);
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        font-size: 14px;
+        transition: var(--transition-smooth);
+        margin: 0 3px;
+        position: relative;
+        overflow: hidden;
+        min-width: 45px;
+        text-align: center;
+    }
+    
+    .pagination-v2 .page-item .page-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: var(--gradient-primary);
+        transition: left 0.3s ease;
+        z-index: -1;
+    }
+    
+    .pagination-v2 .page-item .page-link:hover {
+        border-color: var(--primary-color);
+        color: var(--white-color);
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+    }
+    
+    .pagination-v2 .page-item .page-link:hover::before {
+        left: 0;
+    }
+    
+    .pagination-v2 .page-item.active .page-link {
+        background: var(--gradient-primary);
+        border-color: var(--primary-color);
+        color: var(--white-color);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    .pagination-v2 .page-item.disabled .page-link {
+        color: var(--text-muted);
+        background: var(--lighter-bg);
+        border-color: var(--border-light);
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    
+    .pagination-v2 .page-item.disabled .page-link:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .items-per-page-v2 {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .items-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+    
+    .items-label i {
+        color: var(--primary-color);
+        font-size: 16px;
+    }
+    
+    .items-selector {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--white-color);
+        padding: 8px 15px;
+        border-radius: 25px;
+        border: 2px solid var(--border-color);
+        transition: var(--transition-smooth);
+    }
+    
+    .items-selector:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+    
+    .form-control-modern {
+        border: none;
+        background: transparent;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--primary-color);
+        padding: 0;
+        width: 50px;
+        text-align: center;
+        outline: none;
+    }
+    
+    .items-suffix {
+        font-size: 13px;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+    
+    .items-per-page-v2 select {
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 14px;
+        color: var(--text-dark);
+        background-color: var(--white-color);
+        min-width: 120px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .items-per-page-v2 select:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+    
+    /* Responsive cho phân trang */
+    @@media (max-width: 991.98px) {
+        .pagination-container-v2 {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .pagination-info-v2 {
+            order: 1;
+        }
+        
+        .pagination-v2 {
+            order: 2;
+            justify-content: center;
+        }
+        
+        .items-per-page-v2 {
+            order: 3;
+            justify-content: center;
+        }
+    }
+    
+    @@media (max-width: 575.98px) {
+        .pagination-v2 .page-item .page-link {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+        
+        .pagination-container-v2 {
+            padding: 20px 15px;
+        }
+    }
+</style>
+
+<script>
+    // GIỮ NGUYÊN TOÀN BỘ PHẦN SCRIPT
+    // Logic filter của JS này sẽ hoạt động tốt với danh sách sản phẩm đầy đủ.
+    $(document).ready(function () {
+        const paramsV2 = new URLSearchParams(window.location.search);
+        const categoryIdV2 = paramsV2.get('categoryId');
+        // Xử lý filter category
+        function applyCategory() {
+            if (categoryIdV2) {
+                const catIdNumber = parseInt(categoryIdV2);
+                $('.product-item').each((index, ele) => {
+                    const productCateId = parseInt($(ele).data('cate-id'));
+                    if (productCateId === catIdNumber) {
+                        $(ele).show();
+                    } else {
+                        $(ele).hide();
+                    }
+                });
+                $('.category-link-v2').each((index, ele) => {
+                    const linkCateId = parseInt(new URL(ele.href).searchParams.get('categoryId'));
+                    if (linkCateId === catIdNumber) {
+                        $(ele).addClass('active');
+                    }
+                });
+                $('html, body').animate({
+                    scrollTop: $('.product-page-v2').offset().top - 30
+                }, 300);
+                if ($('.product-item:visible').length === 0) {
+                    $('.product-grid-row-v2').append(`
+                        <div class="col-12 text-center mt-4 text-muted">
+                            <p><i class="fas fa-box-open fa-2x"></i><br>Không tìm thấy sản phẩm phù hợp.</p>
+                        </div>
+                    `);
+                }
+            } else {
+                $('.product-item').show();
+                $('.category-link-v2.all-items').addClass('active');
+            }
+        }
+        
+        applyCategory();
+        const fullUrlV2 = window.location.href;
+        const hasSanPhamV2 = fullUrlV2.split('/').some(part => part.includes('san-pham'));
+        if (!hasSanPhamV2) {
+            $('.category-sidebar-v2').hide();
+            $('.product-list-container-v2').addClass('col-lg-12').removeClass('col-lg-9');
+        }
+        
+        // ===============================================================
+        // LOGIC PHÂN TRANG
+        // ===============================================================
+        // Đợi một chút để đảm bảo DOM đã sẵn sàng
+        setTimeout(function() {
+            initializePagination();
+        }, 100);
+    });
+    
+    // Biến toàn cục cho phân trang
+    let currentPage = 1;
+    let itemsPerPage = 12;
+    let totalItems = 0;
+    let filteredProducts = [];
+    
+    function initializePagination() {
+        console.log('Initializing pagination...');
+        
+        // Lấy tất cả sản phẩm hiện tại (có thể đã được filter theo category)
+        updateFilteredProducts();
+        
+        // Thiết lập event listeners
+        $('#items-per-page').on('change', function() {
+            itemsPerPage = parseInt($(this).val());
+            currentPage = 1;
+            console.log(`Items per page changed to: ${itemsPerPage}`);
+            updatePagination();
+        });
+        
+        // Khởi tạo phân trang lần đầu
+        updatePagination();
+        console.log('Pagination initialized');
+    }
+    
+    function updateFilteredProducts() {
+        // Lấy tất cả sản phẩm từ DOM
+        const allProducts = $('.product-item').toArray();
+        
+        // Lấy các filter hiện tại
+        const params = new URLSearchParams(window.location.search);
+        const categoryId = params.get('categoryId');
+        const searchTerm = $('#product-search').val().toLowerCase().trim();
+        const minPrice = parseFloat($('#min-price').val()) || 0;
+        const maxPrice = parseFloat($('#max-price').val()) || Infinity;
+        
+        // Áp dụng tất cả filter
+        filteredProducts = allProducts.filter(item => {
+            const $item = $(item);
+            
+            // Filter theo category
+            if (categoryId) {
+                const productCateId = parseInt($item.data('cate-id'));
+                if (productCateId !== parseInt(categoryId)) {
+                    return false;
+                }
+            }
+            
+            // Filter theo tên sản phẩm
+            if (searchTerm) {
+                const productName = $item.find('.product-name-v2 a').text().toLowerCase();
+                if (!productName.includes(searchTerm)) {
+                    return false;
+                }
+            }
+            
+            // Filter theo giá
+            const priceText = $item.find('.product-price-v2').text().replace(/[^\d]/g, '');
+            const productPrice = parseFloat(priceText) || 0;
+            if (productPrice < minPrice || productPrice > maxPrice) {
+                return false;
+            }
+            
+            return true;
+        });
+        
+        totalItems = filteredProducts.length;
+        console.log(`Found ${totalItems} products after filtering:`, {
+            category: categoryId || 'all',
+            search: searchTerm || 'none',
+            priceRange: `${minPrice} - ${maxPrice === Infinity ? 'max' : maxPrice}`
+        });
+    }
+    
+    function updatePagination() {
+        updateFilteredProducts();
+        
+        if (totalItems === 0) {
+            $('.pagination-container-v2').hide();
+            return;
+        }
+        
+        $('.pagination-container-v2').show();
+        
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        
+        // Cập nhật thông tin hiển thị
+        const startItem = (currentPage - 1) * itemsPerPage + 1;
+        const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+        
+        $('#current-range').text(`${startItem}-${endItem}`);
+        $('#total-products').text(totalItems);
+        
+        // Hiển thị sản phẩm cho trang hiện tại
+        showProductsForCurrentPage();
+        
+        // Tạo các nút phân trang
+        generatePaginationButtons(totalPages);
+    }
+    
+    function showProductsForCurrentPage() {
+        console.log(`Current page: ${currentPage}, Items per page: ${itemsPerPage}`);
+        console.log(`Total filtered products: ${filteredProducts.length}`);
+        
+        // Ẩn tất cả sản phẩm trước
+        $('.product-item').hide();
+        
+        // Tính toán index
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        
+        console.log(`Showing items from index ${startIndex} to ${endIndex - 1}`);
+        
+        // Hiển thị sản phẩm cho trang hiện tại
+        let shownCount = 0;
+        for (let i = startIndex; i < endIndex && i < filteredProducts.length; i++) {
+            $(filteredProducts[i]).show();
+            shownCount++;
+            console.log(`Showing product ${i + 1}: ${$(filteredProducts[i]).find('.product-name-v2 a').text()}`);
+        }
+        
+        console.log(`Actually shown ${shownCount} products`);
+        
+        // Nếu không có sản phẩm nào được hiển thị
+        if (shownCount === 0 && filteredProducts.length > 0) {
+            console.error('No products shown but filtered products exist!');
+            // Fallback: hiển thị trang đầu
+            currentPage = 1;
+            showProductsForCurrentPage();
+        }
+    }
+    
+    function generatePaginationButtons(totalPages) {
+        const paginationControls = $('#pagination-controls');
+        paginationControls.empty();
+        
+        if (totalPages <= 1) {
+            return;
+        }
+        
+        // Nút Previous
+        const prevDisabled = currentPage === 1 ? 'disabled' : '';
+        paginationControls.append(`
+            <li class="page-item ${prevDisabled}">
+                <a class="page-link" href="#" data-page="${currentPage - 1}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+        `);
+        
+        // Logic hiển thị số trang
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+        
+        // Đảm bảo luôn hiển thị 5 trang nếu có thể
+        if (endPage - startPage < 4) {
+            if (startPage === 1) {
+                endPage = Math.min(totalPages, startPage + 4);
+            } else {
+                startPage = Math.max(1, endPage - 4);
+            }
+        }
+        
+        // Trang đầu và dấu ...
+        if (startPage > 1) {
+            paginationControls.append(`
+                <li class="page-item">
+                    <a class="page-link" href="#" data-page="1">1</a>
+                </li>
+            `);
+            if (startPage > 2) {
+                paginationControls.append(`
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                `);
+            }
+        }
+        
+        // Các trang ở giữa
+        for (let i = startPage; i <= endPage; i++) {
+            const activeClass = i === currentPage ? 'active' : '';
+            paginationControls.append(`
+                <li class="page-item ${activeClass}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `);
+        }
+        
+        // Dấu ... và trang cuối
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationControls.append(`
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                `);
+            }
+            paginationControls.append(`
+                <li class="page-item">
+                    <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+                </li>
+            `);
+        }
+        
+        // Nút Next
+        const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+        paginationControls.append(`
+            <li class="page-item ${nextDisabled}">
+                <a class="page-link" href="#" data-page="${currentPage + 1}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        `);
+        
+        // Gắn sự kiện click cho các nút phân trang
+        paginationControls.find('a.page-link').on('click', function(e) {
+            e.preventDefault();
+            const page = parseInt($(this).data('page'));
+            if (page && page !== currentPage && !$(this).parent().hasClass('disabled')) {
+                currentPage = page;
+                updatePagination();
+                
+                // Cuộn lên đầu danh sách sản phẩm
+                $('html, body').animate({
+                    scrollTop: $('.product-list-container-v2').offset().top - 100
+                }, 300);
+            }
+        });
+    }
+    
+    // Cập nhật phân trang khi filter category thay đổi
+    $(document).on('click', '.category-link-v2', function(e) {
+        e.preventDefault();
+        console.log('Category filter clicked, updating pagination...');
+        
+        const href = $(this).attr('href');
+        const url = new URL(href, window.location.origin);
+        const newCategoryId = url.searchParams.get('categoryId');
+        
+        // Cập nhật URL mà không reload trang
+        window.history.pushState({}, '', href);
+        
+        // Update active category
+        $('.category-link-v2').removeClass('active');
+        $(this).addClass('active');
+        
+        // Reset pagination về trang 1 và update
+        currentPage = 1;
+        updatePagination();
+    });
+    
+    // ===============================================================
+    // EVENT LISTENERS CHO SEARCH VÀ FILTER
+    // ===============================================================
+    
+    // Tìm kiếm sản phẩm theo tên
+    $('#product-search').on('input', function() {
+        console.log('Search input changed:', $(this).val());
+        currentPage = 1; // Reset về trang 1
+        updatePagination();
+    });
+    
+    // Lọc theo giá - input number
+    $('#min-price, #max-price').on('input', function() {
+        const minPrice = parseFloat($('#min-price').val()) || 0;
+        const maxPrice = parseFloat($('#max-price').val()) || 50000000;
+        
+        // Cập nhật range slider
+        $('#price-range-min').val(minPrice);
+        $('#price-range-max').val(maxPrice);
+        
+        console.log('Price filter changed:', minPrice, '-', maxPrice);
+        currentPage = 1; // Reset về trang 1
+        updatePagination();
+    });
+    
+    // Lọc theo giá - range slider
+    $('#price-range-min, #price-range-max').on('input', function() {
+        const minPrice = parseInt($('#price-range-min').val());
+        const maxPrice = parseInt($('#price-range-max').val());
+        
+        // Đảm bảo min <= max
+        if (minPrice > maxPrice) {
+            if ($(this).attr('id') === 'price-range-min') {
+                $('#price-range-max').val(minPrice);
+            } else {
+                $('#price-range-min').val(maxPrice);
+            }
+        }
+        
+        // Cập nhật input number
+        $('#min-price').val($('#price-range-min').val());
+        $('#max-price').val($('#price-range-max').val());
+        
+        console.log('Price range changed:', $('#price-range-min').val(), '-', $('#price-range-max').val());
+        currentPage = 1; // Reset về trang 1
+        updatePagination();
+    });
+    
+    // Reset tất cả filter
+    $('#reset-filters').on('click', function() {
+        console.log('Resetting all filters...');
+        
+        // Reset search
+        $('#product-search').val('');
+        
+        // Reset price filter
+        $('#min-price').val('');
+        $('#max-price').val('');
+        $('#price-range-min').val(0);
+        $('#price-range-max').val(50000000);
+        
+        // Reset category (về tất cả sản phẩm)
+        $('.category-link-v2').removeClass('active');
+        $('.category-link-v2[href="?"]').addClass('active');
+        window.history.pushState({}, '', '?');
+        
+        // Reset pagination
+        currentPage = 1;
+        updatePagination();
+    });
+    
+    // Thêm event listener để test phân trang
+    window.testPagination = function() {
+        console.log('Testing pagination...');
+        console.log('Current page:', currentPage);
+        console.log('Items per page:', itemsPerPage);
+        console.log('Total items:', totalItems);
+        console.log('Filtered products:', filteredProducts.length);
+        updatePagination();
+    };
+    
+    // ===============================================================
+    // EVENT LISTENERS CHO VIEW MODE TOGGLE
+    // ===============================================================
+    
+    // Chuyển đổi giữa grid view và list view
+    $('#grid-view-btn').on('click', function() {
+        if (!$(this).hasClass('active')) {
+            $('.view-btn').removeClass('active');
+            $(this).addClass('active');
+            $('.product-grid-row-v2').removeClass('list-view');
+            console.log('Switched to grid view');
+            
+            // Lưu preference vào localStorage
+            localStorage.setItem('productViewMode', 'grid');
+        }
+    });
+    
+    $('#list-view-btn').on('click', function() {
+        if (!$(this).hasClass('active')) {
+            $('.view-btn').removeClass('active');
+            $(this).addClass('active');
+            $('.product-grid-row-v2').addClass('list-view');
+            console.log('Switched to list view');
+            
+            // Lưu preference vào localStorage
+            localStorage.setItem('productViewMode', 'list');
+        }
+    });
+    
+    // Khôi phục view mode từ localStorage
+    function restoreViewMode() {
+        const savedViewMode = localStorage.getItem('productViewMode') || 'grid';
+        
+        if (savedViewMode === 'list') {
+            $('.view-btn').removeClass('active');
+            $('#list-view-btn').addClass('active');
+            $('.product-grid-row-v2').addClass('list-view');
+        } else {
+            $('.view-btn').removeClass('active');
+            $('#grid-view-btn').addClass('active');
+            $('.product-grid-row-v2').removeClass('list-view');
+        }
+        
+        console.log('Restored view mode:', savedViewMode);
+    }
+    
+    // Khởi tạo phân trang khi trang load
+    $(document).ready(function() {
+        initializePagination();
+        
+        // Khởi tạo giá trị mặc định cho price range
+        $('#price-range-min').val(0);
+        $('#price-range-max').val(50000000);
+        
+        // Khôi phục view mode
+        restoreViewMode();
+    });
+    
+    // Hàm xử lý lỗi hình ảnh với fallback nhiều cấp
+    window.handleImageError = function(img, originalSrc, noImageSrc) {
+        if (img.src !== originalSrc && img.src !== noImageSrc) {
+            // Lần đầu lỗi: thử ảnh gốc
+            img.src = originalSrc;
+        } else if (img.src === originalSrc) {
+            // Ảnh gốc cũng lỗi: dùng noimage
+            img.src = noImageSrc;
+        }
+        // Nếu noimage cũng lỗi thì không làm gì nữa
+    };
+</script>

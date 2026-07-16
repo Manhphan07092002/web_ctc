@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông tin công ty</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff; /* xanh nhạt nền */
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .blog_info_item {
+            background: #fff;
+            border: none; /* bỏ viền */
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .blog_info_item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+        .info_title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #0099FF;
+            margin-bottom: 15px;
+            border-left: 4px solid #0099FF;
+            padding-left: 10px;
+        }
+        .info_content p {
+            line-height: 1.6;
+            text-align: justify;
+        }
+        .logo-pc {
+            display: block;
+            max-width: 180px;
+            margin: 0 auto 20px auto;
+        }
+        .social_img {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .social_img img {
+            width: 40px;
+            height: 40px;
+            border: none; /* bỏ viền xanh quanh icon */
+            transition: transform 0.3s, box-shadow 0.3s;
+			border-radius: 50%; /* Thêm thuộc tính bo tròn */
+        }
+        .social_img img:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+        }
+        .fb-page {
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="blog_info_item">
+    <div class="info_title">
+        Giới thiệu
+    </div>
+    <div class="info_content">
+        <div>
+            <img class="logo-pc" src="@Url.Content("/Content/Image")/logoctc2.png" />
+        </div>
+		<h3>Năng lực cốt lõi</h3>
+        <p>
+			Đội ngũ cán bộ quản lý và kỹ thuật của chúng tôi hoàn toàn là các kỹ sư và cử nhân trẻ, nhiệt huyết. Họ không chỉ nhanh chóng nắm bắt, phân tích mà còn ứng dụng hiệu quả những kinh nghiệm và công nghệ mới nhất vào công việc.
+		</p>
+		<h3>Dấu ấn của tuổi trẻ</h3>
+		<p>
+			Dù tuổi đời còn khá trẻ, các kỹ sư và cử nhân của CTC đã tích lũy kinh nghiệm quý báu qua việc tham gia nhiều dự án viễn thông lớn trên khắp cả nước. Từ vai trò quản lý đến các công tác chuyên môn như tư vấn, thiết kế, lắp đặt, bảo trì các hệ thống ngoại vi, truyền dẫn quang, chuyển mạch, vi ba, thông tin di động, tổng đài vệ tinh và mạng máy tính (LAN/WAN), họ đều thể hiện sự chuyên nghiệp và năng lực vượt trội.
+		</p>
+    </div>
+</div>
+
+<div class="blog_info_item">
+    <div class="info_title">
+        Subscribe & Follow
+    </div>
+    <div class="info_content">
+        <div class="social_img">
+            <a href="#">
+                <img src="@Url.Content("/Content/Image")/website/gg-01.png" />
+            </a>
+            <a href="#">
+                <img src="@Url.Content("/Content/Image")/website/fb-01.png" />
+            </a>
+            <a href="#">
+                <img src="@Url.Content("/Content/Image")/website/ytb-01.png" />
+            </a>
+            <a href="#">
+                <img src="@Url.Content("/Content/Image")/website/sky-01.png" />
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="blog_info_item">
+    <div class="info_title">
+        Find us on Facebook
+    </div>
+    <div class="info_content">
+        <div class="fb-page" data-width="" data-height=""></div>
+        <div class="fb-page" data-href="https://www.facebook.com/ctcdn/" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true">
+            <blockquote cite="https://www.facebook.com/ctcdn/" class="fb-xfbml-parse-ignore">
+                <a href="https://www.facebook.com/ctcdn/">Công ty Cổ Phần Xây Lắp Bưu Điện Miền Trung</a>
+            </blockquote>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

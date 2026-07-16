@@ -1,0 +1,1279 @@
+@{
+    // Lấy ID hoạt động từ query string
+    int activityId = 0;
+    if (!string.IsNullOrEmpty(Request.QueryString["id"]))
+    {
+        int.TryParse(Request.QueryString["id"], out activityId);
+    }
+    
+    // Xử lý Like POST request
+    string likeMessage = "";
+    if (Request.HttpMethod == "POST" && Request.Form["action"] == "like")
+    {
+        try
+        {
+            int likeActivityId = 0;
+            if (int.TryParse(Request.Form["activityId"], out likeActivityId))
+            {
+                using (var connection = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+                {
+                    connection.Open();
+                    
+                    // Cộng like count
+                    var updateQuery = "UPDATE Activities SET LikeCount = ISNULL(LikeCount, 0) + 1 WHERE ActivityID = @activityId";
+                    using (var cmd = new System.Data.SqlClient.SqlCommand(updateQuery, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@activityId", likeActivityId);
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        
+                        if (rowsAffected > 0)
+                        {
+                            likeMessage = "Đã thích hoạt động này!";
+                        }
+                        else
+                        {
+                            likeMessage = "Không thể thích hoạt động này.";
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            likeMessage = "Lỗi: " + ex.Message;
+        }
+    }
+    
+    // Lấy thông tin chi tiết hoạt động từ database
+    dynamic activity = null;
+    
+    try 
+    {
+        using (var connection = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+        {
+            connection.Open();
+            
+            var query = @"SELECT a.ActivityID, a.Title, a.Description, a.ActivityType, a.ImageUrl, 
+                         a.StartDate, a.EndDate, a.Location, a.Participants, a.IsPublished,
+                         a.IsFeatured, a.ViewCount, a.CreatedDate, a.UpdatedDate, a.LikeCount,
+                         a.DocumentUrl,
+                         CASE 
+                            WHEN a.ActivityType = 'conference' THEN N'Hội nghị'
+                            WHEN a.ActivityType = 'workshop' THEN N'Hội thảo'
+                            WHEN a.ActivityType = 'training' THEN N'Đào tạo'
+                            WHEN a.ActivityType = 'seminar' THEN N'Seminar'
+                            WHEN a.ActivityType = 'meeting' THEN N'Cuộc họp'
+                            WHEN a.ActivityType = 'event' THEN N'Sự kiện'
+                            ELSE N'Hoạt động'
+                         END as ActivityTypeDisplay
+                         FROM Activities a
+                         WHERE a.ActivityID = @activityId AND a.IsDeleted = 0 AND a.IsPublished = 1";
+            
+            using (var cmd = new System.Data.SqlClient.SqlCommand(query, connection))
+            {
+                cmd.Parameters.AddWithValue("@activityId", activityId);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        // Xử lý nhiều ảnh (phân tách bởi dấu phẩy)
+                        string imageUrls = reader["ImageUrl"].ToString();
+                        string[] images = new string[0];
+                        if (!string.IsNullOrEmpty(imageUrls))
+                        {
+                            images = imageUrls.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                             .Select(img => img.Trim())
+                                             .Where(img => !string.IsNullOrEmpty(img))
+                                             .ToArray();
+                        }
+                        if (images.Length == 0)
+                        {
+                            // Fallback to single default image
+                            images = new string[] { "/Image/icon/thong_bao.jpg" };
+                        }
+
+                        // Xử lý nhiều file tài liệu (phân tách bởi dấu phẩy)
+                        string documentUrls = reader["DocumentUrl"].ToString();
+                        string[] documents = new string[0];
+                        if (!string.IsNullOrEmpty(documentUrls))
+                        {
+                            documents = documentUrls.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                                   .Select(doc => doc.Trim())
+                                                   .Where(doc => !string.IsNullOrEmpty(doc))
+                                                   .ToArray();
+                        }
+
+                        activity = new {
+                            activityId = Convert.ToInt32(reader["ActivityID"]),
+                            title = reader["Title"].ToString(),
+                            description = reader["Description"].ToString(),
+                            activityType = reader["ActivityTypeDisplay"].ToString(),
+                            imageUrl = reader["ImageUrl"].ToString(),
+                            startDate = reader["StartDate"] != DBNull.Value ? Convert.ToDateTime(reader["StartDate"]).ToString("dd/MM/yyyy") : "",
+                            endDate = reader["EndDate"] != DBNull.Value ? Convert.ToDateTime(reader["EndDate"]).ToString("dd/MM/yyyy") : "",
+                            location = reader["Location"].ToString(),
+                            participants = reader["Participants"].ToString(),
+                            isPublished = Convert.ToBoolean(reader["IsPublished"]),
+                            isFeatured = Convert.ToBoolean(reader["IsFeatured"]),
+                            viewCount = reader["ViewCount"].ToString(),
+                            likeCount = reader["LikeCount"].ToString(),
+                            images = images,
+                            documents = documents,
+                            createdDate = reader["CreatedDate"] != DBNull.Value ? Convert.ToDateTime(reader["CreatedDate"]).ToString("dd/MM/yyyy") : ""
+                        };
+                        
+                        // Cộng lượt xem
+                        var updateViewQuery = "UPDATE Activities SET ViewCount = ISNULL(ViewCount, 0) + 1 WHERE ActivityID = @activityId";
+                        using (var updateCmd = new System.Data.SqlClient.SqlCommand(updateViewQuery, connection))
+                        {
+                            updateCmd.Parameters.AddWithValue("@activityId", activityId);
+                            updateCmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        // Log error và redirect về trang danh sách
+        Response.Redirect("/hoat_dong");
+        return;
+    }
+    
+    // Nếu không tìm thấy hoạt động, redirect về trang danh sách
+    if (activity == null)
+    {
+        Response.Redirect("/hoat_dong");
+        return;
+    }
+}
+
+<style>
+    .activity-detail-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        background: #f8fafc;
+        color: #64748b;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-bottom: 30px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .back-button:hover {
+        background: #e2e8f0;
+        color: #475569;
+        text-decoration: none;
+        transform: translateX(-2px);
+    }
+
+    .back-button svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .activity-header {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        margin-bottom: 30px;
+    }
+
+    .activity-hero-image {
+        width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        background: #f8fafc;
+    }
+
+    /* Image Slider Styles */
+    .image-slider {
+        position: relative;
+        width: 100%;
+        min-height: 200px;
+        max-height: 400px;
+        overflow: hidden;
+        border-radius: 16px 16px 0 0;
+        display: block;
+    }
+
+    .slider-container {
+        display: flex;
+        align-items: center;
+        transform: translateX(0);
+        transition: transform 0.5s ease;
+    }
+
+    .slider-container.single-image {
+        width: 100%;
+        animation: none;
+        justify-content: center;
+    }
+
+    /* Dynamic width based on number of slides */
+    .slider-container[data-slides="1"] { width: 100%; }
+    .slider-container[data-slides="2"] { width: 200%; }
+    .slider-container[data-slides="3"] { width: 300%; }
+    .slider-container[data-slides="4"] { width: 400%; }
+    .slider-container[data-slides="5"] { width: 500%; }
+
+    .slide {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 400px;
+    }
+
+    /* Dynamic slide width based on number of slides */
+    .slider-container[data-slides="1"] .slide { width: 100%; }
+    .slider-container[data-slides="2"] .slide { width: 50%; }
+    .slider-container[data-slides="3"] .slide { width: 33.333%; }
+    .slider-container[data-slides="4"] .slide { width: 25%; }
+    .slider-container[data-slides="5"] .slide { width: 20%; }
+
+    .slide.single {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: auto;
+    }
+
+    .slide img {
+        max-width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        width: auto;
+        height: auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Style cho ảnh hero mặc định */
+    .activity-hero-image {
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .slider-dots {
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+    }
+
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .dot.active {
+        background: white;
+    }
+
+    /* Slider Controls */
+    .slider-controls {
+        position: absolute;
+        top: 50%;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 20px;
+        transform: translateY(-50%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .image-slider:hover .slider-controls {
+        opacity: 1;
+    }
+
+    .slider-btn {
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .slider-btn:hover {
+        background: rgba(0, 0, 0, 0.9);
+        transform: scale(1.1);
+    }
+
+    /* Like Button Styles - Modern Design */
+    .like-button {
+        background: linear-gradient(135deg, #ff6b6b, #ff5252);
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 50px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 20px rgba(255, 107, 107, 0.25);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+        min-width: 180px;
+        position: relative;
+        overflow: hidden;
+        text-transform: none;
+        letter-spacing: 0.5px;
+    }
+
+    .like-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .like-button:hover::before {
+        left: 100%;
+    }
+
+    .like-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        background: linear-gradient(135deg, #ff5252, #f44336);
+    }
+
+    .like-button:active {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .like-button.liked {
+        background: linear-gradient(135deg, #e91e63, #ad1457);
+        box-shadow: 0 4px 20px rgba(233, 30, 99, 0.3);
+        animation: likeAnimation 0.6s ease;
+    }
+
+    .like-button.liked:hover {
+        background: linear-gradient(135deg, #c2185b, #880e4f);
+        box-shadow: 0 8px 25px rgba(233, 30, 99, 0.4);
+    }
+
+    .like-count-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-left: 4px;
+    }
+
+    @@keyframes likeAnimation {
+        0% { transform: scale(1) rotate(0deg); }
+        25% { transform: scale(1.1) rotate(-5deg); }
+        50% { transform: scale(1.15) rotate(5deg); }
+        75% { transform: scale(1.05) rotate(-2deg); }
+        100% { transform: scale(1) rotate(0deg); }
+    }
+
+    @@keyframes heartBeat {
+        0% { transform: scale(1); }
+        14% { transform: scale(1.3); }
+        28% { transform: scale(1); }
+        42% { transform: scale(1.3); }
+        70% { transform: scale(1); }
+    }
+
+    .like-button.liked #likeIcon {
+        animation: heartBeat 1.5s ease-in-out;
+    }
+
+    @@keyframes fadeIn {
+        0% { opacity: 0; transform: translateY(-10px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+
+    /* Auto-play Animation - Dynamic based on number of images */
+    .auto-play .slider-container {
+        animation-play-state: running;
+    }
+
+    .auto-play:hover .slider-container {
+        animation-play-state: paused;
+    }
+
+    /* Animation for 2 images */
+    .auto-play .slider-container[data-slides="2"] {
+        animation: slideShow2 8s infinite ease-in-out;
+    }
+
+    /* Animation for 3 images */
+    .auto-play .slider-container[data-slides="3"] {
+        animation: slideShow3 12s infinite ease-in-out;
+    }
+
+    /* Animation for 4 images */
+    .auto-play .slider-container[data-slides="4"] {
+        animation: slideShow4 16s infinite ease-in-out;
+    }
+
+    /* Animation for 5 images */
+    .auto-play .slider-container[data-slides="5"] {
+        animation: slideShow5 20s infinite ease-in-out;
+    }
+
+    @@keyframes slideShow2 {
+        0% { transform: translateX(0); }
+        40% { transform: translateX(0); }
+        50% { transform: translateX(-20%); }
+        90% { transform: translateX(-20%); }
+        100% { transform: translateX(0); }
+    }
+
+    @@keyframes slideShow3 {
+        0% { transform: translateX(0); }
+        25% { transform: translateX(0); }
+        33% { transform: translateX(-20%); }
+        58% { transform: translateX(-20%); }
+        66% { transform: translateX(-40%); }
+        91% { transform: translateX(-40%); }
+        100% { transform: translateX(0); }
+    }
+
+    @@keyframes slideShow4 {
+        0% { transform: translateX(0); }
+        20% { transform: translateX(0); }
+        25% { transform: translateX(-20%); }
+        45% { transform: translateX(-20%); }
+        50% { transform: translateX(-40%); }
+        70% { transform: translateX(-40%); }
+        75% { transform: translateX(-60%); }
+        95% { transform: translateX(-60%); }
+        100% { transform: translateX(0); }
+    }
+
+    @@keyframes slideShow5 {
+        0% { transform: translateX(0); }
+        16% { transform: translateX(0); }
+        20% { transform: translateX(-20%); }
+        36% { transform: translateX(-20%); }
+        40% { transform: translateX(-40%); }
+        56% { transform: translateX(-40%); }
+        60% { transform: translateX(-60%); }
+        76% { transform: translateX(-60%); }
+        80% { transform: translateX(-80%); }
+        96% { transform: translateX(-80%); }
+        100% { transform: translateX(0); }
+    }
+
+    .activity-header-content {
+        padding: 30px;
+    }
+
+    .activity-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 10px;
+        line-height: 1.2;
+    }
+
+    .activity-category {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 20px;
+    }
+
+    .activity-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .meta-item svg {
+        width: 16px;
+        height: 16px;
+        color: #3b82f6;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #10b981;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .activity-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+        margin-top: 30px;
+    }
+
+    .activity-main {
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+
+    .activity-sidebar {
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        height: fit-content;
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .activity-description {
+        color: #475569;
+        line-height: 1.7;
+        font-size: 16px;
+    }
+
+    .info-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .info-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        font-size: 16px;
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    .document-link {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 24px;
+        background: #3b82f6;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-top: 20px;
+    }
+
+    .document-link:hover {
+        background: #2563eb;
+        color: white;
+        text-decoration: none;
+    }
+
+    .document-link svg {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+    }
+
+    .download-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 24px;
+        background: #10b981;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-top: 20px;
+    }
+
+    .download-btn:hover {
+        background: #059669;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    .download-all-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 24px;
+        background: #dc2626;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-top: 20px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .download-all-btn:hover {
+        background: #b91c1c;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+
+    .file-list {
+        margin-top: 15px;
+        padding: 15px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border-left: 4px solid #3b82f6;
+    }
+
+    .file-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .file-item:last-child {
+        border-bottom: none;
+    }
+
+    .file-name {
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .file-size {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .individual-download {
+        padding: 4px 12px;
+        background: #10b981;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 12px;
+        transition: all 0.2s ease;
+    }
+
+    .individual-download:hover {
+        background: #059669;
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Responsive - Tablet */
+    @@media (max-width: 1024px) and (min-width: 769px) {
+        .slide img {
+            border-radius: 11px;
+            max-height: 350px;
+        }
+
+        .activity-hero-image {
+            border-radius: 11px;
+            max-height: 350px;
+        }
+    }
+
+    /* Responsive - Mobile */
+    @@media (max-width: 768px) {
+        .activity-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .activity-title {
+            font-size: 24px;
+        }
+        
+        .activity-hero-image {
+            max-height: 250px;
+            border-radius: 10px;
+        }
+
+        .slide img {
+            border-radius: 10px;
+            max-height: 250px;
+        }
+        
+        .activity-header-content,
+        .activity-main,
+        .activity-sidebar {
+            padding: 20px;
+        }
+
+        .like-button {
+            min-width: 150px;
+            padding: 12px 20px;
+            font-size: 14px;
+        }
+
+        .like-count-badge {
+            font-size: 12px;
+            padding: 2px 6px;
+        }
+    }
+</style>
+
+<div class="activity-detail-container">
+    <a href="/hoat_dong" class="back-button">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        Quay lại danh sách hoạt động
+    </a>
+
+    <div class="activity-header">
+        @{
+            // Đếm tổng số ảnh có sẵn (bao gồm cả từ images array và imageUrl)
+            var displayImages = new List<string>();
+            
+            // Thêm ảnh từ images array (nếu có)
+            if (activity != null && activity.images != null && activity.images.Length > 0)
+            {
+                foreach (var img in activity.images)
+                {
+                    if (!string.IsNullOrEmpty(img) && img != "/Image/icon/thong_bao.jpg")
+                    {
+                        displayImages.Add(img);
+                    }
+                }
+            }
+            
+            // Thêm ảnh từ imageUrl (nếu có và khác default)
+            if (activity != null && !string.IsNullOrEmpty(activity.imageUrl) && 
+                activity.imageUrl != "/Image/icon/thong_bao.jpg" && 
+                !displayImages.Contains(activity.imageUrl))
+            {
+                displayImages.Add(activity.imageUrl);
+            }
+            
+            // Giới hạn tối đa 5 ảnh
+            if (displayImages.Count > 5)
+            {
+                displayImages = displayImages.Take(5).ToList();
+            }
+            
+            int totalDisplayImages = displayImages.Count;
+        }
+        
+        @if (totalDisplayImages >= 1)
+        {
+            <!-- TH2: Có 1-5 ảnh → Auto-play slider -->
+            <div class="image-slider auto-play" data-auto-play="true">
+                <div class="slider-container" data-slides="@totalDisplayImages">
+                    @for (int i = 0; i < totalDisplayImages; i++)
+                    {
+                        <div class="slide @(i == 0 ? "active" : "")">
+                            <img src="@displayImages[i]" alt="@activity.title - Ảnh @(i+1)" 
+                                 onerror="this.src='/Image/icon/thong_bao.jpg';">
+                        </div>
+                    }
+                </div>
+                
+                @if (totalDisplayImages > 1)
+                {
+                    <div class="slider-dots">
+                        @for (int i = 0; i < totalDisplayImages; i++)
+                        {
+                            <div class="dot @(i == 0 ? "active" : "")" onclick="goToSlide(@i)"></div>
+                        }
+                    </div>
+                    <div class="slider-controls">
+                        <button class="slider-btn prev" onclick="prevSlide()">‹</button>
+                        <button class="slider-btn next" onclick="nextSlide()">›</button>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- TH1: Không có ảnh → Ảnh mặc định -->
+            <div class="image-slider single-image">
+                <div class="slider-container">
+                    <div class="slide single active">
+                        <img src="/Image/icon/thong_bao.jpg" alt="@activity.title" class="activity-hero-image">
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="activity-header-content">
+            <h1 class="activity-title">@activity.title</h1>
+            <span class="activity-category">@activity.activityType</span>
+            
+            <div class="activity-meta">
+                @if (!string.IsNullOrEmpty(activity.location))
+                {
+                    <div class="meta-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25s-7.5-4.108-7.5-11.25a7.5 7.5 0 1 1 15 0Z" />
+                        </svg>
+                        @activity.location
+                    </div>
+                }
+                <div class="meta-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5" />
+                    </svg>
+                    Đã xuất bản
+                </div>
+                @if (!string.IsNullOrEmpty(activity.createdDate))
+                {
+                    <div class="meta-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        @activity.createdDate
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="activity-content">
+        <div class="activity-main">
+            <h2 class="section-title">Mô tả hoạt động</h2>
+            <div class="activity-description">
+                @if (!string.IsNullOrEmpty(activity.description))
+                {
+                    @activity.description
+                }
+                else
+                {
+                    <p>Chưa có mô tả chi tiết cho hoạt động này.</p>
+                }
+            </div>
+
+            @if (activity.documents != null && activity.documents.Length > 0)
+            {
+                <h4 style="margin-top: 30px; margin-bottom: 15px; color: #1e293b;">📁 Tài liệu hoạt động</h4>
+            }
+            
+            @if (activity.documents != null && activity.documents.Length > 1)
+            {
+                <button onclick="downloadAllFiles()" class="download-all-btn">
+                    📦 Tải tất cả (@activity.documents.Length files)
+                </button>
+            }
+
+            @if (activity.documents != null && activity.documents.Length > 0)
+            {
+                <div class="file-list">
+                    @for (int i = 0; i < activity.documents.Length; i++)
+                    {
+                        string fileName = System.IO.Path.GetFileName(activity.documents[i]);
+                        if (string.IsNullOrEmpty(fileName)) 
+                        { 
+                            fileName = "Document " + (i + 1); 
+                        }
+                        
+                        <div class="file-item">
+                            <div>
+                                <div class="file-name">📄 @fileName</div>
+                                <div class="file-size">File @(i + 1)</div>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <a href="@activity.documents[i]" target="_blank" class="document-link" style="margin: 0; padding: 6px 12px; font-size: 12px;">
+                                    👁️ Xem
+                                </a>
+                                <a href="@activity.documents[i]" download class="individual-download">
+                                    ⬇️ Tải
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="activity-sidebar">
+            <h3 class="section-title">Thông tin hoạt động</h3>
+            <div class="info-grid">
+                @if (!string.IsNullOrEmpty(activity.participants))
+                {
+                    <div class="info-item">
+                        <div class="info-label">Người tham gia</div>
+                        <div class="info-value">@activity.participants</div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(activity.startDate))
+                {
+                    <div class="info-item">
+                        <div class="info-label">Thời gian bắt đầu</div>
+                        <div class="info-value" style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #3b82f6;">📅</span>
+                            <span>@activity.startDate</span>
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(activity.endDate))
+                {
+                    <div class="info-item">
+                        <div class="info-label">Thời gian kết thúc</div>
+                        <div class="info-value" style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #dc2626;">🏁</span>
+                            <span>@activity.endDate</span>
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(activity.viewCount))
+                {
+                    <div class="info-item">
+                        <div class="info-label">Lượt xem</div>
+                        <div class="info-value" style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #059669;">👁️</span>
+                            <span>@activity.viewCount</span>
+                        </div>
+                    </div>
+                }
+
+            </div>
+            
+            <!-- Like Button Form -->
+            <div style="margin-top: 30px; text-align: center;">
+                @if (!string.IsNullOrEmpty(likeMessage))
+                {
+                    <div style="margin-bottom: 15px; padding: 10px; background: #d4edda; color: #155724; border-radius: 8px; font-size: 14px;">
+                        @likeMessage
+                    </div>
+                }
+                
+                <form method="post" target="likeFrame" style="display: inline-block;" onsubmit="handleLikeSubmit(this)">
+                    <input type="hidden" name="action" value="like" />
+                    <input type="hidden" name="activityId" value="@activity.activityId" />
+                    <button type="submit" class="like-button" id="likeBtn">
+                        <span id="likeIcon">❤️</span>
+                        <span id="likeText">Thích hoạt động</span>
+                        <span id="likeCount" class="like-count-badge">@activity.likeCount</span>
+                    </button>
+                </form>
+                
+                <!-- Hidden iframe for form submission -->
+                <iframe name="likeFrame" style="display: none;" onload="handleLikeResponse()"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    // Tạo JavaScript array cho documents
+    string documentsJson = "[]";
+    if (activity.documents != null && activity.documents.Length > 0)
+    {
+        var docList = new List<string>();
+        for (int i = 0; i < activity.documents.Length; i++)
+        {
+            string fileName = System.IO.Path.GetFileName(activity.documents[i]);
+            if (string.IsNullOrEmpty(fileName)) 
+            { 
+                fileName = "Document_" + (i + 1);
+            }
+            
+            docList.Add(string.Format("{{\"url\": \"{0}\", \"name\": \"{1}\"}}", 
+                activity.documents[i].Replace("\"", "\\\"").Replace("\\", "\\\\"), 
+                fileName.Replace("\"", "\\\"").Replace("\\", "\\\\")));
+        }
+        documentsJson = "[" + string.Join(",", docList.ToArray()) + "]";
+    }
+}
+
+<!-- Hidden input to pass documents data -->
+<input type="hidden" id="documentsData" value="@Html.Raw(Server.HtmlEncode(documentsJson))" />
+
+<script type="text/javascript">
+    // Activity documents data
+    var activityDocuments = [];
+    
+    // Initialize documents array from hidden input
+    function initDocuments() {
+        try {
+            var hiddenInput = document.getElementById('documentsData');
+            if (hiddenInput && hiddenInput.value) {
+                activityDocuments = JSON.parse(hiddenInput.value);
+            } else {
+                activityDocuments = [];
+            }
+        } catch(e) {
+            console.error('Error parsing documents data:', e);
+            activityDocuments = [];
+        }
+    }
+    
+    // Call initialization when DOM is ready
+    document.addEventListener('DOMContentLoaded', initDocuments);
+
+    // Download all files function
+    function downloadAllFiles() {
+        if (activityDocuments.length === 0) {
+            alert('Không có tài liệu để tải xuống!');
+            return;
+        }
+
+        // Show loading message
+        const btn = document.querySelector('.download-all-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '⏳ Đang tải...';
+        btn.disabled = true;
+
+        // Download each file with delay to avoid browser blocking
+        activityDocuments.forEach((doc, index) => {
+            setTimeout(() => {
+                const link = document.createElement('a');
+                link.href = doc.url;
+                link.download = doc.name;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Reset button after last download
+                if (index === activityDocuments.length - 1) {
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }, 1000);
+                }
+            }, index * 500); // 500ms delay between downloads
+        });
+    }
+
+    // Optional: Add click functionality to slider dots
+    document.addEventListener('DOMContentLoaded', function() {
+        const dots = document.querySelectorAll('.dot');
+        const sliderContainer = document.querySelector('.slider-container');
+        
+        if (dots.length > 1 && sliderContainer) {
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', function() {
+                    // Remove active class from all dots
+                    dots.forEach(d => d.classList.remove('active'));
+                    // Add active class to clicked dot
+                    this.classList.add('active');
+                    
+                    // Move slider to corresponding position
+                    const slideCount = parseInt(sliderContainer.getAttribute('data-slides')) || dots.length;
+                    const translateX = -index * (100 / slideCount); // Dynamic percentage per slide
+                    sliderContainer.style.transform = `translateX(${translateX}%)`;
+                    
+                    // Pause animation temporarily
+                    sliderContainer.style.animationPlayState = 'paused';
+                    setTimeout(() => {
+                        sliderContainer.style.animationPlayState = 'running';
+                    }, 3000);
+                });
+            });
+        }
+    });
+
+    // Slider Control Functions
+    let currentSlide = 0;
+    let totalSlides = 0;
+    let sliderContainer = null;
+    let dots = [];
+
+    // Initialize slider
+    document.addEventListener('DOMContentLoaded', function() {
+        const slider = document.querySelector('.image-slider');
+        if (slider) {
+            sliderContainer = slider.querySelector('.slider-container');
+            dots = slider.querySelectorAll('.dot');
+            totalSlides = dots.length;
+            
+            // Only auto-advance if it has auto-play class
+            if (slider.classList.contains('auto-play')) {
+                setInterval(() => {
+                    if (!slider.matches(':hover')) {
+                        nextSlide();
+                    }
+                }, 3000);
+            }
+        }
+    });
+
+    function goToSlide(slideIndex) {
+        currentSlide = slideIndex;
+        updateSlider();
+    }
+
+    function nextSlide() {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        updateSlider();
+    }
+
+    function prevSlide() {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+        updateSlider();
+    }
+
+    function updateSlider() {
+        if (sliderContainer && dots.length > 0) {
+            const slideCount = parseInt(sliderContainer.getAttribute('data-slides')) || totalSlides;
+            const translateX = -currentSlide * (100 / slideCount); // Dynamic percentage per slide
+            
+            // Temporarily disable CSS animation
+            sliderContainer.style.animation = 'none';
+            sliderContainer.style.transform = `translateX(${translateX}%)`;
+            
+            // Update dots
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+            
+            // Re-enable animation after a short delay with correct animation based on slide count
+            setTimeout(() => {
+                const slider = document.querySelector('.image-slider');
+                if (slider && slider.classList.contains('auto-play')) {
+                    const slideCount = sliderContainer.getAttribute('data-slides');
+                    switch(slideCount) {
+                        case '2':
+                            sliderContainer.style.animation = 'slideShow2 8s infinite ease-in-out';
+                            break;
+                        case '3':
+                            sliderContainer.style.animation = 'slideShow3 12s infinite ease-in-out';
+                            break;
+                        case '4':
+                            sliderContainer.style.animation = 'slideShow4 16s infinite ease-in-out';
+                            break;
+                        case '5':
+                            sliderContainer.style.animation = 'slideShow5 20s infinite ease-in-out';
+                            break;
+                        default:
+                            sliderContainer.style.animation = 'slideShow3 12s infinite ease-in-out';
+                    }
+                }
+            }, 500);
+        }
+    }
+
+    // Like functionality with iframe (no page reload)
+    let currentLikeCount = parseInt('@activity.likeCount') || 0;
+    let isSubmitting = false;
+
+    function handleLikeSubmit(form) {
+        if (isSubmitting) return false;
+        
+        isSubmitting = true;
+        const btn = document.getElementById('likeBtn');
+        const icon = document.getElementById('likeIcon');
+        const text = document.getElementById('likeText');
+        const count = document.getElementById('likeCount');
+        
+        // Update UI immediately
+        btn.classList.add('liked');
+        icon.textContent = '💖';
+        text.textContent = 'Đã thích';
+        currentLikeCount++;
+        count.textContent = currentLikeCount;
+        
+        // Disable button temporarily
+        btn.disabled = true;
+        
+        return true; // Allow form submission
+    }
+
+    function handleLikeResponse() {
+        // This runs when iframe loads (form submitted)
+        setTimeout(() => {
+            const btn = document.getElementById('likeBtn');
+            btn.disabled = false;
+            isSubmitting = false;
+            
+            // Show success message
+            showLikeMessage('Đã thích hoạt động này! ❤️');
+        }, 500);
+    }
+
+    function showLikeMessage(message) {
+        // Create or update message div
+        let messageDiv = document.getElementById('likeMessage');
+        if (!messageDiv) {
+            messageDiv = document.createElement('div');
+            messageDiv.id = 'likeMessage';
+            messageDiv.style.cssText = 'margin-bottom: 15px; padding: 10px; background: #d4edda; color: #155724; border-radius: 8px; font-size: 14px; animation: fadeIn 0.5s ease;';
+            
+            const likeContainer = document.querySelector('.like-button').parentElement.parentElement;
+            likeContainer.insertBefore(messageDiv, likeContainer.firstChild);
+        }
+        
+        messageDiv.textContent = message;
+        messageDiv.style.display = 'block';
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 3000);
+    }
+</script>

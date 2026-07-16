@@ -1,0 +1,182 @@
+@{
+    ViewBag.Title = ViewBag.Title ?? "Custom SQL Query Test";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+    var query = ViewBag.Query as string ?? "";
+    var queryResult = ViewBag.QueryResult;
+    var querySuccess = ViewBag.QuerySuccess ?? false;
+    var queryError = ViewBag.QueryError as string;
+}
+
+<style>
+    .test-container { max-width: 1200px; margin: 20px auto; padding: 20px; }
+    .test-section { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .test-title { color: #495057; font-size: 1.2em; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #007bff; padding-bottom: 5px; }
+    .success { color: #28a745; font-weight: bold; }
+    .error { color: #dc3545; font-weight: bold; background: #f8d7da; padding: 10px; border-radius: 4px; }
+    .query-textarea { width: 100%; height: 150px; font-family: monospace; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; }
+    .result-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .result-table th, .result-table td { border: 1px solid #dee2e6; padding: 8px; text-align: left; }
+    .result-table th { background-color: #e9ecef; font-weight: bold; }
+    .result-table tr:nth-child(even) { background-color: #f8f9fa; }
+    .sample-queries { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+    .sample-query { background: white; border: 1px solid #dee2e6; border-radius: 6px; padding: 15px; cursor: pointer; transition: all 0.2s; }
+    .sample-query:hover { background: #e3f2fd; border-color: #2196f3; }
+    .sample-query h4 { margin: 0 0 10px 0; color: #1976d2; }
+    .sample-query code { background: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-size: 0.9em; }
+</style>
+
+<div class="test-container">
+    <h1>🔍 Custom SQL Query Test</h1>
+    <p><strong>URL:</strong> <code>/Test/SqlQuery</code></p>
+    
+    <!-- Query Form -->
+    <div class="test-section">
+        <div class="test-title">📝 SQL Query Input</div>
+        <form method="GET" action="/Test/SqlQuery">
+            <textarea name="query" class="query-textarea" placeholder="Enter your SELECT query here...">@query</textarea>
+            <br><br>
+            <button type="submit" class="btn btn-primary">🚀 Execute Query</button>
+            <button type="button" class="btn btn-secondary" onclick="document.querySelector('.query-textarea').value = ''">🗑️ Clear</button>
+        </form>
+        
+        <div style="margin-top: 15px;">
+            <strong>⚠️ Security Note:</strong> Only SELECT queries are allowed for safety reasons.
+        </div>
+    </div>
+
+    <!-- Query Result -->
+    @if (!string.IsNullOrEmpty(query))
+    {
+        <div class="test-section">
+            <div class="test-title">📊 Query Result</div>
+            
+            <div><strong>Executed Query:</strong></div>
+            <div style="background: #f1f3f4; border: 1px solid #dadce0; border-radius: 4px; padding: 10px; font-family: monospace; margin: 10px 0;">@query</div>
+            
+            @if (!string.IsNullOrEmpty(queryError))
+            {
+                <div class="error">
+                    <strong>❌ Error:</strong> @queryError
+                </div>
+            }
+            else if (querySuccess && queryResult != null)
+            {
+                <div class="success">✅ Query executed successfully!</div>
+                
+                @if (((IEnumerable<dynamic>)queryResult).Any())
+                {
+                    var firstItem = ((IEnumerable<dynamic>)queryResult).First();
+                    var properties = ((System.Data.Entity.Infrastructure.DbDataRecord)firstItem).GetType().GetProperties();
+                    
+                    <table class="result-table">
+                        <thead>
+                            <tr>
+                                @for (int i = 0; i < ((System.Data.Entity.Infrastructure.DbDataRecord)firstItem).FieldCount; i++)
+                                {
+                                    <th>@(((System.Data.Entity.Infrastructure.DbDataRecord)firstItem).GetName(i))</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in (IEnumerable<dynamic>)queryResult)
+                            {
+                                <tr>
+                                    @for (int i = 0; i < ((System.Data.Entity.Infrastructure.DbDataRecord)row).FieldCount; i++)
+                                    {
+                                        <td>@(((System.Data.Entity.Infrastructure.DbDataRecord)row)[i])</td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div>No results returned.</div>
+                }
+            }
+        </div>
+    }
+
+    <!-- Sample Queries -->
+    <div class="test-section">
+        <div class="test-title">📚 Sample Queries</div>
+        <div class="sample-queries">
+            
+            <div class="sample-query" onclick="setQuery('SELECT * FROM Activities')">
+                <h4>All Activities</h4>
+                <code>SELECT * FROM Activities</code>
+                <p>Get all activities from the database</p>
+            </div>
+            
+            <div class="sample-query" onclick="setQuery('SELECT * FROM Activities WHERE IsPublished = 1')">
+                <h4>Published Activities</h4>
+                <code>SELECT * FROM Activities WHERE IsPublished = 1</code>
+                <p>Get only published activities</p>
+            </div>
+            
+            <div class="sample-query" onclick="setQuery('SELECT ActivityType, COUNT(*) as Count FROM Activities WHERE IsPublished = 1 GROUP BY ActivityType')">
+                <h4>Count by Type</h4>
+                <code>SELECT ActivityType, COUNT(*) as Count FROM Activities WHERE IsPublished = 1 GROUP BY ActivityType</code>
+                <p>Count activities by type</p>
+            </div>
+            
+            <div class="sample-query" onclick="setQuery('SELECT TOP 5 * FROM Activities WHERE IsPublished = 1 ORDER BY CreatedDate DESC')">
+                <h4>Recent Activities</h4>
+                <code>SELECT TOP 5 * FROM Activities WHERE IsPublished = 1 ORDER BY CreatedDate DESC</code>
+                <p>Get 5 most recent activities</p>
+            </div>
+            
+            <div class="sample-query" onclick="setQuery('SELECT * FROM Activities WHERE IsFeatured = 1 AND IsPublished = 1')">
+                <h4>Featured Activities</h4>
+                <code>SELECT * FROM Activities WHERE IsFeatured = 1 AND IsPublished = 1</code>
+                <p>Get featured activities only</p>
+            </div>
+            
+            <div class="sample-query" onclick="setQuery('SELECT ActivityType, AVG(ViewCount) as AvgViews, MAX(ViewCount) as MaxViews FROM Activities WHERE IsPublished = 1 GROUP BY ActivityType')">
+                <h4>View Statistics</h4>
+                <code>SELECT ActivityType, AVG(ViewCount) as AvgViews, MAX(ViewCount) as MaxViews FROM Activities WHERE IsPublished = 1 GROUP BY ActivityType</code>
+                <p>View count statistics by type</p>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="test-section">
+        <div class="test-title">⚡ Quick Actions</div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/Test/Activities" class="btn btn-info">📊 Activities Test Page</a>
+            <a href="/WProducts/hoat_dong" class="btn btn-success">👀 View Live Page</a>
+            <button onclick="setQuery('SELECT COUNT(*) as TotalActivities FROM Activities')" class="btn btn-secondary">📈 Quick Count</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setQuery(query) {
+        document.querySelector('.query-textarea').value = query;
+    }
+</script>
+
+<style>
+    .btn {
+        display: inline-block;
+        padding: 8px 16px;
+        margin: 4px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: bold;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        background-color: #6c757d;
+        color: white;
+    }
+    .btn-primary { background-color: #007bff; }
+    .btn-secondary { background-color: #6c757d; }
+    .btn-info { background-color: #17a2b8; }
+    .btn-success { background-color: #28a745; }
+    .btn:hover { opacity: 0.8; }
+</style>

@@ -1,0 +1,242 @@
+@* Nhúng file CSS *@
+<link href="@Url.Content("~/Content/css/Tin_tuc.css")" rel="stylesheet" />
+
+@using System.Data.SqlClient
+@using System.Configuration
+
+@{
+    var activities = new List<object>();
+    var errorMessage = "";
+    
+    try
+    {
+        // Lấy connection string từ web.config
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+        
+        using (var connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+            
+            // SQL query để lấy các hoạt động đã được publish và không bị xóa - OPTIMIZED
+            // Only select needed columns for better performance
+            string query = @"
+                SELECT TOP 10 
+                    [ActivityID],
+                    [Title],
+                    [ActivityType],
+                    [ImageUrl],
+                    [StartDate],
+                    [EndDate],
+                    [Location],
+                    [Participants],
+                    [IsFeatured],
+                    [ViewCount],
+                    [CreatedDate],
+                    [LikeCount]
+                FROM [Activities]
+                WHERE [IsPublished] = 1 AND ([IsDeleted] = 0 OR [IsDeleted] IS NULL)
+                ORDER BY [IsFeatured] DESC, [CreatedDate] DESC";
+            
+            using (var command = new SqlCommand(query, connection))
+            {
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        // Xử lý ImageUrl - lấy ảnh đầu tiên nếu có nhiều ảnh
+                        string imageUrl = reader["ImageUrl"] != DBNull.Value ? reader["ImageUrl"].ToString() : "";
+                        if (!string.IsNullOrEmpty(imageUrl))
+                        {
+                            // Nếu có nhiều ảnh (phân tách bằng dấu phẩy), lấy ảnh đầu tiên
+                            if (imageUrl.Contains(","))
+                            {
+                                imageUrl = imageUrl.Split(',')[0].Trim();
+                            }
+                            
+                            // Xử lý đường dẫn ảnh
+                            if (!imageUrl.StartsWith("http") && !imageUrl.StartsWith("/"))
+                            {
+                                if (imageUrl.StartsWith("Content/"))
+                                {
+                                    imageUrl = "/" + imageUrl;
+                                }
+                                else if (!imageUrl.StartsWith("uploads/"))
+                                {
+                                    imageUrl = "/uploads/activities/images/" + imageUrl;
+                                }
+                                else
+                                {
+                                    imageUrl = "/" + imageUrl;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            imageUrl = "/Image/icon/thong_bao.jpg";
+                        }
+                        
+                        // Không hiển thị mô tả để gọn hơn
+                        string description = "";
+                        
+                        // Xử lý ActivityType
+                        string activityType = reader["ActivityType"] != DBNull.Value ? reader["ActivityType"].ToString() : "";
+                        string activityTypeDisplay = "";
+                        switch (activityType.ToLower())
+                        {
+                            case "meeting":
+                                activityTypeDisplay = "Họp mặt";
+                                break;
+                            case "conference":
+                                activityTypeDisplay = "Hội nghị";
+                                break;
+                            case "training":
+                                activityTypeDisplay = "Đào tạo";
+                                break;
+                            case "workshop":
+                                activityTypeDisplay = "Hội thảo";
+                                break;
+                            case "event":
+                                activityTypeDisplay = "Sự kiện";
+                                break;
+                            case "project":
+                                activityTypeDisplay = "Dự án";
+                                break;
+                            default:
+                                activityTypeDisplay = "Hoạt động";
+                                break;
+                        }
+                        
+                        activities.Add(new {
+                            ActivityID = Convert.ToInt32(reader["ActivityID"]),
+                            Title = reader["Title"] != DBNull.Value ? reader["Title"].ToString() : "",
+                            Description = "",
+                            ActivityType = activityTypeDisplay,
+                            ImageUrl = imageUrl,
+                            StartDate = reader["StartDate"] != DBNull.Value ? Convert.ToDateTime(reader["StartDate"]) : (DateTime?)null,
+                            EndDate = reader["EndDate"] != DBNull.Value ? Convert.ToDateTime(reader["EndDate"]) : (DateTime?)null,
+                            Location = reader["Location"] != DBNull.Value ? reader["Location"].ToString() : "",
+                            Participants = reader["Participants"] != DBNull.Value ? Convert.ToInt32(reader["Participants"]) : 0,
+                            IsFeatured = reader["IsFeatured"] != DBNull.Value ? Convert.ToBoolean(reader["IsFeatured"]) : false,
+                            ViewCount = reader["ViewCount"] != DBNull.Value ? Convert.ToInt32(reader["ViewCount"]) : 0,
+                            LikeCount = reader["LikeCount"] != DBNull.Value ? Convert.ToInt32(reader["LikeCount"]) : 0,
+                            CreatedDate = reader["CreatedDate"] != DBNull.Value ? Convert.ToDateTime(reader["CreatedDate"]) : DateTime.Now
+                        });
+                    }
+                }
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        errorMessage = "Không thể tải danh sách hoạt động: " + ex.Message;
+    }
+}
+
+<div class="news-section">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+    else if (activities.Count == 0)
+    {
+        <div class="alert alert-warning">Hiện tại chưa có hoạt động nào được công bố. Vui lòng quay lại sau.</div>
+    }
+    else
+    {
+        <div class="page-header">
+            <h3>TIN TỨC & HOẠT ĐỘNG CÔNG TY <small>Cập nhật lúc: @DateTime.Now.ToString("HH:mm dd/MM/yyyy")</small></h3>
+        </div>
+
+        <div class="news-grid">
+            @foreach (dynamic activity in activities)
+            {
+                <div class="news-item @(activity.IsFeatured ? "featured" : "")">
+                    <div class="news-card">
+                        @if (activity.IsFeatured)
+                        {
+                            <div class="featured-badge">
+                                <i class="fa fa-star"></i> Nổi bật
+                            </div>
+                        }
+                        
+                        <div class="img-container">
+                            <a href="/hoat_dong_chi_tiet?id=@activity.ActivityID">
+                                @{
+                                    string newsImageUrl;
+                                    if (string.IsNullOrEmpty(activity.ImageUrl))
+                                    {
+                                        newsImageUrl = Url.Content("~/Image/icon/thong_bao.jpg");
+                                    }
+                                    else
+                                    {
+                                        var imgUrl = activity.ImageUrl.ToString();
+                                        newsImageUrl = imgUrl.StartsWith("~") 
+                                            ? Url.Content(imgUrl)
+                                            : (imgUrl.StartsWith("/") 
+                                                ? Url.Content("~" + imgUrl)
+                                                : (imgUrl.StartsWith("http") 
+                                                    ? imgUrl
+                                                    : (imgUrl.StartsWith("Content/") || imgUrl.StartsWith("Image/") || imgUrl.StartsWith("uploads/")
+                                                        ? Url.Content("~/" + imgUrl)
+                                                        : Url.Content("~/Image/" + imgUrl))));
+                                    }
+                                }
+                                <img src="@newsImageUrl" 
+                                     alt="@activity.Title" 
+                                     loading="lazy"
+                                     decoding="async"
+                                     width="300"
+                                     height="200"
+                                     data-fallback="@Url.Content("~/Image/icon/thong_bao.jpg")"
+                                     onerror="if(this.src!==this.getAttribute('data-fallback')){this.src=this.getAttribute('data-fallback');}else{this.style.display='none';}">
+                            </a>
+                        </div>
+                        
+                        <div class="caption">
+                            <p class="news-source">@activity.ActivityType</p>
+                            <h4>
+                                <a href="/hoat_dong_chi_tiet?id=@activity.ActivityID" title="@activity.Title">
+                                    @activity.Title
+                                </a>
+                            </h4>
+                            
+                            <div class="activity-meta">
+                                @if (activity.StartDate != null)
+                                {
+                                    var startDate = (DateTime)activity.StartDate;
+                                    <div class="meta-item">
+                                        <i class="fa fa-calendar"></i>
+                                        <span>@startDate.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                }
+                                
+                                @if (!string.IsNullOrEmpty(activity.Location))
+                                {
+                                    <div class="meta-item">
+                                        <i class="fa fa-map-marker"></i>
+                                        <span>@activity.Location</span>
+                                    </div>
+                                }
+                                
+                            </div>
+                            
+                            <div class="activity-stats">
+                                <span class="stat-item">
+                                    <i class="fa fa-eye"></i> @activity.ViewCount lượt xem
+                                </span>
+                                <span class="stat-item">
+                                    <i class="fa fa-heart"></i> @activity.LikeCount thích
+                                </span>
+                            </div>
+                            
+                            <p>
+                                <a href="/hoat_dong_chi_tiet?id=@activity.ActivityID" 
+                                   class="btn-primary" role="button">Xem chi tiết</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

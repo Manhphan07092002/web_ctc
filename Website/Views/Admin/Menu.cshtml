@@ -1,0 +1,206 @@
+﻿@{
+    ViewBag.Title = "Thiết lập Menu";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script src="~/Content/plugins/sortable/jquery-sortable.js"></script>
+<style>
+    .sortable {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+
+        .sortable li {
+            margin: 3px 0;
+            display: block;
+        }
+
+            .sortable li span {
+                padding: 8px;
+                padding-left: 15px;
+                font-size: 14px;
+                border: 1px solid #ccc;
+                display: block;
+                background: #fbfcff;
+                position: relative;
+            }
+
+            .sortable li.dragged span {
+                background: #fffbfa;
+            }
+
+            .sortable li.placeholder {
+                border: 1px solid #f35369;
+            }
+
+                .sortable li.placeholder span {
+                    background: #fff;
+                }
+
+            .sortable li span button {
+                float: right;
+            }
+
+            .sortable li ul {
+                -webkit-padding-start: 20px;
+            }
+</style>
+
+<div class="x_panel">
+    <div class="x_title">
+        <h2>Thiết lập Menu</h2>
+        <div class="col-md-2 pull-right search-top" style="text-align:right;">
+            <button type="button" class="btn btn-danger   btn-sm refresh-button" onclick="fnEditMenu(0)">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Thêm mới
+            </button>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="x_content">
+
+
+
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-master list-panel" id="list-panel">
+                    <div class="panel-body">
+
+                        <ul id="menutree" class="sortable"></ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        getListMenu();
+    });
+    function getListMenu() {
+        $.ajax({
+            url: "/Admin/GetListMenu",
+            method: "POST",
+            success: function (data) {
+                var html = '';
+                for (var i in data) {
+                    var item = data[i];
+                    html += loadListMenu(item);
+
+                }
+                $("#menutree").html(html);
+            }
+        });
+
+
+    }
+
+    function loadListMenu(item) {
+        var html = '';
+        html += '<li><span>' + item.MenuName;
+        html += '<button type="button" style="margin:0 2px;" class="btn btn-xs btn-dark" title="Xóa" onclick="fnDeleteMenu(' + item.ID + ')"><i class="glyphicon glyphicon-trash"></i></button>';
+        html += '<button type="button" style="margin:0 2px;" class="btn btn-xs btn-warning" title="Cập nhật" onclick="fnEditMenu(' + item.ID + ')"><i class="glyphicon glyphicon-edit"></i></button>';
+        if (item.IsActive == true) {
+            html += '<button type="button" style="margin:0 2px;" class="btn btn-xs btn-success" title="Không hiển thị" onclick="fnUnActive(' + item.ID + ')"><i class="	glyphicon glyphicon-ok"></i></button>';
+        }
+        else {
+            html += '<button type="button" style="margin:0 2px;" class="btn btn-xs btn-danger" title="Hiển thị" onclick="fnUnActive(' + item.ID + ')"><i class="glyphicon glyphicon-remove"></i></button>';
+        }
+
+        html += '</span>';
+
+
+        if (item.ListSubMenu.length > 0) {
+            html += '<ul class="sortable">';
+            for (var i in item.ListSubMenu) {
+                html += loadListMenu(item.ListSubMenu[i]);
+            }
+            html += '</ul>';
+        }
+
+        html += '</li>';
+
+
+        return html;
+    }
+    function fnEditMenu(id) {
+        $.ajax({
+            url: "/Admin/EditMenu",
+            method: "POST",
+            beforeSend: function () {
+                showSpinLoading();
+            },
+            data: {
+                id: id
+            },
+            success: function (data) {
+                hideSpinLoading();
+                $("#popupContainer1").html(data);
+                $("#ModalMenu").modal("show");
+            }
+        });
+    }
+    function fnSaveMenu() {
+        var fd = new FormData(document.getElementById("MenuForm"));
+        $.ajax({
+            url: "/Admin/SaveMenu",
+            method: "POST",
+            beforeSend: function () {
+                showSpinLoading();
+            },
+            data: fd,
+            enctype: 'multipart/form-data',
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,   // tell jQuery not to set contentType
+            success: function (data) {
+                hideSpinLoading();
+                if (data.Code === 1) {
+                    $('#ModalMenu').modal('hide');
+                    getListMenu();
+                    showSuccess("Thành Công", data.message);
+                } else {
+                    showError('Lỗi', data.message);
+                }
+            }
+        });
+    }
+    function fnDeleteMenu(id) {
+        showConfirm("Thông Báo !", 'Bạn chắc chắn muốn xóa ?',
+            function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/Admin/DeleteMenu',
+                    data: { id: id },
+                }).success(function (data) {
+                    if (data.Code === 1) {
+                        getListMenu();
+                        showSuccess("Thành Công", data.message);
+                    } else {
+                        showError('Lỗi', data.message);
+                    }
+                });
+            }
+            , NoCallAction())
+    }
+    function fnUnActive(id) {
+        $.ajax({
+            url: "/Admin/UpdateActiveMenu",
+            method: "POST",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                if (data.Code === 1) {
+                    showSuccess("Thành Công", data.message);
+                    getListMenu();
+                } else {
+                    showError('Lỗi', data.message);
+                }
+            }
+        });
+    }
+</script>

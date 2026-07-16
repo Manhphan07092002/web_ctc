@@ -1,0 +1,240 @@
+@* --- Khối khai báo và lấy dữ liệu --- *@
+@{
+    Cubetech.Website.DAO.WProductsDAO dao = new Cubetech.Website.DAO.WProductsDAO();
+    var lstMenu = dao.GetListMenuHeader(0, 1);
+}
+
+@* --- Liên kết đến file CSS riêng cho Header - Optimized --- *@
+<link href="@Url.Content("~/Content/css/Header.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/header-language-switcher.css")" rel="stylesheet" type="text/css" media="print" onload="this.media='all'" />
+<noscript><link href="@Url.Content("~/Content/css/header-language-switcher.css")" rel="stylesheet" type="text/css" /></noscript>
+<link href="@Url.Content("~/Content/css/mobile-menu-fix.css")" rel="stylesheet" type="text/css" media="print" onload="this.media='all'" />
+<noscript><link href="@Url.Content("~/Content/css/mobile-menu-fix.css")" rel="stylesheet" type="text/css" /></noscript>
+
+
+
+@* --- Header Integration for GT Translate Integrator - Optimized --- *@
+<script defer>
+    // SIMPLIFIED MOBILE MENU - MAXIMUM COMPATIBILITY
+    document.addEventListener('DOMContentLoaded', function(){
+        var btn  = document.getElementById('cb_menu');
+        var menu = document.querySelector('.cb_collapse') || document.querySelector('.navbar-collapse');
+        if(!btn || !menu) return;
+
+        // Tạo overlay 1 lần
+        var overlay = document.createElement('div');
+        overlay.className = 'cb-overlay';
+        document.body.appendChild(overlay);
+
+        function openSheet(){
+            menu.classList.add('in');
+            btn.classList.add('active');
+            document.body.classList.add('menu-open'); // chặn scroll nền
+            btn.setAttribute('aria-expanded','true');
+            overlay.classList.add('show');
+            
+            // Force create modern language card - INSTANT
+            var navbarRight = menu.querySelector('.navbar-right');
+            if(navbarRight && !navbarRight.querySelector('.language-card-fake')){
+                var langCard = document.createElement('div');
+                langCard.className = 'language-card-fake';
+                langCard.innerHTML = '🇻🇳 Tiếng Việt';
+                langCard.style.cssText = 'display:flex!important;align-items:center!important;justify-content:center!important;min-height:44px!important;border:1px solid #e1e5e9!important;border-radius:8px!important;background:#fff!important;padding:10px 12px!important;font-size:12px!important;color:#2677f1!important;font-weight:600!important;box-sizing:border-box!important;box-shadow:0 2px 8px rgba(0,0,0,0.08)!important;transition:all 0.3s ease!important;margin-bottom:6px!important;';
+                
+                // Add hover effect
+                langCard.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-1px)';
+                    this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)';
+                });
+                
+                langCard.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                });
+                
+                navbarRight.appendChild(langCard);
+            }
+            
+            console.log('SHEET OPENED');
+        }
+        function closeSheet(){
+            menu.classList.remove('in');
+            btn.classList.remove('active');
+            document.body.classList.remove('menu-open');
+            btn.setAttribute('aria-expanded','false');
+            overlay.classList.remove('show');
+            console.log('SHEET CLOSED');
+        }
+
+        btn.addEventListener('click', function(e){
+            e.preventDefault(); e.stopPropagation();
+            if(menu.classList.contains('in')) closeSheet(); else openSheet();
+        });
+
+        // Click overlay để đóng
+        overlay.addEventListener('click', closeSheet);
+
+        // ESC để đóng
+        document.addEventListener('keydown', function(e){
+            if(e.key === 'Escape' && menu.classList.contains('in')) closeSheet();
+        });
+
+        // Ngăn cuộn nền khi lướt trong sheet (iOS)
+        menu.addEventListener('touchmove', function(e){ e.stopPropagation(); }, {passive:false});
+    });
+
+    // Language Switcher Toggle
+    document.addEventListener('click', function(e){
+        const sw = document.querySelector('.language-switcher');
+        if(!sw) return;
+
+        const toggle = e.target.closest('.language-switcher .dropdown-toggle');
+        const inside = e.target.closest('.language-switcher');
+
+        if (toggle){
+            e.preventDefault();
+            sw.classList.toggle('open');
+            return;
+        }
+        if (!inside){
+            sw.classList.remove('open');
+        }
+    });
+    
+    // Smart Scroll Behavior - Optimized with requestAnimationFrame
+    (function() {
+        'use strict';
+        
+        let ticking = false;
+        let lastScrollTop = 0;
+        const header = document.querySelector('.cb-header');
+        
+        if (!header) return;
+        
+        function updateHeader() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Add shadow when scrolled
+            if (scrollTop > 10) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+            
+            // Auto-hide on mobile when scrolling down (only on mobile)
+            if (window.innerWidth <= 768) {
+                if (scrollTop > 100 && scrollTop > lastScrollTop) {
+                    header.classList.add('header-hidden');
+                } else {
+                    header.classList.remove('header-hidden');
+                }
+            }
+            
+            lastScrollTop = scrollTop;
+            ticking = false;
+        }
+        
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(updateHeader);
+                ticking = true;
+            }
+        }, { passive: true });
+    })();
+</script>
+
+<div class="navbar navbar-inverse navbar-fixed-top cb-header">
+    <div class="container">
+        <div class="navbar-header">
+            <button id="cb_menu" type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-nav" href="/">
+                <img class="logo-pc" src="@Url.Content("~/Image/logo_rm_bgr.png")" alt="CÔNG TY CỔ PHẦN XÂY LẮP BƯU ĐIỆN MIỀN TRUNG" />
+            </a>
+        </div>
+
+        <div class="navbar-collapse collapse cb_collapse">
+            
+            <ul class="nav navbar-nav">
+                @foreach (var item in lstMenu)
+                {
+                    var menuUrl = (item.ID != 8) ? Url.Content("~/" + item.MenuURL) : item.MenuURL;
+                    
+                    <li>
+                        <a href="@menuUrl">
+                            <span>@item.MenuName</span>
+                            <span>
+                                <small>
+                                    @* @item.MenuEnglishName *@
+                                </small>
+                            </span>
+                        </a>
+                    </li>
+                }
+            </ul>
+
+            <div class="navbar-right">
+                <div class="contact-info">
+                    <a href="tel:0915059666" title="Gọi Hotline">
+                        <span class="contact-label">LIÊN HỆ NGAY</span>
+                        <div class="phone-info">
+                             <img src="@Url.Content("~/Image/call.png")" alt="Call Icon" />
+                             <span class="hotline-number">0915.059.666</span>
+                        </div>
+                    </a>
+                </div>
+                
+                @* Clean Language Switcher (No Conflicts) *@
+                <div class="language-switcher">
+                    <a href="#" class="dropdown-toggle" 
+                       aria-label="Chọn ngôn ngữ" title="Language Selector">
+                        <img id="current-flag" 
+                             src="@Url.Content("~/Image/flags/vn.png")" 
+                             alt="Tiếng Việt" 
+                             class="flag-icon" />
+                        <span id="current-lang" class="lang-text">VN</span>
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="#" class="language-option" data-lang="vi">
+                                <img src="@Url.Content("~/Image/flags/vn.png")" 
+                                     alt="Tiếng Việt" 
+                                     class="flag-icon" /> 
+                                Tiếng Việt
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="language-option" data-lang="en">
+                                <img src="@Url.Content("~/Image/flags/us.png")" 
+                                     alt="English" 
+                                     class="flag-icon" /> 
+                                English
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="language-option" data-lang="ja">
+                                <img src="@Url.Content("~/Image/flags/jp.png")" 
+                                     alt="日本語" 
+                                     class="flag-icon" /> 
+                                日本語 (Japanese)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="language-option" data-lang="ko">
+                                <img src="@Url.Content("~/Image/flags/kr.png")" 
+                                     alt="한국어" 
+                                     class="flag-icon" /> 
+                                한국어 (Korean)
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

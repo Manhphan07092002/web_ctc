@@ -1,0 +1,122 @@
+﻿@{
+    Layout = null;
+    var custom = ViewData["obj"] as Cubetech.Website.Models.OurCustomer;
+}
+<script src="~/Scripts/common.js"></script>
+<div class="modal" id="modalCustomer" role="dialog" data-easein="bounceIn">
+    <div class="modal-dialog modal-small">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">@ViewData["Title"]</h4>
+            </div>
+            <form id="CustomerForm">
+
+                <div class="modal-body">
+                    <input type="hidden" name="mode" id="mode" value="@ViewData["Mode"]" />
+                    <input type="hidden" name="ID" id="ID" value="@custom.ID" />
+                    <div class="form-group">
+                        <label for="FullName">Tên</label>
+                        <input type="text" class="form-control" id="Name" name="Name" placeholder="Tên" tabindex="1" value="@custom.Name">
+                    </div>
+                    <div class="col-md-6" style="padding-left:0px;">
+                        <div class="form-group">
+                            <label for="pwd">Hình Đại Diện:</label>
+
+                            <div class="fileupload-item">
+
+                                <img width="100%" id="imageDisplay" src="@custom.Image" />
+                                <button type="button" class="btn btn-danger pull-right btn-sm btn-flat" onclick="deleteImageDetail('imageDisplay','Image')"><i class="fa fa-trash-o" aria-hidden="true"></i></button><br /><br />
+                                <label type="button" class="btn btn-success pull-right btn-sm btn-flat" onclick="selectIMG( '#Image','#imageDisplay')">
+                                    <i class="fa fa-camera" aria-hidden="true"></i> Ảnh
+                                </label>
+                                <input type="hidden" name="Image" id="Image" value="@custom.Image" />
+                            </div><hr style="margin-top:36px" />
+                        </div>
+                    </div>
+                    <div class="col-md-6" style="padding-right:0px;">
+                        <div class="form-group">
+
+                            <div class="checkbox icheck" style="margin-top:0px">
+                                <label for="ckbIcheck">
+                                    <input type="checkbox" id="ckbIcheck" @if ((custom.IsActive == true)) { ViewContext.Writer.Write("checked"); } /> Kích Hoạt
+                                </label>
+                                <input type="hidden" name="IsActive" id="IsActive" value="@custom.IsActive.ToString()" />
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="clearfix" style="clear:both;"></div>
+                    <div class="form-group">
+                        <label for="FullName">Thông tin</label>
+                        <textarea id="Info">@custom.Info</textarea>
+                        <input type="hidden" value="" id="htmlInfo" name="htmlInfo" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="FullName">Website</label>
+                        <input type="text" class="form-control" id="Website" name="Website" placeholder="Website" tabindex="1" value="@custom.Website">
+                    </div>
+
+                    <div class="clearfix"></div>
+                    <div class="form-group">
+                        <label for="FullName">Số điện thoại</label>
+                        <input type="text" class="form-control" id="PhoneNumber" name="PhoneNumber" placeholder="Số điện thoại" tabindex="1" value="@custom.PhoneNumber">
+                    </div>
+                    <div class="form-group">
+                        <label for="FullName">Fanpage</label>
+                        <input type="text" class="form-control" id="Fanpage" name="Fanpage" placeholder="Fanpage" tabindex="1" value="@custom.Fanpage">
+                    </div>
+                    <div class="form-group">
+                        <label for="FullName">Dự án</label>
+                        <textarea class="form-control" rows="3" name="Project" id="Project" style="resize:none">@custom.Project</textarea>
+                    </div>
+
+                </div>
+                <div class="clearfix"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" data-dismiss="modal" aria-hidden="true">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hủy
+                    </button>
+                    <button type="button" onclick="fnSaveCustomer();" class="btn btn-danger"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Lưu</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script src="@Url.Content("~/Content/")plugins/tinymce/tinymce.min.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+
+
+        tinymce.init(tinymceOption('#modalCustomer #Info'));
+        setIcheck('#ckbIcheck', "[name=IsActive]", "true", "false", function (e) { });
+    });
+
+    function fnSaveCustomer() {
+        var fd = new FormData(document.getElementById("CustomerForm"));
+
+        $.ajax({
+            url: "/OurCustomer/UpdateOurCustomer",
+            type: "POST",
+            data: fd,
+            enctype: 'multipart/form-data',
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,   // tell jQuery not to set contentType
+            success: function (data) {
+                if (data.Code == 1) {
+                    showSuccess("Thành công", data.message);
+                    $("#modalCustomer").modal("hide");
+                    loadTable();
+                }
+                else {
+                    showError('Lỗi', data.message);
+                }
+            }
+        });
+    }
+</script>

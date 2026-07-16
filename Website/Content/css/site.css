@@ -1,0 +1,50 @@
+/* --- CSS CHO BANNER THỐNG KÊ --- */
+
+.stats-banner {
+    background-color: #ffffff; 
+    padding: 70px 0;
+    color: #333333; 
+    position: relative;
+    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: center;
+}
+
+.stats-banner .container { 
+    position: relative; 
+    z-index: 2; 
+}
+
+/* Sử dụng class của Bootstrap nếu có, nếu không thì dùng class này */
+.stats-column { 
+    margin-bottom: 30px; 
+    text-align: center;
+    /* Nếu dùng Bootstrap, các class col-md-3 sẽ tự chia cột. */
+    /* Nếu không, bạn cần thêm width và display: inline-block như ví dụ trước */
+    padding: 0 15px; 
+}
+
+.stats-number {
+    font-size: 52px; 
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 5px;
+    font-family: 'Roboto', sans-serif;
+    color: #0056b3; 
+}
+
+.stats-title {
+    font-size: 14px; 
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'Roboto', sans-serif;
+    color: #555555; 
+}
+
+@media (max-width: 768px) {
+    .stats-number { font-size: 40px; }
+    .stats-title { font-size: 13px; }
+    .stats-banner { padding: 50px 0; }
+}
+/* --- KẾT THÚC CSS CHO BANNER THỐNG KÊ --- */

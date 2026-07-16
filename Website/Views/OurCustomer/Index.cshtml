@@ -1,0 +1,190 @@
+﻿
+@{
+    ViewBag.Title = "Khách hàng tiêu biểu";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-master list-panel" id="list-panel">
+            <form id="frmOurCustomerSearch">
+                <div class="panel-heading list-panel-heading">
+                    <div class="col-md-4">
+                        <div class="input-group input-group-sm pull-right">
+                            <input type="text" class="form-control" id="Info" name="Info" placeholder="Nội dung tìm kiếm">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-success btn-flat" onclick="loadTable()">
+                                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Tìm kiếm
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 pull-right search-top">
+                        <button type="button" onclick="showCustomerModal(0)" class="btn btn-danger btn-sm  refresh-button" id="refresh-button">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Thêm mới
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <div class="panel-body">
+                <table id="tbOurCustomer" class="table table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Hình Ảnh</th>
+                            <th>Tên</th>
+                            <th>Hoạt động</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        loadTable();
+    });
+    $(function () {
+        $("#popupSelectImage").on("hidden.bs.modal", function () {
+            if (($("#modalCustomer").data('bs.modal') || {}).isShown) {
+                $('body').addClass('modal-open');
+            }
+            else {
+                $('body').removeClass('modal-open');
+            }
+        });
+    })
+    // enterSearch("#Info", ReloadTable);
+    function loadTable() {
+        $("#Info").val($.trim($("#Info").val()));
+        var table = $('#tbOurCustomer').DataTable({
+            "bDestroy": true,
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "/OurCustomer/GetListOurCustomer",
+                "type": "POST",
+                "data": function (d) {
+                    return $.extend({}, d, {
+                        'Info': $('#Info').val()
+                    })
+                }
+            },
+            "columns": [
+                { "name": "ID", "data": "ID" },
+                 {
+                     "name": "Image",
+                     'render': function (data, type, full, meta) {
+                         var html = "";
+                         if (full.Image == null || full.Image == "") {
+                             html += '<span  style="padding-left:15px;"><img  style="border:1px solid #ccc;padding:1px;" width="50" src = "/Content/Image/noimage.png"" /></span>';
+
+                         }
+                         else {
+                             html += '<span  style="padding-left:15px;"><img  style="border:1px solid #ccc;padding:1px;" width="50" src = "' + full.Image + '" /></span>';
+
+                         }
+                         return html;
+                     }
+                 },
+                        { "name": "Name", "data": "Name" },
+                           {
+                               //"class": "tdright",
+                               "name": "IsActive", "data": "IsActive", "class": "cssPrice", 'width': '5%',
+                               'render': function (data, type, full, meta) {
+                                   var html = "";
+                                   if (full.IsActive) {
+                                       html += '<button type="button"  class="btn btn-success btn-xs" title="Cập Nhật"  onclick="updateIsActive(\'' + full.ID + '\')"><i class="fa fa-check" aria-hidden="true"></i></button>';
+                                   }
+                                   else {
+                                       html += '<button type="button"  class="btn btn-danger btn-xs" title="Cập Nhật"  onclick="updateIsActive(\'' + full.ID + '\')"><i class="fa fa-times" aria-hidden="true"></i></button>';
+                                   }
+                                   return html;
+                               }
+                           },
+                        {
+                            targets: 'no-sort',
+                            orderable: false,
+                            'class': 'text-center',
+                            'width': '10%',
+                            'render': function (data, type, full, meta) {
+                                var html = '<button type="button"  style="margin-right: 10px;" class="btn btn-warning btn-xs" title="Cập Nhật" onclick="showCustomerModal(' + full.ID + ')"><i class="glyphicon glyphicon-edit"></i></a>' +
+                                            '<button type="button" class="btn  btn-dark btn-xs" style="margin-right: 10px;" title="Xóa" onclick="Remove(this,' + full.ID + ')"><i class="glyphicon glyphicon-trash"></i></button> ';
+                                return html;
+                            }
+                        }
+            ],
+            "scrollCollapse": true,
+            "scrollX": true,
+            "paging": true,
+            "lengthChange": true,
+            "searching": false,
+            "ordering": true,
+            "info": false,
+            "autoWidth": false,
+            "dom": '<"top"i>rt<"bottom row"<"col-md-3"l><"col-md-9"<"pullright"p>>><"clear">'
+        });
+    }
+
+    function showCustomerModal(id) {
+        $.ajax({
+            url: "/OurCustomer/AddNewEditOurCustomer",
+            method: "POST",
+            beforeSend: function () {
+                showSpinLoading();
+            },
+            data: {
+                id: id
+            },
+            success: function (data) {
+                hideSpinLoading();
+                $("#popupContainer1").html(data);
+                $("#modalCustomer").modal("show");
+            }
+        });
+    }
+
+    function Remove(thiz, id) {
+        showConfirm("", "Bạn có chắc chắn muốn xóa khách hàng ?",
+            function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/OurCustomer/DeleteOurCustomer',
+                    data: { id: id },
+
+                }).success(function (data) {
+                    if (data.Code === 1) {
+                        loadTable();
+                        showSuccess('Thông báo', data.message);
+                    } else {
+                        showError('Lỗi', data.message);
+                    }
+                });
+
+            }, function () { }
+);
+    }
+
+
+    function updateIsActive(id) {
+        $.ajax({
+            url: "/OurCustomer/UpdateIsActive",
+            method: "POST",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                showSuccess("Thành Công", data.message);
+                loadTable();
+            }
+        });
+    }
+</script>

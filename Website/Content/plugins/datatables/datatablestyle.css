@@ -1,0 +1,9 @@
+﻿  .dataTable  tr.group,
+  .dataTable  tr.group:hover {
+        background-color:#00bcd4 !important;
+    }
+
+    .dataTable tr th {
+           background-color:#59b5ea !important;
+    }
+

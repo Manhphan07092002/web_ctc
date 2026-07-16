@@ -1,0 +1,160 @@
+﻿body {
+    height: 100%;
+    background-color: rgba(247, 247, 247, .2);
+    background-image: url(../image/website/login-bg.jpg);
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
+.body_container {
+    position: relative;
+}
+
+.login_container {
+
+    padding: 30px 30px;
+    position: fixed;
+    background-color: rgba(255, 255, 255, .4);
+    top: 50%;
+    right: 5%;
+    transform: translate(-5%, -50%);
+    text-align: center;
+    width:450px;
+}
+
+    .login_container img {
+        width: 50%;
+        margin: 0 auto;
+        margin-bottom: 30px;
+    }
+
+.login_content {
+    margin-top: 15px;
+}
+
+.login_container .input, .regist_container .input {
+    background-color: #fff;
+    border-radius: 0px !important;
+    border: none !important;
+}
+
+.btnlogin {
+    background: #123a60;
+    color: #fff;
+    font-size: 17px;
+    text-align: center;
+    text-transform: uppercase;
+    border-radius: 0px;
+}
+
+    .btnlogin:hover {
+        color: #fff;
+    }
+
+
+.regist_container {
+    min-width: 900px;
+    -webkit-box-shadow: 0px 0px 60px 10px rgba(0,0,0,1);
+    -moz-box-shadow: 0px 0px 60px 10px rgba(0,0,0,1);
+    box-shadow: 0px 0px 60px 10px rgba(0,0,0,1);
+    padding: 100px 150px;
+    position: fixed;
+    background-color: rgba(0, 0, 0, .4);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+    .regist_container img {
+        width: 40%;
+        margin: 0 auto;
+    }
+
+.waiting-spin-content {
+    position: fixed !important;
+}
+/* enable absolute positioning */
+.inner-addon {
+    position: relative;
+}
+
+    /* style icon */
+    .inner-addon .glyphicon {
+        position: absolute;
+        padding: 10px;
+        pointer-events: none;
+        color: #a2a2a2;
+    }
+
+/* align icon */
+.left-addon .glyphicon {
+    left: 2px;
+}
+
+.right-addon .glyphicon {
+    right: 0px;
+}
+
+/* add padding  */
+.left-addon input {
+    padding-left: 32px;
+}
+
+.right-addon input {
+    padding-right: 30px;
+}
+
+@media screen and (max-width: 768px) {
+    body {
+        background-size: auto;
+    }
+
+    .regist_container {
+        padding: 15px;
+    }
+
+    .login_container {
+        padding: 15px;
+    }
+
+    .regist_container img {
+        width: 60%;
+        margin: 0 auto;
+    }
+
+    .login_container {
+    padding: 30px 30px;
+    position: fixed;
+    background-color: rgba(255, 255, 255, .4);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 90%;
+}
+}
+
+@media screen and (max-width: 414px) {
+    .regist_container, .login_container {
+        min-width: 384px;
+    }
+}
+
+@media screen and (max-width: 375px) {
+    .regist_container, .login_container {
+        min-width: 345px;
+    }
+}
+
+@media screen and (max-width: 360px) {
+    .regist_container, .login_container {
+        min-width: 330px;
+    }
+}
+
+@media screen and (max-width: 320px) {
+    .regist_container, .login_container {
+        min-width: 290px;
+    }
+}

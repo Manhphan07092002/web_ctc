@@ -1,0 +1,210 @@
+/* ================================================================== */
+/* == CSS cho Module Sản phẩm nổi bật (RecommendProduct) == */
+/* ================================================================== */
+
+/* Thiết lập chung cho widget */
+.widget-product-grid.highline-new {
+    font-family: Arial, Helvetica, sans-serif;
+    border: 1px solid #007bff;
+    padding: 20px;
+    background: #fff;
+    margin-bottom: 25px;
+    position: relative;
+    border-radius: 4px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+/* Tiêu đề */
+.highline-new .box-heading-new {
+    position: relative;
+    margin-bottom: 25px;
+    padding-top: 10px;
+}
+
+
+.highline-new .box-heading-new {
+    background: #007bff;
+    color: #fff;
+    font-weight: 600;
+    padding: 8px 15px;
+    margin: 0;
+    line-height: 1.2;
+    border-radius: 4px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    border-bottom-right-radius: 100px;
+    display: flex;
+}
+
+
+.highline-new .box-heading-new h2 {
+    font-size: 18px;
+    margin: 0;
+    font-weight: bold;
+}
+
+.highline-new .box-heading-new .empty {
+    width: 20px;
+}
+
+/* Cột chứa sản phẩm trong carousel */
+.product-grid-item {
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 20px;
+}
+
+/* Thẻ sản phẩm */
+.product-card {
+    border: 1px solid #ebebeb;
+    background-color: #fff;
+    text-align: left;
+    position: relative;
+    padding: 10px;
+    border-radius: 4px;
+    width: 100%;
+    display: block;
+    transition: box-shadow 0.2s ease-in-out;
+    margin-bottom: 0;
+}
+
+.product-card:hover {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.product-image-link {
+    display: block;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.product-image {
+    max-width: 100%;
+    height: 210px;
+    object-fit: contain;
+    transition: opacity 0.3s ease;
+}
+
+.product-card:hover .product-image {
+    opacity: 0.85;
+}
+
+/* Tên sản phẩm */
+.product-name {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.product-name a {
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.product-name a:hover {
+    color: #007bff;
+}
+
+/* Giá sản phẩm */
+.product-price {
+    font-size: 12px;
+    font-weight: bold;
+    color: #d92a2a;
+}
+
+/* Icon giỏ hàng */
+.product-cart-icon {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 32px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    transform: scale(0);
+    opacity: 0;
+}
+
+.product-card:hover .product-cart-icon {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.product-cart-icon:hover {
+    background-color: #007bff;
+}
+
+.product-cart-icon i {
+    font-size: 14px;
+}
+
+/* CSS cho Bootstrap Carousel */
+#featured-product-carousel {
+    padding: 0 40px;
+    margin-top: 50px;
+}
+
+#featured-product-carousel .carousel-inner .row {
+    margin-left: -10px;
+    margin-right: -10px;
+}
+
+#featured-product-carousel .carousel-control {
+    background-image: none;
+    background-color: #007bff;
+    width: 40px;
+    height: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+#featured-product-carousel .carousel-control:hover {
+    opacity: 1;
+}
+
+#featured-product-carousel .carousel-control.left {
+    left: -10px;
+}
+
+#featured-product-carousel .carousel-control.right {
+    right: -10px;
+}
+
+#featured-product-carousel .carousel-control .fa {
+    font-size: 24px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#featured-product-carousel .carousel-indicators {
+    bottom: -25px;
+}
+
+#featured-product-carousel .carousel-indicators li {
+    background-color: #ccc;
+    border-color: #ccc;
+}
+
+#featured-product-carousel .carousel-indicators .active {
+    background-color: #007bff;
+    border-color: #007bff;
+}

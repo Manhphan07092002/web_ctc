@@ -1,0 +1,486 @@
+﻿@{
+    Cubetech.Website.DAO.WProductsDAO dao = new Cubetech.Website.DAO.WProductsDAO();
+    Cubetech.Website.Models.Product pro = ViewData["Product"] as Cubetech.Website.Models.Product;
+
+    ViewBag.Title = pro.Name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var lstParrentCate = dao.GetListParentCategory(pro.CategoryID);
+
+    string priceDisplay;
+    if (pro.PriceSale2 > 0)
+    {
+        priceDisplay = string.Format("{0:N0} đ", pro.PriceSale2);
+        if (pro.PriceSale > 0 && pro.PriceSale > pro.PriceSale2) {
+            priceDisplay += string.Format(" <del style='color: #888; font-size: 0.9em;'>{0:N0} đ</del>", pro.PriceSale);
+        } else if (pro.Price > 0 && pro.Price > pro.PriceSale2) {
+            priceDisplay += string.Format(" <del style='color: #888; font-size: 0.9em;'>{0:N0} đ</del>", pro.Price);
+        }
+    }
+    else if (pro.PriceSale > 0)
+    {
+        priceDisplay = string.Format("{0:N0} đ", pro.PriceSale);
+        if (pro.Price > 0 && pro.Price > pro.PriceSale) {
+            priceDisplay += string.Format(" <del style='color: #888; font-size: 0.9em;'>{0:N0} đ</del>", pro.Price);
+        }
+    }
+    else if (pro.Price > 0)
+    {
+        priceDisplay = string.Format("{0:N0} đ", pro.Price);
+    }
+    else
+    {
+        priceDisplay = "Liên hệ";
+    }
+
+    Random randomGenerator = new Random();
+    int viewCountFromData = randomGenerator.Next(100, 10001);
+
+    var allImagesForThumbs = new List<string>();
+    if (!string.IsNullOrEmpty(pro.Image)) { allImagesForThumbs.Add(pro.Image); }
+    if (!string.IsNullOrEmpty(pro.Image1)) { allImagesForThumbs.Add(pro.Image1); }
+    if (!string.IsNullOrEmpty(pro.Image2)) { allImagesForThumbs.Add(pro.Image2); }
+    if (!string.IsNullOrEmpty(pro.Image3)) { allImagesForThumbs.Add(pro.Image3); }
+    if (!string.IsNullOrEmpty(pro.Image4)) { allImagesForThumbs.Add(pro.Image4); }
+    if (!string.IsNullOrEmpty(pro.Image5)) { allImagesForThumbs.Add(pro.Image5); }
+    if (!string.IsNullOrEmpty(pro.Image6)) { allImagesForThumbs.Add(pro.Image6); }
+
+    var distinctThumbnailUrls = allImagesForThumbs.Where(url => !string.IsNullOrEmpty(url)).Distinct().ToList();
+}
+
+<style>
+    /* Bố cục chính với 2 cột */
+    .detail-page-layout {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row-reverse;
+        gap: 30px;
+        margin-top: 20px;
+        font-family: Arial, sans-serif;
+    }
+    .detail-sidebar {
+        flex: 0 0 300px;
+    }
+    .detail-main-content {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    /* ======== CSS CHO SIDEBAR ======== */
+    .info-widget {
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        background-color: #fff;
+        margin-bottom: 25px;
+        overflow: hidden;
+    }
+    .widget-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        padding: 12px 15px;
+        background-color: #f7f7f7;
+        border-bottom: 1px solid #e0e0e0;
+        margin: 0;
+    }
+    .widget-content {
+        padding: 15px;
+    }
+    
+    /* --- CSS CHO PHẦN HỖ TRỢ TRỰC TUYẾN --- */
+    .support-section {
+        margin-bottom: 20px;
+    }
+    .support-section:last-child {
+        margin-bottom: 0;
+    }
+    .support-section-title {
+        font-size: 15px;
+        font-weight: bold;
+        color: #0056b3; /* Màu xanh dương đậm cho tiêu đề mục */
+        margin-bottom: 8px;
+    }
+    .support-description {
+        font-size: 13px;
+        line-height: 1.5;
+        color: #555;
+        margin-bottom: 15px;
+    }
+    .support-contact-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .support-contact-list li {
+        font-size: 14px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+    .support-contact-list li:last-child {
+        margin-bottom: 0;
+    }
+    .support-contact-list .fas {
+        margin-right: 10px;
+        font-size: 15px;
+        color: #dc3545; /* Màu đỏ cho icon */
+        width: 20px; /* Cố định độ rộng để căn lề thẳng hàng */
+        text-align: center;
+    }
+    .support-contact-list strong {
+        margin-right: 5px;
+    }
+    .support-contact-list a {
+        color: #333;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .support-contact-list a:hover {
+        color: #dc3545;
+    }
+    
+    /* Chính sách bán hàng */
+    .sales-policy-widget ul {
+        list-style: none; padding: 0; margin: 0;
+    }
+    .sales-policy-widget li {
+        font-size: 14px; margin-bottom: 12px; display: flex; align-items: center;
+    }
+    .sales-policy-widget li:last-child { margin-bottom: 0; }
+    .sales-policy-widget .fas.fa-check-circle {
+        margin-right: 10px; font-size: 16px; color: #28a745;
+    }
+
+    /* ======== CSS CHO PHẦN CHI TIẾT SẢN PHẨM ======== */
+    .breadcrumb-product{padding:10px 0;border-bottom:1px solid #eee;margin-bottom:20px;font-size:14px}.breadcrumb-product a{color:#007bff;text-decoration:none}.breadcrumb-product a:hover{text-decoration:underline}.breadcrumb-product .glyphicon{font-size:12px;color:#6c757d;margin:0 5px}.breadcrumb-product .active_cate{color:#333;font-weight:bold}.product-main-section{display:flex;flex-wrap:wrap;gap:30px}.product-image-column{flex:0 0 40%;max-width:40%;position:relative}.product-main-image-container{position:relative}.product-main-image{overflow:hidden;border:1px solid #ddd;border-radius:4px;padding:5px}.product-main-image img{width:100%;object-fit:contain;max-height:400px;display:block;opacity:1;transition:transform .3s ease-in-out,opacity .3s ease-in-out}.product-main-image img:hover{transform:scale(1.05)}.product-main-image img.image-loading{opacity:0}.image-nav-button{position:absolute;top:50%;transform:translateY(-50%);background-color:rgba(0,0,0,.3);color:#fff;border:none;padding:10px;cursor:pointer;font-size:20px;z-index:10;border-radius:3px}.image-nav-button:hover{background-color:rgba(0,0,0,.6)}.btn-prev-image{left:15px}.btn-next-image{right:15px}.product-thumbnails{margin-top:15px;display:flex;flex-wrap:wrap;gap:10px}.product-thumbnails img{width:80px;height:80px;border:2px solid #ddd;border-radius:4px;cursor:pointer;object-fit:cover;transition:transform .3s ease-in-out,border-color .3s ease}.product-thumbnails img:hover,.product-thumbnails img.active-thumbnail{border-color:#007bff;transform:scale(1.1)}.product-info-column{flex:1;min-width:300px}.product-title-detail{font-size:28px;font-weight:bold;color:#333;margin-bottom:15px;line-height:1.3}.product-meta-info{margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid #f0f0f0}.product-price-detail,.product-view-count{font-size:18px;color:#555;margin-bottom:10px}.product-price-detail strong{color:#d9534f;font-size:20px}.product-detail-expandable-content{margin-top:20px}.product-content-detail{font-size:16px;line-height:1.7;color:#444;max-height:150px;overflow:hidden;position:relative;transition:max-height .5s ease-in-out}.product-content-detail p{margin-bottom:15px}.product-content-detail ul,.product-content-detail ol{padding-left:20px;margin-bottom:15px}.product-content-detail img{max-width:100%;height:auto;margin:10px 0}.product-content-detail.js-fade-effect:after{content:"";position:absolute;bottom:0;left:0;right:0;height:50px;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff)}.product-content-detail.expanded{max-height:100000px}.btn-toggle-detail{display:block;margin:15px auto 0;padding:10px 20px;background-color:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:14px;font-weight:bold;transition:background-color .3s ease}.btn-toggle-detail:hover{background-color:#0056b3}
+
+    
+    /* ======== CSS CHO BANNER DỊCH VỤ ======== */
+    .service-banner-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 40px;
+        padding-top: 25px;
+        border-top: 1px solid #f0f0f0;
+    }
+    .service-banner-item {
+        display: flex;
+        align-items: center;
+        background-color: #ffffff;
+        border: 1px solid #f0f0f0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border-radius: 8px;
+        padding: 12px 15px;
+        gap: 15px;
+        flex-grow: 1;
+        flex-basis: 190px;
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+    .service-banner-item:hover {
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        transform: translateY(-4px);
+    }
+    
+    /* BẮT ĐẦU CODE ANIMATION ĐÃ CẬP NHẬT */
+    @@keyframes continuous-shake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(16deg); } /* Tăng độ lắc */
+      50% { transform: rotate(5eg); }
+      75% { transform: rotate(-16deg); } /* Tăng độ lắc */
+    }
+
+    .service-banner-item img {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+        /* Áp dụng animation lắc lư nhanh và mạnh hơn */
+        animation: continuous-shake 1.2s infinite ease-in-out; /* Giảm thời gian để nhanh hơn */
+    }
+    /* KẾT THÚC CODE ANIMATION */
+
+    .service-banner-text {
+        line-height: 1.5;
+    }
+    .service-banner-text strong {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #2c3e50;
+        display: block;
+        text-transform: uppercase;
+    }
+    .service-banner-text span {
+        font-size: 11.5px;
+        color: #7f8c8d;
+    }
+    
+    /* Responsive */
+    @@media (max-width: 991px) {
+        .detail-page-layout {
+            flex-direction: column;
+        }
+        .detail-sidebar {
+            flex: 0 0 100%; width: 100%;
+        }
+    }
+    @@media (max-width: 768px) {
+        .product-main-section {
+            flex-direction: column;
+        }
+        .product-image-column, .product-info-column {
+            flex: 0 0 100%; max-width: 100%;
+        }
+        .image-nav-button { padding: 5px; font-size: 16px; }
+        .btn-prev-image { left: 5px; }
+        .btn-next-image { right: 5px; }
+    }
+
+    @@media (max-width: 1200px) {
+        .service-banner-container {
+            justify-content: center;
+        }
+        .service-banner-item {
+           flex-basis: 210px;
+        }
+    }
+    @@media (max-width: 576px) {
+        .service-banner-item {
+           flex-basis: 100%;
+           justify-content: flex-start;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="breadcrumb-product">
+        @if (lstParrentCate != null && lstParrentCate.Count > 0)
+        {
+            <a href="/">Trang chủ</a>
+            foreach (var item in lstParrentCate)
+            {
+                <span class="glyphicon glyphicon-menu-right"></span>
+                <a href="@Cubetech.Website.Controllers.WProductsController.GetCategoryUrl(item)">@item.Name</a>
+            }
+            <span class="glyphicon glyphicon-menu-right"></span>
+            <a href="@Cubetech.Website.Controllers.WProductsController.GetProductUrl(pro)" class="active_cate">@pro.Name</a>
+        }
+        else
+        {
+            <a href="/">Trang chủ</a>
+            <span class="glyphicon glyphicon-menu-right"></span>
+            <a href="@Cubetech.Website.Controllers.WProductsController.GetProductUrl(pro)" class="active_cate">@pro.Name</a>
+        }
+    </div>
+
+    <div class="detail-page-layout">
+        
+        <main class="detail-main-content">
+            <div class="product-main-section">
+                <div class="product-image-column">
+                    <div class="product-main-image-container">
+                        <div class="product-main-image">
+                            <img src="@Url.Content(pro.Image)" alt="@pro.Name" />
+                        </div>
+                        @if (distinctThumbnailUrls.Count > 1)
+                        {
+                            <button class="image-nav-button btn-prev-image" aria-label="Ảnh trước">&lt;</button>
+                            <button class="image-nav-button btn-next-image" aria-label="Ảnh kế tiếp">&gt;</button>
+                        }
+                    </div>
+                    <div class="product-thumbnails">
+                        @if (distinctThumbnailUrls != null)
+                        {
+                            int thumbCounter = 0;
+                            foreach (var thumbUrl in distinctThumbnailUrls)
+                            {
+                                <img src="@Url.Content(thumbUrl)" alt="Ảnh sản phẩm @(thumbCounter + 1)" data-index="@thumbCounter"
+                                     class="@(thumbCounter == 0 ? "active-thumbnail" : "")" />
+                                thumbCounter++;
+                            }
+                        }
+                    </div>
+                </div>
+
+                <div class="product-info-column">
+                    <h1 class="product-title-detail">@pro.Name</h1>
+                    <div class="product-meta-info">
+                        <div class="product-price-detail">
+                            <strong>
+                                @if (pro.CategoryID == 12)
+                                {
+                                    <span>ĐẦU TƯ DỰ ÁN: @Html.Raw(priceDisplay)</span>
+                                }
+                                else
+                                {
+                                    <span>Giá: @Html.Raw(priceDisplay)</span>
+                                }
+                            </strong>
+                        </div>
+                        <div class="product-view-count">
+                            Lượt xem: @viewCountFromData.ToString("N0")
+                        </div>
+                    </div>
+
+                    <div class="product-detail-expandable-content">
+                        <div class="product-content-detail" id="productDetailContent">
+                            @Html.Raw(pro.DetailInfo)
+                        </div>
+                        <button id="toggleDetailButton" class="btn-toggle-detail">Xem thêm</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="service-banner-container">
+                <div class="service-banner-item">
+                    <img src="@Url.Content("~/Image/gh.png")" alt="Giao hàng nhanh chóng">
+                    <div class="service-banner-text">
+                        <strong>GIAO HÀNG NHANH CHÓNG</strong>
+                        <span>Chỉ trong vòng 24h</span>
+                    </div>
+                </div>
+                <div class="service-banner-item">
+                    <img src="@Url.Content("~/Image/ch.png")" alt="Chính hãng 100%">
+                    <div class="service-banner-text">
+                        <strong>CHÍNH HÃNG 100%</strong>
+                        <span>Sản phẩm chính hãng</span>
+                    </div>
+                </div>
+                <div class="service-banner-item">
+                    <img src="@Url.Content("~/Image/tk.png")" alt="Tiết kiệm chi phí">
+                    <div class="service-banner-text">
+                        <strong>TIẾT KIỆM CHI PHÍ</strong>
+                        <span>Giá tốt nhất thị trường</span>
+                    </div>
+                </div>
+                <div class="service-banner-item">
+                    <img src="@Url.Content("~/Image/hl.png")" alt="Hotline">
+                    <div class="service-banner-text">
+                        <strong>HOTLINE</strong>
+                        <span>097.9900.874</span>
+                    </div>
+                </div>
+            </div>
+            </main>
+
+        <aside class="detail-sidebar">
+            
+            <div class="info-widget sales-policy-widget">
+                <h3 class="widget-title">Chính sách bán hàng</h3>
+                <div class="widget-content">
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> Sản phẩm chính hãng™ 100%</li>
+                        <li><i class="fas fa-check-circle"></i> Giá cạnh tranh nhất thị trường</li>
+                        <li><i class="fas fa-check-circle"></i> Tư vấn giải pháp, dự án miễn phí</li>
+                        <li><i class="fas fa-check-circle"></i> Hỗ trợ đại lý và dự án</li>
+                        <li><i class="fas fa-check-circle"></i> Đầy đủ CO/CQ</li>
+                        <li><i class="fas fa-check-circle"></i> Bán hàng online toàn quốc</li>
+                        <li><i class="fas fa-check-circle"></i> Hỗ trợ kỹ thuật tận tâm</li>
+                        <li><i class="fas fa-check-circle"></i> Bảo hành chuyên nghiệp, uy tín</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-widget">
+                <h3 class="widget-title">Hỗ trợ trực tuyến</h3>
+                <div class="widget-content">
+                    
+                    <div class="support-section">
+                        <h4 class="support-section-title">Tư vấn, bán hàng và dịch vụ sản phẩm</h4>
+                        <p class="support-description">
+                            Bạn cần tư vấn về sản phẩm, đặt hàng hay hỗ trợ dịch vụ? Hãy liên hệ ngay với đội ngũ bán hàng chuyên nghiệp của chúng tôi:
+                        </p>
+                        <ul class="support-contact-list">
+                            <li><i class="fas fa-phone-alt"></i><strong>Mr. Đạt:</strong> <a href="tel:0915059666">0915 059 666</a></li>
+                            <li><i class="fas fa-phone-alt"></i><strong>Mr. Huy:</strong> <a href="tel:0945207781">0945 207 781</a></li>
+                            <li><i class="fas fa-envelope"></i><strong>Email:</strong> <a href="mailto:sales@ctcdn.vn">sales@ctcdn.vn</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="support-section">
+                        <h4 class="support-section-title">Tư vấn thiết kế và thi công dự án</h4>
+                        <p class="support-description">
+                            Đối với các dự án viễn thông, dân dụng, hoặc cần tư vấn về thiết kế và thi công, đội ngũ kỹ thuật của chúng tôi luôn sẵn sàng:
+                        </p>
+                         <ul class="support-contact-list">
+                            <li><i class="fas fa-phone-alt"></i><strong>Mr. Xuyên:</strong> <a href="tel:0913443334">0913 443 334</a></li>
+                            <li><i class="fas fa-phone-alt"></i><strong>Mr. Toàn:</strong> <a href="tel:0905167892">0905 167 892</a></li>
+                            <li><i class="fas fa-envelope"></i><strong>Email:</strong> <a href="mailto:technical@ctcdn.vn">technical@ctcdn.vn</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+        </aside>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const imageUrls = @Html.Raw(Json.Encode(distinctThumbnailUrls.Select(Url.Content)));
+        let currentImageIndex = 0;
+        const mainImage = document.querySelector('.product-main-image img');
+        const thumbnailElements = document.querySelectorAll('.product-thumbnails img');
+        const btnPrev = document.querySelector('.btn-prev-image');
+        const btnNext = document.querySelector('.btn-next-image');
+        function updateMainImage(index, newAltText) {
+            if (!mainImage || index < 0 || index >= imageUrls.length) return;
+            const newSrc = imageUrls[index];
+            if (mainImage.src !== newSrc) {
+                mainImage.classList.add('image-loading');
+                setTimeout(() => {
+                    mainImage.src = newSrc;
+                    mainImage.alt = newAltText || `Ảnh sản phẩm ${index + 1}`;
+                    mainImage.classList.remove('image-loading');
+                }, 150);
+            }
+            currentImageIndex = index;
+            updateActiveThumbnail();
+        }
+        function updateActiveThumbnail() {
+            thumbnailElements.forEach((thumb, idx) => {
+                thumb.classList.toggle('active-thumbnail', idx === currentImageIndex);
+            });
+        }
+        thumbnailElements.forEach(thumb => {
+            thumb.addEventListener('click', event => {
+                const newIndex = parseInt(event.target.dataset.index);
+                updateMainImage(newIndex, event.target.alt);
+            });
+        });
+        if (btnPrev && btnNext) {
+            btnPrev.addEventListener('click', () => {
+                let newIndex = currentImageIndex - 1;
+                if (newIndex < 0) { newIndex = imageUrls.length - 1; }
+                updateMainImage(newIndex);
+            });
+            btnNext.addEventListener('click', () => {
+                let newIndex = currentImageIndex + 1;
+                if (newIndex >= imageUrls.length) { newIndex = 0; }
+                updateMainImage(newIndex);
+            });
+            if (imageUrls.length > 0) updateActiveThumbnail();
+        }
+        const detailContent = document.getElementById('productDetailContent');
+        const toggleButton = document.getElementById('toggleDetailButton');
+        if (detailContent && toggleButton) {
+            const initialMaxHeight = 150;
+            if (detailContent.scrollHeight > initialMaxHeight) {
+                toggleButton.style.display = 'block';
+                detailContent.classList.add('js-fade-effect');
+            } else {
+                toggleButton.style.display = 'none';
+                detailContent.style.maxHeight = 'none';
+            }
+            toggleButton.addEventListener('click', function () {
+                detailContent.classList.toggle('expanded');
+                const isExpanded = detailContent.classList.contains('expanded');
+                this.textContent = isExpanded ? 'Thu gọn' : 'Xem thêm';
+                detailContent.classList.toggle('js-fade-effect', !isExpanded);
+            });
+        }
+    });
+</script>

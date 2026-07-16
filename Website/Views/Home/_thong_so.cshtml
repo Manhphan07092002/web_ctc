@@ -1,0 +1,1064 @@
+<div>
+    <style>
+        /* CSS được tinh chỉnh để mượt mà hơn */
+        .stats-banner {
+            padding: 80px 0;
+            background-color: #f8f9fa;
+            background-image: linear-gradient(135deg, #f0f2f5 0%, #e9ecef 100%);
+            position: relative;
+            overflow: hidden; /* Ẩn các phần tử trượt ra ngoài */
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: #343a40;
+        }
+
+        .stats-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23e0e0e0" opacity="0.2"/><circle cx="75" cy="75" r="1" fill="%23e0e0e0" opacity="0.2"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* --- Trạng thái ban đầu (ẩn) cho hiệu ứng xuất hiện --- */
+        .stats-column {
+            padding: 15px;
+            opacity: 0; /* Ẩn đi lúc đầu */
+            transform: translateY(30px); /* Dịch chuyển xuống dưới một chút */
+            transition: opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+            will-change: opacity, transform; /* GPU acceleration */
+        }
+        
+        /* --- Hiệu ứng trễ cho từng cột để xuất hiện tuần tự (Stagger Effect) --- */
+        .stats-column:nth-child(2) { transition-delay: 0.1s; }
+        .stats-column:nth-child(3) { transition-delay: 0.2s; }
+        .stats-column:nth-child(4) { transition-delay: 0.3s; }
+
+        /* --- Trạng thái khi hiển thị (được kích hoạt bởi JS) --- */
+        .stats-column.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .stats-circle {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            will-change: transform; /* GPU acceleration */
+            transform: translateZ(0); /* Force GPU layer */
+        }
+
+        .progress-ring {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .progress-ring-circle-bg {
+            fill: none;
+            stroke: #e0e0e0;
+            stroke-width: 8;
+            opacity: 0.6;
+        }
+
+        .progress-ring-circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke: url(#blueGradient);
+            transition: stroke-dashoffset 2.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Easing mượt hơn */
+            filter: drop-shadow(0 0 10px rgba(38, 119, 241, 0.4));
+            will-change: stroke-dashoffset; /* GPU acceleration */
+        }
+
+        .gradient-defs {
+            position: absolute; width: 0; height: 0; overflow: hidden;
+        }
+
+        .stats-number-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+
+        .stats-number {
+            font-size: 38px;
+            font-weight: 700;
+            color: #2677f1;
+            line-height: 1;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+.stats-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #5a6268;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    line-height: 1.2;
+    max-width: 180px;
+    margin: 25px auto 0;
+    text-align: center;
+    opacity: 0.9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+}
+
+/* Tùy chỉnh đặc biệt cho title dài */
+.stats-column:nth-child(1) .stats-title {
+    font-size: 16px;
+    line-height: 1.1;
+    letter-spacing: 0.4px;
+}
+
+.stats-column:nth-child(2) .stats-title {
+    font-size: 16px;
+    line-height: 1.1;
+    letter-spacing: 0.4px;
+}
+
+        /* ===== MODERN RESPONSIVE DESIGN ===== */
+        
+        /* ===== MOBILE FIRST APPROACH ===== */
+        
+        /* Mobile Portrait (320px - 480px) */
+        @@media (max-width: 480px) {
+            .stats-banner {
+                padding: 40px 0;
+                background-image: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+            
+            .row {
+                margin: 0 -8px;
+            }
+            
+            .stats-column {
+                padding: 8px;
+                margin-bottom: 20px;
+            }
+            
+            .stats-circle {
+                width: 120px;
+                height: 120px;
+                margin: 0 auto 15px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            }
+            
+            .stats-number {
+                font-size: 24px;
+                font-weight: 700;
+            }
+            
+            .stats-number-container {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+            }
+            
+            .stats-title {
+                font-size: 13px;
+                font-weight: 600;
+                margin: 15px auto 0;
+                max-width: 120px;
+                letter-spacing: 0.4px;
+                line-height: 1.1;
+                min-height: 32px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .stats-column:nth-child(1) .stats-title,
+            .stats-column:nth-child(2) .stats-title {
+                font-size: 12px;
+                letter-spacing: 0.3px;
+            }
+            
+            .progress-ring-circle-bg,
+            .progress-ring-circle {
+                stroke-width: 6;
+            }
+        }
+        
+        /* Mobile Landscape (481px - 767px) */
+        @@media (min-width: 481px) and (max-width: 767px) {
+            .stats-banner {
+                padding: 50px 0;
+            }
+            
+            .container {
+                padding: 0 20px;
+            }
+            
+            .stats-column {
+                padding: 12px;
+                margin-bottom: 25px;
+            }
+            
+            .stats-circle {
+                width: 140px;
+                height: 140px;
+                margin: 0 auto 18px;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            }
+            
+            .stats-number {
+                font-size: 28px;
+                font-weight: 700;
+            }
+            
+            .stats-number-container {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+            }
+            
+            .stats-title {
+                font-size: 15px;
+                font-weight: 600;
+                margin: 18px auto 0;
+                max-width: 140px;
+                letter-spacing: 0.5px;
+                line-height: 1.1;
+                min-height: 36px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .stats-column:nth-child(1) .stats-title,
+            .stats-column:nth-child(2) .stats-title {
+                font-size: 14px;
+                letter-spacing: 0.4px;
+            }
+            
+            .progress-ring-circle-bg,
+            .progress-ring-circle {
+                stroke-width: 7;
+            }
+        }
+        
+        /* Tablet (768px - 991px) */
+        @@media (min-width: 768px) and (max-width: 991px) {
+            .stats-banner {
+                padding: 60px 0;
+            }
+            
+            .stats-column {
+                padding: 15px;
+                margin-bottom: 30px;
+            }
+            
+            .stats-circle {
+                width: 160px;
+                height: 160px;
+                margin: 0 auto 20px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            }
+            
+            .stats-number {
+                font-size: 32px;
+            }
+            
+            .stats-number-container {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+            }
+            
+            .stats-title {
+                font-size: 17px;
+                font-weight: 600;
+                margin: 22px auto 0;
+                max-width: 160px;
+                letter-spacing: 0.6px;
+                line-height: 1.1;
+                min-height: 40px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .stats-column:nth-child(1) .stats-title,
+            .stats-column:nth-child(2) .stats-title {
+                font-size: 15px;
+                letter-spacing: 0.5px;
+            }
+        }
+        
+        /* Desktop (992px - 1199px) */
+        @@media (min-width: 992px) and (max-width: 1199px) {
+            .stats-banner {
+                padding: 80px 0;
+            }
+            
+            .stats-circle {
+                width: 180px;
+                height: 180px;
+                margin: 0 auto 25px;
+            }
+            
+            .stats-number {
+                font-size: 38px;
+            }
+            
+            .stats-number-container {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+            }
+            
+            .stats-title {
+                font-size: 18px;
+                font-weight: 600;
+                margin: 25px auto 0;
+                max-width: 180px;
+                letter-spacing: 0.6px;
+                line-height: 1.1;
+                min-height: 42px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .stats-column:nth-child(1) .stats-title,
+            .stats-column:nth-child(2) .stats-title {
+                font-size: 16px;
+                letter-spacing: 0.5px;
+            }
+        }
+        
+        /* Large Desktop (1200px+) */
+        @@media (min-width: 1200px) {
+            .stats-banner {
+                padding: 100px 0;
+            }
+            
+            .stats-circle {
+                width: 200px;
+                height: 200px;
+                margin: 0 auto 30px;
+                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+            }
+            
+            .stats-number {
+                font-size: 42px;
+            }
+            
+            .stats-number-container {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+            }
+            
+            .stats-title {
+                font-size: 20px;
+                font-weight: 600;
+                margin: 30px auto 0;
+                max-width: 200px;
+                letter-spacing: 0.7px;
+                line-height: 1.1;
+                min-height: 44px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .stats-column:nth-child(1) .stats-title,
+            .stats-column:nth-child(2) .stats-title {
+                font-size: 18px;
+                letter-spacing: 0.6px;
+            }
+        }
+        
+        /* ===== DESKTOP (992px - 1199px) ===== */
+        @@media (max-width: 1199px) and (min-width: 992px) {
+            .stats-banner {
+                padding: 80px 0;
+            }
+            
+            .stats-circle {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .stats-number {
+                font-size: 38px;
+            }
+            
+            .stats-title {
+                font-size: 20px;
+                margin-top: 25px;
+            }
+        }
+        
+        /* ===== TABLET (768px - 991px) ===== */
+        @@media (max-width: 991px) and (min-width: 768px) {
+            .stats-banner {
+                padding: 70px 0;
+            }
+            
+            .stats-column {
+                margin-bottom: 40px;
+            }
+            
+            .stats-column:nth-last-child(-n+2) {
+                margin-bottom: 0;
+            }
+            
+            .stats-circle {
+                width: 160px;
+                height: 160px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            }
+            
+            .stats-number {
+                font-size: 34px;
+            }
+            
+            .stats-title {
+                font-size: 18px;
+                margin-top: 20px;
+                max-width: 160px;
+            }
+            
+            .progress-ring-circle {
+                stroke-width: 7;
+            }
+            
+            .progress-ring-circle-bg {
+                stroke-width: 7;
+            }
+        }
+        
+        /* ===== MOBILE LARGE (576px - 767px) ===== */
+        @@media (max-width: 767px) and (min-width: 576px) {
+            .stats-banner {
+                padding: 60px 0;
+                background-image: linear-gradient(135deg, #f0f2f5 0%, #e9ecef 100%);
+            }
+            
+            .stats-column {
+                margin-bottom: 50px;
+                padding: 20px;
+            }
+            
+            .stats-column:last-child {
+                margin-bottom: 0;
+            }
+            
+            .stats-circle {
+                width: 150px;
+                height: 150px;
+                margin: 0 auto;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            }
+            
+            .stats-number {
+                font-size: 32px;
+            }
+            
+            .stats-title {
+                font-size: 16px;
+                margin-top: 20px;
+                max-width: 150px;
+                letter-spacing: 0.6px;
+            }
+            
+            .progress-ring-circle {
+                stroke-width: 6;
+            }
+            
+            .progress-ring-circle-bg {
+                stroke-width: 6;
+            }
+        }
+        
+        /* ===== MOBILE MEDIUM (480px - 575px) ===== */
+        @@media (max-width: 575px) and (min-width: 480px) {
+            .stats-banner {
+                padding: 50px 0;
+            }
+            
+            .container {
+                padding: 0 20px;
+            }
+            
+            .stats-column {
+                margin-bottom: 45px;
+                padding: 15px;
+            }
+            
+            .stats-column:last-child {
+                margin-bottom: 0;
+            }
+            
+            .stats-circle {
+                width: 140px;
+                height: 140px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            }
+            
+            .stats-number {
+                font-size: 28px;
+            }
+            
+            .stats-title {
+                font-size: 15px;
+                margin-top: 18px;
+                max-width: 140px;
+                letter-spacing: 0.5px;
+            }
+            
+            .progress-ring-circle {
+                stroke-width: 5;
+            }
+            
+            .progress-ring-circle-bg {
+                stroke-width: 5;
+            }
+        }
+        
+        /* ===== MOBILE SMALL (320px - 479px) ===== */
+        @@media (max-width: 479px) {
+            .stats-banner {
+                padding: 40px 0;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+            
+            .stats-column {
+                margin-bottom: 40px;
+                padding: 10px;
+            }
+            
+            .stats-column:last-child {
+                margin-bottom: 0;
+            }
+            
+            .stats-circle {
+                width: 120px;
+                height: 120px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            }
+            
+            .stats-number {
+                font-size: 24px;
+            }
+            
+            .stats-title {
+                font-size: 13px;
+                margin-top: 15px;
+                max-width: 120px;
+                letter-spacing: 0.4px;
+                line-height: 1.3;
+            }
+            
+            .progress-ring-circle {
+                stroke-width: 4;
+            }
+            
+            .progress-ring-circle-bg {
+                stroke-width: 4;
+            }
+        }
+        
+        /* ===== EXTRA SMALL MOBILE (≤ 319px) ===== */
+        @@media (max-width: 319px) {
+            .stats-banner {
+                padding: 30px 0;
+            }
+            
+            .container {
+                padding: 0 10px;
+            }
+            
+            .stats-column {
+                margin-bottom: 35px;
+                padding: 8px;
+            }
+            
+            .stats-circle {
+                width: 100px;
+                height: 100px;
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            }
+            
+            .stats-number {
+                font-size: 20px;
+            }
+            
+            .stats-title {
+                font-size: 11px;
+                margin-top: 12px;
+                max-width: 100px;
+                letter-spacing: 0.3px;
+                line-height: 1.2;
+            }
+            
+            .progress-ring-circle {
+                stroke-width: 3;
+            }
+            
+            .progress-ring-circle-bg {
+                stroke-width: 3;
+            }
+        }
+        
+        /* ===== LANDSCAPE ORIENTATION ===== */
+        @@media (max-height: 500px) and (orientation: landscape) {
+            .stats-banner {
+                padding: 30px 0;
+            }
+            
+            .stats-circle {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .stats-number {
+                font-size: 24px;
+            }
+            
+            .stats-title {
+                font-size: 13px;
+                margin-top: 10px;
+            }
+        }
+        
+        /* ===== HIGH DPI DISPLAYS ===== */
+        @@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .stats-circle {
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            }
+            
+            .stats-number {
+                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+        }
+        
+        /* ===== ACCESSIBILITY & PERFORMANCE ===== */
+        @@media (prefers-reduced-motion: reduce) {
+            .stats-column {
+                transition: none;
+            }
+            
+            .stats-circle {
+                transition: none;
+            }
+            
+            .stats-number {
+                transition: none;
+            }
+            
+            .progress-ring-circle {
+                transition: none;
+            }
+        }
+        
+        /* ===== DARK MODE SUPPORT ===== */
+        @@media (prefers-color-scheme: dark) {
+            .stats-banner {
+                background-color: #1a1a1a;
+                background-image: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+                color: #e0e0e0;
+            }
+            
+            .stats-circle {
+                background-color: #2a2a2a;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            }
+            
+            .stats-number {
+                color: #4a90e2;
+            }
+            
+            .stats-title {
+                color: #b0b0b0;
+            }
+            
+            .progress-ring-circle-bg {
+                stroke: #404040;
+            }
+        }
+        
+        /* ===== PRINT STYLES ===== */
+        @@media print {
+            .stats-banner {
+                background: none !important;
+                padding: 20px 0;
+            }
+            
+            .stats-circle {
+                box-shadow: none;
+                border: 2px solid #ccc;
+            }
+            
+            .stats-number {
+                color: #000 !important;
+            }
+            
+            .stats-title {
+                color: #000 !important;
+            }
+        }
+    </style>
+    
+    <section class="stats-banner">
+        <svg class="gradient-defs">
+            <defs>
+                <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#4a90e2;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#2677f1;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+        </svg>
+
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3 col-sm-6 stats-column">
+                    <div class="stats-circle" data-percentage="85">
+                         <svg class="progress-ring">
+                            <circle class="progress-ring-circle-bg" cx="50%" cy="50%"/>
+                            <circle class="progress-ring-circle" cx="50%" cy="50%"/>
+                        </svg>
+                        <div class="stats-number-container">
+                            <div class="stats-number" data-start-value="0" data-target-value="30" data-suffix="+">0+</div>
+                        </div>
+                    </div>
+                    <div class="stats-title">Năm Kinh Nghiệm</div>
+                </div>
+
+                <div class="col-md-3 col-sm-6 stats-column">
+                    <div class="stats-circle" data-percentage="99">
+                        <svg class="progress-ring">
+                            <circle class="progress-ring-circle-bg" cx="50%" cy="50%"/>
+                            <circle class="progress-ring-circle" cx="50%" cy="50%"/>
+                        </svg>
+                        <div class="stats-number-container">
+                            <div class="stats-number" data-start-value="0" data-target-value="99" data-suffix="%">0%</div>
+                        </div>
+                    </div>
+                    <div class="stats-title">Mức Độ Hài Lòng</div>
+                </div>
+
+                <div class="col-md-3 col-sm-6 stats-column">
+                    <div class="stats-circle" data-percentage="75">
+                        <svg class="progress-ring">
+                            <circle class="progress-ring-circle-bg" cx="50%" cy="50%"/>
+                            <circle class="progress-ring-circle" cx="50%" cy="50%"/>
+                        </svg>
+                        <div class="stats-number-container">
+                            <div class="stats-number" data-start-value="0" data-target-value="50" data-suffix="+">0+</div>
+                        </div>
+                    </div>
+                    <div class="stats-title">Nhân Viên</div>
+                </div>
+
+                <div class="col-md-3 col-sm-6 stats-column">
+                    <div class="stats-circle" data-percentage="90">
+                        <svg class="progress-ring">
+                           <circle class="progress-ring-circle-bg" cx="50%" cy="50%"/>
+                           <circle class="progress-ring-circle" cx="50%" cy="50%"/>
+                        </svg>
+                        <div class="stats-number-container">
+                            <div class="stats-number" data-start-value="0" data-target-value="5000" data-suffix="+">0+</div>
+                        </div>
+                    </div>
+                    <div class="stats-title">Đối Tác</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        // --- RESPONSIVE STATS SECTION WITH ENHANCED ANIMATIONS ---
+        const statsSection = document.querySelector('.stats-banner');
+        if (!statsSection) return;
+
+        // Lưu trữ các timer để có thể hủy khi cần
+        let animationTimers = [];
+        let resizeTimeout;
+        
+        // Responsive breakpoints
+        const breakpoints = {
+            xs: 320,
+            sm: 576,
+            md: 768,
+            lg: 992,
+            xl: 1200
+        };
+        
+        // Get current breakpoint
+        function getCurrentBreakpoint() {
+            const width = window.innerWidth;
+            if (width >= breakpoints.xl) return 'xl';
+            if (width >= breakpoints.lg) return 'lg';
+            if (width >= breakpoints.md) return 'md';
+            if (width >= breakpoints.sm) return 'sm';
+            return 'xs';
+        }
+        
+        // Mobile-optimized animation settings
+        const responsiveSettings = {
+            xl: { duration: 2500, delay: 0.15, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
+            lg: { duration: 2200, delay: 0.12, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
+            md: { duration: 2000, delay: 0.1, easing: 'cubic-bezier(0.25, 0.8, 0.25, 1)' },
+            sm: { duration: 1600, delay: 0.08, easing: 'cubic-bezier(0.25, 0.8, 0.25, 1)' },
+            xs: { duration: 1200, delay: 0.06, easing: 'cubic-bezier(0.25, 0.8, 0.25, 1)' }
+        };
+        
+        // Mobile-specific optimizations
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        function isReducedMotion() {
+            return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        }
+        
+        // Handle responsive layout changes
+        function handleResponsiveChanges() {
+            const currentBreakpoint = getCurrentBreakpoint();
+            const settings = responsiveSettings[currentBreakpoint];
+            const isMobile = currentBreakpoint === 'xs' || currentBreakpoint === 'sm';
+            
+            // Mobile-specific optimizations
+            if (isMobile) {
+                // Reduce animation complexity on mobile
+                const circles = statsSection.querySelectorAll('.progress-ring-circle');
+                circles.forEach(circle => {
+                    circle.style.filter = 'none'; // Remove drop-shadow on mobile
+                });
+                
+                // Optimize touch interactions
+                const statsCircles = statsSection.querySelectorAll('.stats-circle');
+                statsCircles.forEach(circle => {
+                    circle.style.cursor = 'pointer';
+                    circle.addEventListener('touchstart', function(e) {
+                        this.style.transform = 'scale(0.95)';
+                    }, { passive: true });
+                    
+                    circle.addEventListener('touchend', function(e) {
+                        this.style.transform = 'scale(1)';
+                    }, { passive: true });
+                });
+            }
+            
+            // Update animation settings based on screen size
+            const columns = statsSection.querySelectorAll('.stats-column');
+            columns.forEach((col, index) => {
+                col.style.transitionDelay = `${settings.delay * index}s`;
+            });
+            
+            // Recalculate circle sizes for SVG elements
+            updateCircleSizes();
+        }
+        
+        // Update SVG circle sizes based on current breakpoint
+        function updateCircleSizes() {
+            const currentBreakpoint = getCurrentBreakpoint();
+            const circles = statsSection.querySelectorAll('.progress-ring-circle, .progress-ring-circle-bg');
+            
+            let radius;
+            switch(currentBreakpoint) {
+                case 'xs': radius = 54; break;  // 120px circle
+                case 'sm': radius = 64; break;  // 140px circle  
+                case 'md': radius = 74; break;  // 160px circle
+                case 'lg': radius = 84; break;  // 180px circle
+                default: radius = 94; break;    // 200px circle
+            }
+            
+            const circumference = 2 * Math.PI * radius;
+            
+            circles.forEach(circle => {
+                circle.setAttribute('r', radius);
+                if (circle.classList.contains('progress-ring-circle')) {
+                    circle.style.strokeDasharray = circumference;
+                    circle.style.strokeDashoffset = circumference;
+                }
+            });
+        }
+        
+        // Optimized intersection observer for mobile
+        function createOptimizedObserver() {
+            const options = {
+                threshold: isMobileDevice() ? 0.1 : 0.3, // Lower threshold for mobile
+                rootMargin: isMobileDevice() ? '50px' : '100px' // Smaller margin for mobile
+            };
+            
+            return new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const currentBreakpoint = getCurrentBreakpoint();
+                        const settings = responsiveSettings[currentBreakpoint];
+                        
+                        // Skip animations if reduced motion is preferred
+                        if (isReducedMotion()) {
+                            entry.target.classList.add('is-visible');
+                            const numberElement = entry.target.querySelector('.stats-number');
+                            const targetValue = numberElement.getAttribute('data-target-value');
+                            const suffix = numberElement.getAttribute('data-suffix') || '';
+                            numberElement.textContent = targetValue + suffix;
+                            return;
+                        }
+                        
+                        // Animate with mobile-optimized settings
+                        setTimeout(() => {
+                            entry.target.classList.add('is-visible');
+                            animateStatsNumber(entry.target, settings);
+                            animateProgressRing(entry.target, settings);
+                        }, settings.delay * 100);
+                    }
+                });
+            }, options);
+        }
+        
+        // Mobile-optimized animation functions
+        function animateStatsNumber(column, settings) {
+            const numberElement = column.querySelector('.stats-number');
+            if (!numberElement) return;
+            
+            const startValue = parseInt(numberElement.getAttribute('data-start-value')) || 0;
+            const targetValue = parseInt(numberElement.getAttribute('data-target-value')) || 0;
+            const suffix = numberElement.getAttribute('data-suffix') || '';
+            
+            const duration = settings.duration;
+            const startTime = performance.now();
+            
+            function updateNumber(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Use easing function for smooth animation
+                const easedProgress = easeOutCubic(progress);
+                const currentValue = Math.round(startValue + (targetValue - startValue) * easedProgress);
+                
+                numberElement.textContent = currentValue + suffix;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateNumber);
+                }
+            }
+            
+            requestAnimationFrame(updateNumber);
+        }
+        
+        function animateProgressRing(column, settings) {
+            const circle = column.querySelector('.progress-ring-circle');
+            const statsCircle = column.querySelector('.stats-circle');
+            if (!circle || !statsCircle) return;
+            
+            const percentage = parseInt(statsCircle.getAttribute('data-percentage')) || 0;
+            const radius = parseFloat(circle.getAttribute('r')) || 84;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (percentage / 100) * circumference;
+            
+            // Apply mobile-optimized transition
+            circle.style.transition = `stroke-dashoffset ${settings.duration}ms ${settings.easing}`;
+            circle.style.strokeDashoffset = offset;
+        }
+        
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+        
+        // Initialize responsive stats section
+        function initializeStatsSection() {
+            // Initial setup
+            handleResponsiveChanges();
+            
+            // Create intersection observer
+            const observer = createOptimizedObserver();
+            const columns = statsSection.querySelectorAll('.stats-column');
+            columns.forEach(column => observer.observe(column));
+            
+            // Handle window resize with debouncing
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    handleResponsiveChanges();
+                }, 250);
+            }, { passive: true });
+            
+            // Handle orientation change for mobile
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => {
+                    handleResponsiveChanges();
+                }, 300);
+            });
+        }
+        
+        // Start the magic
+        initializeStatsSection();
+    });
+    </script>
+</div>

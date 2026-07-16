@@ -1,0 +1,94 @@
+﻿
+@{
+    Layout = null;
+    var user = ViewData["obj"] as Cubetech.Website.Models.User;
+    Cubetech.Website.DAO.UserDAO dao = new Cubetech.Website.DAO.UserDAO();
+    List<Cubetech.Website.Models.Role> lstRole = dao.Model.Roles.Where(f => f.IsDelete == false).ToList();
+}
+
+
+
+<div id="modelUser" class="modal" data-easein="bounceIn" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="glyphicon glyphicon-remove"></i></button>
+                <h4 class="modal-title"><i class="glyphicon glyphicon-edit"></i>@ViewData["Title"]</h4>
+            </div>
+            <form id="frmUserForm" data-toggle="validator">
+                <div class="modal-body row">
+                    <input type="hidden" name="mode" id="mode" value="@ViewData["Mode"]" />
+                    <div class="form-group col-sm-12">
+                        <label for="exampleInputEmail1">Tên đăng nhập</label>
+                        <input type="text" class="form-control nounicode" id="UserName" name="UserName" placeholder="Tên đăng nhập" autofocus value="@user.UserName">
+                    </div>
+
+                    <div class="form-group col-sm-6">
+                        <label for="exampleInputEmail1">Tên</label>
+                        <input type="text" class="form-control" id="Name" name="Name" value="@user.Name" placeholder="Tên">
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label for="exampleInputEmail1">Điện Thoại</label>
+                        <input type="text" class="form-control" id="PhoneNumber" name="PhoneNumber" placeholder="Số Điện Thoại" value="@user.PhoneNumber">
+                    </div>
+                    <div class="form-group col-sm-12">
+                        <label>Địa Chỉ</label>
+                        <textarea class="form-control" rows="2" style="resize: none;margin: 0px -0.5px 0px 0px;" name="Address" id="Address" placeholder="Địa Chỉ">@user.Address</textarea>
+                    </div>
+                
+                    <div class="form-group col-sm-6">
+                        <label>Phân Quyền</label>
+                        @Html.DropDownList("Role", new SelectList(lstRole, "RoleID", "RoleName"), new { @class = " form-control", @required = "required" })
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <div class="checkbox icheck" style="margin-top:0px">
+                            <label for="ckbIcheck">
+                                <input type="checkbox" id="ckbIcheck" @if ((user.IsActive == true)) { ViewContext.Writer.Write("checked"); } /> Kích Hoạt
+                            </label>
+                            <input type="hidden" name="IsActive" id="IsActive" value="@user.IsActive.ToString()" />
+                        </div>
+
+                    </div>
+                   
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-left">Mật khẩu mặc định: 1234567890</div>
+                    <button class="btn btn-dark" data-dismiss="modal" aria-hidden="true">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hủy
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="fnSaveUser()"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        setIcheck('#ckbIcheck', "[name=IsActive]", "true", "false", function (e) { });
+    });
+
+    function fnSaveUser() {
+        var fd = new FormData(document.getElementById("frmUserForm"));
+
+        $.ajax({
+            url: "/User/Update",
+            type: "POST",
+            data: fd,
+            enctype: 'multipart/form-data',
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,   // tell jQuery not to set contentType
+            success: function (data) {
+                if (data.Code == 1) {
+                    showSuccess("Thành công", data.message);
+                    $("#modelUser").modal("hide");
+                    SearchList();
+                }
+                else {
+                    showError('Lỗi', data.message);
+                }
+            }
+        });
+    }
+    </script>

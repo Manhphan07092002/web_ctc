@@ -1,0 +1,256 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký Nhận Tin</title>
+    <!-- Optimized font loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Optimized icon loading -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"></noscript>
+    
+    <!-- Defer EmailJS script -->
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js" defer></script>
+
+    <style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .dknt-section {
+        width: 100%;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #007bff, #3399ff);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    .dknt-form-container {
+        background: #ffffff;
+        padding: 40px 50px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        max-width: 800px;
+        width: 100%;
+    }
+    .dknt-form-container h2 {
+        font-size: 32px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        color: #007bff;
+        text-align: center;
+        font-weight: 600;
+    }
+    .dknt-form-container p {
+        font-size: 18px;
+        margin-bottom: 30px;
+        color: #555;
+        text-align: center;
+    }
+    .dknt-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .dknt-form-row {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    .dknt-form-group {
+        flex: 1;
+        min-width: 250px;
+    }
+    .dknt-full-width {
+        flex: 100%;
+    }
+    .dknt-input-icon {
+        position: relative;
+    }
+    .dknt-input-icon i {
+        position: absolute;
+        top: 50%;
+        left: 15px;
+        transform: translateY(-50%);
+        color: #007bff;
+        font-size: 18px;
+    }
+    .dknt-form-input {
+        width: 100%;
+        padding: 15px 20px 15px 45px;
+        font-size: 16px;
+        border: 1px solid #ccddee;
+        border-radius: 12px;
+        background-color: #f8fbfd;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    .dknt-form-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 8px rgba(0,123,255,0.4);
+        background-color: #fff;
+    }
+    .dknt-submit-btn {
+        padding: 15px 40px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #fff;
+        background: linear-gradient(45deg, #3399ff, #007bff);
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    .dknt-submit-btn:hover {
+        opacity: 0.95;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .dknt-success-msg {
+        display: none;
+        text-align: center;
+        color: green;
+        font-weight: 600;
+        margin-top: 20px;
+    }
+    @@media (max-width: 1024px) {
+        .dknt-form-container {
+            padding: 30px 30px;
+            max-width: 90%;
+        }
+    }
+    @@media (max-width: 768px) {
+        .dknt-form-row {
+            flex-direction: column;
+        }
+        .dknt-form-group {
+            min-width: 100%;
+        }
+        .dknt-form-container h2 {
+            font-size: 28px;
+        }
+        .dknt-form-container p {
+            font-size: 16px;
+        }
+    }
+    @@media (max-width: 480px) {
+        .dknt-form-container {
+            padding: 20px 15px;
+            border-radius: 15px;
+        }
+        .dknt-submit-btn {
+            padding: 12px 20px;
+            font-size: 16px;
+        }
+    }
+</style>
+
+</head>
+
+<body>
+<div class="dknt-section">
+    <div class="dknt-form-container">
+        <h2>Đăng Ký Nhận Tin</h2>
+        <p>Hãy đăng ký để nhận những ưu đãi hấp dẫn từ CTC</p>
+
+        <form class="dknt-form" id="dknt-subscribeForm">
+            <div class="dknt-form-row">
+                <div class="dknt-form-group">
+                    <div class="dknt-input-icon">
+                        <i class="fa fa-user"></i>
+                        <input type="text" name="ho_ten" placeholder="Họ tên" class="dknt-form-input" required />
+                    </div>
+                </div>
+
+                <div class="dknt-form-group">
+                    <div class="dknt-input-icon">
+                        <i class="fa fa-envelope"></i>
+                        <input type="email" name="email" placeholder="Email" class="dknt-form-input" required />
+                    </div>
+                </div>
+
+                <div class="dknt-form-group">
+                    <div class="dknt-input-icon">
+                        <i class="fa fa-map-marker"></i>
+                        <input type="text" name="dia_chi" placeholder="Địa chỉ" class="dknt-form-input" required />
+                    </div>
+                </div>
+            </div>
+
+            <div class="dknt-form-row">
+                <div class="dknt-form-group dknt-full-width">
+                    <div class="dknt-input-icon">
+                        <i class="fa fa-comment"></i>
+                        <input type="text" name="noi_dung" placeholder="Nội dung cần hỗ trợ" class="dknt-form-input" required />
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="dknt-submit-btn" id="dknt-submitBtn">Đăng ký</button>
+        </form>
+
+        <div id="dknt-successMsg" class="dknt-success-msg">🎉 Đăng ký thành công! Cảm ơn bạn.</div>
+    </div>
+</div>
+
+<script defer>
+    (function(){
+        // Wait for EmailJS to load
+        if (typeof emailjs !== 'undefined') {
+            emailjs.init("BYnxJ0Wja0K4oeHNA");
+        } else {
+            // Retry if EmailJS hasn't loaded yet
+            setTimeout(function() {
+                if (typeof emailjs !== 'undefined') {
+                    emailjs.init("BYnxJ0Wja0K4oeHNA");
+                }
+            }, 100);
+        }
+    })();
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.getElementById('dknt-subscribeForm');
+        if (!form) return;
+        
+        form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('dknt-submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Đang gửi...';
+
+        const formData = {
+            ho_ten: this.ho_ten.value,
+            email: this.email.value,
+            dia_chi: this.dia_chi.value,
+            noi_dung: this.noi_dung.value
+        };
+
+        emailjs.send('service_utptd8j', 'template_etonz8o', formData)
+        .then(function(response) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Đăng ký';
+            document.getElementById('dknt-subscribeForm').reset();
+            document.getElementById('dknt-successMsg').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('dknt-successMsg').style.display = 'none';
+            }, 4000);
+        }, function(error) {
+            alert('Lỗi gửi mail: ' + JSON.stringify(error));
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Đăng ký';
+        });
+    });
+    });
+</script>
+
+</body>
+</html>

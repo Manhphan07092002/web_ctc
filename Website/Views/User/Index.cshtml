@@ -1,0 +1,195 @@
+﻿
+@{
+    ViewBag.Title = "Quản lý người dùng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    Cubetech.Website.DAO.UserDAO dao = new Cubetech.Website.DAO.UserDAO();
+    List<Cubetech.Website.Models.Role> lstRole = dao.Model.Roles.Where(f => f.IsDelete == false).ToList();
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-category list-panel" id="list-panel">
+            <div class="panel-heading list-panel-heading">
+                <div class="col-md-4 search-top">
+                    <div class="input-group input-group-sm pull-right">
+                        <input type="text" class="form-control" id="Info" name="Info" placeholder="Thông tin tìm kiếm">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-success btn-flat" onclick="SearchList()">
+                                <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Tìm kiếm
+                            </button>
+                        </span>
+                    </div>
+
+                </div>
+                <div class="col-md-2 pull-right search-top">
+                    <button type="button" data-toggle="modal" data-target="#modelUser" class="btn btn-danger   btn-sm refresh-button" id="refresh-button" onclick="UpdateUser(this, '');">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Thêm mới
+                    </button>
+                    @*<button type="button" class="btn btn-danger  btn-sm refresh-button" id="refresh-button">
+                            <span class="glyphicon glyphicon-open" aria-hidden="true"></span> Import
+                        </button>*@
+                </div>
+
+            </div>
+            <div class="panel-body">
+                <table id="tbUsers" class="table table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Tên Đăng Nhập</th>
+                            <th> Tên Nhân Viên</th>
+                            <th>Điện Thoại</th>
+                            <th>Địa Chỉ</th>
+                            <th>Kích Hoạt</th>
+                            <th>Phân Quyền</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="lstRole" value='@Html.Raw(Json.Encode(lstRole))' />
+<script>
+    $(document).ready(function () {
+
+        SearchList();
+        lstRole = JSON.parse($('#lstRole').val());
+    });
+    function SearchList() {
+        $("#Info").val($.trim($("#Info").val()));
+        var table = $('#tbUsers').DataTable({
+            "bDestroy": true,
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "/User/ListUsers",
+                "type": "POST",
+                "data": function (d) {
+                    return $.extend({}, d, {
+                        'Info': $("#Info").val()
+                    })
+                },
+             
+            },
+            "columns": [
+                        {
+                            "name": "UserName",
+                            "data": "UserName"
+                        },
+
+                        {
+                            "name": "Name",
+                            "data": "Name", "width": "20%",
+                        },
+                        {
+                            "name": "PhoneNumber",
+                            "data": "PhoneNumber"
+                        },
+                        {
+                            "name": "Address",
+                            "data": "Address"
+                        },
+                                    {
+                                        "name": "IsActive", "data": "IsActive", "class": "cssPrice", 'width': '5%',
+                                        'render': function (data, type, full, meta) {
+                                            var html = "";
+                                            if (full.IsActive) {
+                                                html += '<button type="button"  class="btn btn-success btn-xs" title="Cập Nhật"  onclick="updateIsActive(\'' + full.UserName + '\')"><i class="fa fa-check" aria-hidden="true"></i></button>';
+                                            }
+                                            else {
+                                                html += '<button type="button"  class="btn btn-danger btn-xs" title="Cập Nhật"  onclick="updateIsActive(\'' + full.UserName + '\')"><i class="fa fa-times" aria-hidden="true"></i></button>';
+                                            }
+                                            return html;
+                                        }
+                                    },
+                        {
+                            "name": "Role",
+                            "data": "Role",
+                            'render': function (data, type, full, meta) {
+                                var html = "";
+                                if (full.Role != null) {
+                                    var role = lstRole.find(i=>i.RoleID == full.Role)
+                                    html = ' <span class="label label-danger">' + role.RoleName + '</span>';
+                                }
+                                return html;
+                            }
+
+
+                        },
+
+
+                        {
+                            targets: 'no-sort',
+                            orderable: false,
+                            'class': 'text-center',
+                            'width': '10%',
+                            'render': function (data, type, full, meta) {
+                                var html = '<button type="button" style="margin-right: 10px;" class="btn btn-warning btn-xs" title="Cập Nhật"  onclick="UpdateUser(this,\'' + full.UserName + '\')"><i class="glyphicon glyphicon-edit"></i></button>' +
+                                            '<button type="button" class="btn  btn-dark btn-xs" title="Xóa" style="margin-right: 10px;" onclick="Remove(this,\'' + full.UserName + '\')"><i class="glyphicon glyphicon-trash"></i></button> ';
+                                return html;
+                            }
+                        }
+            ],
+            "scrollCollapse": true,
+            "scrollX": true,
+            "paging": true,
+            "lengthChange": true,
+            "searching": false,
+            "ordering": true,
+            "info": false,
+            "autoWidth": false,
+            "dom": '<"top"i>rt<"bottom row"<"col-md-3"l><"col-md-9"<"pullright"p>>><"clear">'
+        });
+    }
+ 
+
+    function Remove(thiz, username) {
+
+        showConfirm("", "Bạn có chắc chắn muốn xóa Nhân viên ?",
+            function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/User/Delete',
+                    data: { username: username },
+                }).success(function (data) {
+                    if (data.Code === 1) {
+                        $('#tbUsers').DataTable().row($(thiz).parents('tr')).remove().draw(false);
+                        showSuccess('Thông báo', data.message);
+                    } else {
+                        showError('Lỗi', data.message);
+                    }
+                });
+            }, function () { }
+            );
+    }
+  
+
+    function ReloadTable() {
+        $("#Info").val($.trim($("#Info").val()));
+        var table = $('#tbUsers').DataTable();
+        table.ajax.reload();
+    }
+
+
+    function UpdateUser(thiz,username){
+        $.ajax({
+            url: "/User/AddNewEditUser",
+            method: "POST",
+            beforeSend: function () {
+                showSpinLoading();
+            },
+            data: {
+                userName: username
+            },
+            success: function (data) {
+                hideSpinLoading();
+                $("#popupContainer1").html(data);
+                $("#modelUser").modal("show");
+            }
+        });
+    }
+</script>

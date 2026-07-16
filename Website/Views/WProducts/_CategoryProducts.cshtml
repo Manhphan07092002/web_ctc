@@ -1,0 +1,365 @@
+﻿@{
+    // Phần này vẫn giữ nguyên để bạn có thể tích hợp logic thật sau này
+    Cubetech.Website.DAO.BaseWebDAO dao = new Cubetech.Website.DAO.BaseWebDAO();
+    Cubetech.Website.Models.DTO.WpSearchViewDTO modelData = Model as Cubetech.Website.Models.DTO.WpSearchViewDTO;
+    Cubetech.Website.Models.Category cate = modelData.Cate; // Biến này có vẻ không được sử dụng trong phần hiển thị dịch vụ tĩnh
+    string info = modelData.Info; // Biến này có vẻ không được sử dụng trong phần hiển thị dịch vụ tĩnh
+    
+    var staticServices = new List<dynamic>() {
+        new {
+            Name = "Hạ tầng Viễn thông",
+            Image = "~/Image/Dich_vu/htvt.jpg",
+            ShortDescription = "Thi công trạm BTS, tuyến cáp quang và hạ tầng viễn thông đồng bộ, đảm bảo kết nối thông suốt, vững chắc.",
+            DetailDescription = "<p>Là đối tác tin cậy của các nhà mạng lớn, CTC cung cấp giải pháp toàn diện về hạ tầng viễn thông, bao gồm:</p><ul><li><strong>Xây lắp trạm thu phát sóng (BTS):</strong> Thi công, lắp đặt và tối ưu hóa các trạm 2G, 3G, 4G và sẵn sàng cho mạng 5G.</li><li><strong>Phát triển hạ tầng cáp quang:</strong> Xây dựng các tuyến cáp quang trục, cáp thuê bao và thực hiện ngầm hóa hệ thống cáp.</li><li><strong>Giải pháp Trung tâm Dữ liệu (Data Center):</strong> Xây dựng và lắp đặt hạ tầng cho các Data Center tiêu chuẩn.</li></ul><p>Chúng tôi cam kết chất lượng, tiến độ và an toàn tuyệt đối cho mọi dự án.</p>"
+        },
+        new {
+            Name = "Công trình Điện",
+            Image = "~/Image/Dich_vu/ctd.jpg",
+            ShortDescription = "Xây dựng, lắp đặt đường dây và trạm biến áp đến 110kV, cung cấp nguồn năng lượng ổn định.",
+            DetailDescription = "<p>Với năng lực và kinh nghiệm dày dặn, CTC đảm nhận thi công các công trình điện lực với độ phức tạp cao, đáp ứng tiêu chuẩn kỹ thuật của ngành điện Việt Nam.</p><ul><li><strong>Đường dây truyền tải:</strong> Lắp đặt hệ thống đường dây trên không và cáp ngầm điện áp đến 110kV.</li><li><strong>Trạm biến áp:</strong> Xây dựng và lắp đặt trọn gói các trạm biến áp phân phối, trạm biến áp trung gian.</li><li><strong>Hệ thống điện công nghiệp:</strong> Cung cấp giải pháp điện toàn diện cho các nhà máy, khu công nghiệp.</li></ul>"
+        },
+        new {
+            Name = "Xây dựng Dân dụng & Công nghiệp",
+            Image = "~/Image/Dich_vu/xddd.jpg",
+            ShortDescription = "Tổng thầu thi công các công trình tòa nhà văn phòng, khu công nghiệp, nhà xưởng chất lượng.",
+            DetailDescription = "<p>CTC mang đến các giải pháp xây dựng hiệu quả, áp dụng công nghệ thi công tiên tiến để tối ưu chi phí và rút ngắn tiến độ cho chủ đầu tư.</p><ul><li><strong>Công trình dân dụng:</strong> Thi công tòa nhà văn phòng, chung cư, khách sạn, trường học, bệnh viện.</li><li><strong>Công trình công nghiệp:</strong> Xây dựng nhà xưởng, nhà kho, khu công nghiệp theo tiêu chuẩn quốc tế.</li><li><strong>Hạ tầng giao thông:</strong> Tham gia thi công các công trình cầu đường, hạ tầng kỹ thuật khu đô thị.</li></ul>"
+        },
+         new { 
+            Name = "Hệ thống Cơ điện ",
+            Image = "~/Image/Dich_vu/htdc.jpg", 
+            ShortDescription = "Lắp đặt hệ thống cơ điện M&E cho tòa nhà, nhà máy, đảm bảo vận hành thông minh, an toàn.",
+            DetailDescription = "<p>Chúng tôi là tổng thầu M&E chuyên nghiệp, cung cấp dịch vụ thiết kế, cung cấp và lắp đặt các hệ thống:</p><ul><li><strong>Hệ thống điện:</strong> Điện động lực, chiếu sáng, điện nhẹ (camera, internet, điện thoại).</li><li><strong>Hệ thống cơ:</strong> Điều hòa không khí và thông gió (HVAC), phòng cháy chữa cháy (PCCC), cấp thoát nước.</li><li><strong>Tự động hóa tòa nhà (BMS):</strong> Tích hợp các hệ thống cơ điện để quản lý và vận hành tòa nhà thông minh.</li></ul>"
+        },
+        new {
+            Name = "Năng lượng Tái tạo",
+            Image = "~/Image/Dich_vu/nltt.jpg",
+            ShortDescription = "Tổng thầu EPC các dự án điện mặt trời, điện gió, cung cấp giải pháp năng lượng sạch.",
+            DetailDescription = "<p>Đón đầu xu hướng chuyển dịch năng lượng, CTC mang đến các giải pháp năng lượng xanh toàn diện, góp phần vào sự phát triển bền vững của quốc gia.</p><ul><li><strong>Điện mặt trời áp mái:</strong> Tư vấn, thiết kế và lắp đặt hệ thống cho nhà xưởng, khu công nghiệp, tòa nhà thương mại.</li><li><strong>Trang trại điện mặt trời (Solar Farm):</strong> Tổng thầu EPC, thực hiện trọn gói từ khâu thiết kế, cung ứng vật tư đến thi công và vận hành.</li><li><strong>Dự án điện gió:</strong> Cung cấp dịch vụ xây lắp các hạng mục hạ tầng, móng tuabin và trạm biến áp cho các dự án điện gió.</li></ul>"
+        },
+        new {
+            Name = "Vận hành & Bảo trì",
+            Image = "~/Image/Dich_vu/vh-bt.jpg",
+            ShortDescription = "Cung cấp dịch vụ vận hành, bảo trì và tối ưu hóa hệ thống sau đầu tư.",
+            DetailDescription = "<p>Một công trình không chỉ kết thúc sau khi xây dựng. Đội ngũ kỹ sư chuyên nghiệp của chúng tôi đảm bảo các hệ thống của bạn luôn hoạt động ở hiệu suất cao nhất.</p><ul><li><strong>Tối đa hóa hiệu suất:</strong> Giám sát hoạt động 24/7, thực hiện bảo trì, bảo dưỡng định kỳ để ngăn ngừa sự cố.</li><li><strong>Kéo dài tuổi thọ thiết bị:</strong> Cung cấp dịch vụ sửa chữa, thay thế và nâng cấp hệ thống theo công nghệ mới nhất.</li><li><strong>Phản ứng nhanh:</strong> Đội ngũ kỹ thuật lưu động sẵn sàng xử lý sự cố kịp thời, đảm bảo hoạt động kinh doanh của khách hàng không bị gián đoạn.</li></ul>"
+        },
+        new {
+            Name = "Giải pháp Đô thị & Tòa nhà Thông minh",
+            Image = "~/Image/Dich_vu/smart-city.jpg", 
+            ShortDescription = "Tích hợp công nghệ tiên tiến xây dựng đô thị thông minh, tòa nhà tự động hóa, nâng cao chất lượng sống và quản lý hiệu quả.",
+            DetailDescription = "<p>CTC tiên phong ứng dụng các giải pháp công nghệ 4.0 vào xây dựng và quản lý hạ tầng, hướng tới các đô thị và tòa nhà thông minh, bền vững.</p><ul><li><strong>Hệ thống quản lý tòa nhà (BMS):</strong> Tối ưu hóa năng lượng, an ninh và tiện nghi cho các công trình.</li><li><strong>Giải pháp chiếu sáng thông minh:</strong> Tiết kiệm năng lượng, điều khiển tự động cho đường phố và khu đô thị.</li><li><strong>Hạ tầng IoT cho đô thị:</strong> Kết nối và quản lý các thiết bị cảm biến, thu thập dữ liệu phục vụ quản lý đô thị hiệu quả.</li><li><strong>An ninh và giám sát thông minh:</strong> Hệ thống camera AI, kiểm soát ra vào tích hợp.</li></ul>"
+        },
+        new {
+            Name = "Tư vấn Kỹ thuật & Quản lý Dự án",
+            Image = "~/Image/Dich_vu/project-management.jpg", 
+            ShortDescription = "Cung cấp dịch vụ tư vấn chuyên sâu, lập dự án, quản lý thi công và giám sát chất lượng cho các công trình phức tạp.",
+            DetailDescription = "<p>Với đội ngũ chuyên gia giàu kinh nghiệm, CTC cung cấp dịch vụ tư vấn và quản lý dự án toàn diện, đảm bảo sự thành công cho các dự án xây lắp quy mô lớn và phức tạp.</p><ul><li><strong>Tư vấn đầu tư và lập dự án:</strong> Nghiên cứu tiền khả thi, khả thi, thiết kế cơ sở và kỹ thuật.</li><li><strong>Quản lý dự án chuyên nghiệp (PMC):</strong> Lập kế hoạch, điều phối, giám sát tiến độ, chi phí và quản lý rủi ro.</li><li><strong>Giám sát thi công (CM):</strong> Đảm bảo chất lượng công trình theo đúng thiết kế và tiêu chuẩn kỹ thuật.</li><li><strong>Thẩm tra và nghiệm thu công trình:</strong> Hỗ trợ chủ đầu tư trong việc đánh giá và đưa công trình vào sử dụng.</li></ul>"
+        }
+    };
+}
+
+<div class="container">
+    <div class="service_title">
+        <div class="col-sm-12 text-center">
+            <h2>Dịch Vụ Của Chúng Tôi</h2>
+            <p class="lead">CTC tự hào cung cấp các giải pháp toàn diện, chất lượng cao trong lĩnh vực xây lắp và hạ tầng.</p>
+            <hr />
+        </div>
+    </div>
+
+
+    <div class="row">
+        @for (int i = 0; i < staticServices.Count; i++)
+        {
+            var item = staticServices[i];
+            var imageUrl = !string.IsNullOrEmpty(item.Image) ? Url.Content(item.Image) : Url.Content("~/Content/Image/noimage.png");
+            var modalImageUrl = !string.IsNullOrEmpty(item.Image) ? Url.Content(item.Image) : Url.Content("~/Content/Image/noimage.png");
+            
+            <div class="col-md-3 col-sm-6 service-item">
+                <div class="thumbnail text-center">
+                    <img src="@imageUrl" alt="@item.Name" class="img-responsive">
+                    <div class="caption">
+                        <h3>@item.Name</h3>
+                        <p>@item.ShortDescription</p>
+                        <p class="text-center"> 
+                            <a href="#" class="btn btn-primary" role="button" data-toggle="modal" data-target="#serviceModal"
+                               data-title="@item.Name"
+                               data-image="@modalImageUrl"
+                               data-description="@Html.Raw(item.DetailDescription)">
+                                Xem chi tiết
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            if ((i + 1) % 4 == 0) 
+            {
+                <div class="clearfix visible-md-block visible-lg-block"></div>
+            }
+            if ((i + 1) % 2 == 0)
+            {
+                <div class="clearfix visible-sm-block"></div>
+            }
+        }
+    </div>
+</div>
+
+
+<div class="modal fade" id="serviceModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modal-title">Tiêu đề dịch vụ</h4>
+            </div>
+            <div class="modal-body">
+                <img id="modal-image" src="" class="img-responsive" style="width:100%; margin-bottom: 15px;"
+                    alt="Hình ảnh dịch vụ">
+                <div id="modal-description">
+                    <p>Nội dung chi tiết của sẽ được hiển thị ở đây.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Script (giữ nguyên) *@
+<script>
+    $(document).ready(function () {
+        $('#serviceModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var title = button.data('title');
+            var imageUrl = button.data('image');
+            var description = button.data('description');
+            var modal = $(this);
+            modal.find('.modal-title').text(title);
+            modal.find('#modal-image').attr('src', imageUrl);
+            modal.find('#modal-description').html(description);
+        });
+    });
+</script>
+
+@* CSS CẬP NHẬT VỚI ANIMATION CHO MODAL *@
+<style>
+    /* --- CSS cho Service Items (giữ nguyên) --- */
+    .service-item .thumbnail img {
+        height: 200px;
+        width: 100%;
+        object-fit: cover;
+    }
+
+    .service-item .thumbnail {
+        min-height: 420px; 
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+    }
+
+    .service-item .thumbnail:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .service-item .caption {
+        flex-grow: 1;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .service-item .caption h3 {
+        margin-top: 0;
+        font-size: 1.3em;
+    }
+    .service-item .caption p {
+        font-size: 0.9em;
+        margin-bottom: 15px;
+    }
+    .service-item .btn-primary {
+        background-color: #0056b3;
+        border-color: #004a99;
+        transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    .service-item .btn-primary:hover,
+    .service-item .btn-primary:focus {
+        background-color: #004080;
+        border-color: #003366;
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .service_title h2 {
+        margin-top: 0;
+    }
+
+    /* --- CSS MỚI CHO ANIMATION CỦA MODAL --- */
+
+    /* Hiệu ứng cho toàn bộ nội dung modal khi xuất hiện */
+    /* Bootstrap 3 dùng class .in khi modal hiển thị, không phải .show */
+    .modal.fade .modal-dialog {
+        /* Hiệu ứng trượt xuống mặc định của Bootstrap 3 là tốt rồi, 
+           nếu muốn thay đổi mạnh hơn có thể cần ghi đè nhiều hơn hoặc dùng JS.
+           Ở đây chúng ta sẽ tập trung vào các thành phần con. */
+    }
+
+    .modal-content {
+        border-radius: 8px; /* Bo góc cho modal content */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.25); /* Tăng nhẹ bóng đổ */
+        /* Thêm transition nếu muốn các thay đổi khác (như transform) mượt mà */
+        transition: transform 0.3s ease-out; 
+    }
+    
+    /* Nếu muốn modal có hiệu ứng "zoom" nhẹ khi xuất hiện, 
+       bạn có thể thử (nhưng cẩn thận xung đột với hiệu ứng slide mặc định của Bootstrap):
+    .modal.fade .modal-dialog {
+        transform: scale(0.95);
+        opacity: 0;
+        transition: transform 0.3s ease-out, opacity 0.3s ease-out !important;
+    }
+    .modal.fade.in .modal-dialog {
+        transform: scale(1);
+        opacity: 1;
+    }
+    */
+
+
+    /* Hiệu ứng cho nút X (close) trong header của modal */
+    .modal-header .close {
+        font-size: 28px; /* Tăng kích thước nút close một chút */
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    }
+    .modal-header .close:hover {
+        opacity: 0.8;
+        transform: scale(1.1) rotate(90deg); /* Xoay nhẹ và phóng to khi hover */
+    }
+
+    /* Hiệu ứng cho hình ảnh trong modal body */
+    #modal-image {
+        border-radius: 4px; /* Bo góc nhẹ cho ảnh */
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+    #modal-image:hover {
+        transform: scale(1.03); /* Phóng to ảnh một chút khi hover */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    /* Hiệu ứng cho nút "Đóng" trong footer */
+    .modal-footer .btn-default {
+        transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    }
+    .modal-footer .btn-default:hover {
+        background-color: #e6e6e6; /* Màu nền xám nhạt hơn khi hover */
+        border-color: #adadad;
+        transform: translateY(-2px); /* Nhích nút lên một chút */
+    }
+    .service_title h2 {
+        font-size: 36px; /* Tăng kích thước font cho tiêu đề chính, bạn có thể điều chỉnh giá trị này */
+        font-weight: bold; /* Đảm bảo chữ được in đậm (thường h2 đã đậm sẵn) */
+        /* Bạn có thể thêm các thuộc tính khác nếu muốn, ví dụ: */
+        /* color: #2c3e50; */
+        /* margin-bottom: 15px; */
+    }
+
+    .service_title .lead { /* Hoặc .service_title p.lead nếu muốn cụ thể hơn */
+        font-size: 20px; /* Tăng kích thước font cho đoạn mô tả ngắn, điều chỉnh nếu cần */
+        font-weight: 600; /* In đậm (bold thường là 700, 600 là semi-bold, bạn có thể dùng 'bold' trực tiếp) */
+        /* color: #555; */
+        /* line-height: 1.6; */
+    }
+
+    /* Nếu bạn muốn HR cũng có chút thay đổi */
+    .service_title hr {
+        border-top: 2px solid #eeeeee; /* Làm cho đường kẻ dày hơn và màu nhạt hơn một chút */
+        width: 100px; /* Thu hẹp chiều rộng của đường kẻ */
+        margin-top: 25px;
+        margin-bottom: 30px;
+    }
+
+    /* CSS cho Service Items và Modal (giữ nguyên từ trước) */
+    .service-item .thumbnail img {
+        height: 200px;
+        width: 100%;
+        object-fit: cover;
+    }
+
+    .service-item .thumbnail {
+        min-height: 420px; 
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+    }
+
+    .service-item .thumbnail:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .service-item .caption {
+        flex-grow: 1;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .service-item .caption h3 {
+        margin-top: 0;
+        font-size: 1.3em;
+    }
+    .service-item .caption p {
+        font-size: 0.9em;
+        margin-bottom: 15px;
+    }
+    .service-item .btn-primary {
+        background-color: #0056b3;
+        border-color: #004a99;
+        transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    .service-item .btn-primary:hover,
+    .service-item .btn-primary:focus {
+        background-color: #004080;
+        border-color: #003366;
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    /* CSS cho Modal Animation (giữ nguyên từ trước) */
+    .modal-content {
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+        transition: transform 0.3s ease-out; 
+    }
+    .modal-header .close {
+        font-size: 28px;
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    }
+    .modal-header .close:hover {
+        opacity: 0.8;
+        transform: scale(1.1) rotate(90deg);
+    }
+    #modal-image {
+        border-radius: 4px;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+    #modal-image:hover {
+        transform: scale(1.03);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .modal-footer .btn-default {
+        transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    }
+    .modal-footer .btn-default:hover {
+        background-color: #e6e6e6;
+        border-color: #adadad;
+        transform: translateY(-2px);
+    }
+
+</style>

@@ -1,0 +1,124 @@
+﻿.news_contents {
+    overflow: auto;
+}
+
+.blog_info_item {
+    margin: 15px 0;
+}
+
+    .blog_info_item .info_title {
+        background: #58595b;
+        color: #fff;
+        text-transform: uppercase;
+        text-align: center;
+        padding: 8px 0;
+    }
+
+    .blog_info_item .info_content {
+        text-align: center;
+        margin: 15px 0;
+    }
+
+        .blog_info_item .info_content p {
+            text-align: justify;
+        }
+
+.news h1 {
+    text-align: center;
+    color: #d2d3d5;
+    text-transform: uppercase;
+    font-size: 30px;
+}
+
+.newslist_page {
+    width: 50%;
+    float: left;
+    padding: 25px 15px;
+}
+
+    .newslist_page:first-child {
+        width: 100%;
+    }
+
+.newslist_title {
+    display: block;
+    text-align: center;
+    width: 80%;
+    margin: 0 auto;
+}
+
+.newslist_page:first-child .newslist_title {
+    width: 50%;
+}
+
+.newslist_title h3 {
+    max-height: 52px;
+    overflow: hidden;
+}
+
+    .newslist_title h3 a {
+        color: #58595b;
+        font-size: 22px;
+        text-transform: uppercase;
+    }
+
+        .newslist_title h3 a:hover {
+            text-decoration: none;
+        }
+
+.icon_news {
+    margin-top: 10px;
+}
+
+    .icon_news span {
+        color: #58595b;
+        font-size: 18px;
+        border-top: 2px solid #58595b;
+        padding-top: 10px;
+    }
+
+.btnLoadDrap {
+    border-bottom: 1px solid #5e5f61;
+    border-top: 1px solid #5e5f61;
+    color: #6d6e70;
+}
+
+    .btnLoadDrap .btn {
+        font-size: 17px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+        .btnLoadDrap .btn:active {
+            box-shadow: none;
+        }
+        .blog_des{
+            text-align:justify;
+            margin: 15px 0;
+            color:#5a5b5d;
+            font-size: 14px;
+        }
+        .blog_container{
+            margin: 25px 0;
+        }
+        .blog-title a{
+            color:#404042;
+            font-size: 15px;
+        }
+        .blog_name{
+            color:#58595b;
+            font-size: 30px;
+            font-weight:bold;
+        }
+        .blog_time{
+            font-size: 15px;
+            margin: 5px 0;
+            color: #949599;
+        }
+        .blog_time_content{
+            color:#58595b;
+            font-weight: bold;
+        }
+        .blog_content{
+            margin: 15px 0;
+        }

@@ -1,0 +1,72 @@
+/* Flag CSS for Language Switcher */
+.flag-vn {
+    background: linear-gradient(to bottom, #da251d 0%, #da251d 100%);
+    position: relative;
+}
+
+.flag-vn::after {
+    content: "★";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffff00;
+    font-size: 8px;
+}
+
+.flag-us {
+    background: linear-gradient(to bottom, 
+        #b22234 0%, #b22234 7.7%, 
+        #ffffff 7.7%, #ffffff 15.4%, 
+        #b22234 15.4%, #b22234 23.1%, 
+        #ffffff 23.1%, #ffffff 30.8%, 
+        #b22234 30.8%, #b22234 38.5%, 
+        #ffffff 38.5%, #ffffff 46.2%, 
+        #b22234 46.2%, #b22234 53.9%, 
+        #ffffff 53.9%, #ffffff 61.6%, 
+        #b22234 61.6%, #b22234 69.3%, 
+        #ffffff 69.3%, #ffffff 77%, 
+        #b22234 77%, #b22234 84.7%, 
+        #ffffff 84.7%, #ffffff 92.4%, 
+        #b22234 92.4%, #b22234 100%);
+    position: relative;
+}
+
+.flag-us::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40%;
+    height: 53.8%;
+    background: #3c3b6e;
+}
+
+.flag-kr {
+    background: #ffffff;
+    position: relative;
+}
+
+.flag-kr::after {
+    content: "☯";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #cd2e3a;
+    font-size: 10px;
+}
+
+.flag-cn {
+    background: #de2910;
+    position: relative;
+}
+
+.flag-cn::after {
+    content: "★";
+    position: absolute;
+    top: 25%;
+    left: 25%;
+    color: #ffde00;
+    font-size: 8px;
+}

@@ -1,0 +1,921 @@
+@{
+    // Lấy ID dự án từ query string
+    int projectId = 0;
+    if (!string.IsNullOrEmpty(Request.QueryString["id"]))
+    {
+        int.TryParse(Request.QueryString["id"], out projectId);
+    }
+    
+    // Lấy thông tin chi tiết dự án từ database
+    dynamic project = null;
+    
+    try 
+    {
+        using (var connection = new System.Data.SqlClient.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+        {
+            connection.Open();
+            
+            var query = @"SELECT p.ProjectID, p.Title, p.Description, p.Category, p.Location, p.Client, 
+                         p.Contractor, p.ProjectValue, p.Currency, p.StartDate, p.EndDate, 
+                         p.CompletionDate, p.Status, p.Progress, p.ImageUrl, p.DocumentUrl,
+                         p.Tags, p.ViewCount, p.LikeCount, p.CreatedDate,
+                         CASE 
+                            WHEN p.Status = 'completed' THEN N'Đã hoàn thành'
+                            WHEN p.Status = 'in_progress' THEN N'Đang thực hiện'
+                            WHEN p.Status = 'planning' THEN N'Lập kế hoạch'
+                            WHEN p.Status = 'on_hold' THEN N'Tạm dừng'
+                            ELSE N'Đã hoàn thành'
+                         END as StatusDisplay,
+                         ISNULL(pc.CategoryName, p.Category) as CategoryName
+                         FROM Projects p
+                         LEFT JOIN ProjectCategories pc ON p.Category = pc.CategoryCode
+                         WHERE p.ProjectID = @projectId AND p.IsDeleted = 0 AND p.IsPublished = 1";
+            
+            using (var cmd = new System.Data.SqlClient.SqlCommand(query, connection))
+            {
+                cmd.Parameters.AddWithValue("@projectId", projectId);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        // Xử lý nhiều ảnh (phân tách bởi dấu phẩy)
+                        string imageUrls = reader["ImageUrl"].ToString();
+                        string[] images = new string[0];
+                        if (!string.IsNullOrEmpty(imageUrls))
+                        {
+                            images = imageUrls.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                             .Select(img => img.Trim())
+                                             .Where(img => !string.IsNullOrEmpty(img))
+                                             .ToArray();
+                        }
+                        if (images.Length == 0)
+                        {
+                            // Fallback to single default image
+                            images = new string[] { "/Content/uploads/projects/images/nen_du_an.jpg" };
+                        }
+
+                        // Xử lý nhiều file tài liệu (phân tách bởi dấu phẩy)
+                        string documentUrls = reader["DocumentUrl"].ToString();
+                        string[] documents = new string[0];
+                        if (!string.IsNullOrEmpty(documentUrls))
+                        {
+                            documents = documentUrls.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                                   .Select(doc => doc.Trim())
+                                                   .Where(doc => !string.IsNullOrEmpty(doc))
+                                                   .ToArray();
+                        }
+
+                        project = new {
+                            id = Convert.ToInt32(reader["ProjectID"]),
+                            title = reader["Title"].ToString(),
+                            location = reader["Location"].ToString(),
+                            description = reader["Description"].ToString(),
+                            category = reader["CategoryName"].ToString(),
+                            status = reader["StatusDisplay"].ToString(),
+                            imageUrl = images[0], // Ảnh đầu tiên cho backward compatibility
+                            images = images, // Mảng tất cả ảnh
+                            client = reader["Client"].ToString(),
+                            contractor = reader["Contractor"].ToString(),
+                            projectValue = reader["ProjectValue"].ToString(),
+                            currency = reader["Currency"].ToString(),
+                            startDate = reader["StartDate"] != DBNull.Value ? Convert.ToDateTime(reader["StartDate"]).ToString("dd/MM/yyyy") : "",
+                            endDate = reader["EndDate"] != DBNull.Value ? Convert.ToDateTime(reader["EndDate"]).ToString("dd/MM/yyyy") : "",
+                            completionDate = reader["CompletionDate"] != DBNull.Value ? Convert.ToDateTime(reader["CompletionDate"]).ToString("dd/MM/yyyy") : "",
+                            progress = reader["Progress"].ToString(),
+                            documentUrl = reader["DocumentUrl"].ToString(),
+                            documents = documents, // Mảng tất cả tài liệu
+                            tags = reader["Tags"].ToString(),
+                            viewCount = reader["ViewCount"].ToString(),
+                            likeCount = reader["LikeCount"].ToString(),
+                            createdDate = reader["CreatedDate"] != DBNull.Value ? Convert.ToDateTime(reader["CreatedDate"]).ToString("dd/MM/yyyy") : ""
+                        };
+                    }
+                }
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        // Log error và redirect về trang danh sách
+        Response.Redirect("/du_an");
+        return;
+    }
+    
+    // Nếu không tìm thấy dự án, redirect về trang danh sách
+    if (project == null)
+    {
+        Response.Redirect("/du_an");
+        return;
+    }
+}
+
+<style>
+    body {
+        background-color: #f8fafc;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    .project-detail-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .project-header {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        margin-bottom: 30px;
+    }
+
+    .project-hero-image {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+    }
+
+    /* Image Slider Styles */
+    .image-slider {
+        position: relative;
+        width: 100%;
+        height: 400px;
+        overflow: hidden;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .slider-container {
+        display: flex;
+        width: 500%;
+        height: 100%;
+        animation: slideShow 15s infinite;
+    }
+
+    .slider-container.single-image {
+        width: 100%;
+        animation: none;
+    }
+
+    .slide {
+        width: 20%;
+        height: 100%;
+        flex-shrink: 0;
+    }
+
+    .slide.single {
+        width: 100%;
+    }
+
+    .slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .slider-dots {
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+    }
+
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .dot.active {
+        background: white;
+    }
+
+    @@keyframes slideShow {
+        0%, 20% { transform: translateX(0); }
+        25%, 45% { transform: translateX(-20%); }
+        50%, 70% { transform: translateX(-40%); }
+        75%, 95% { transform: translateX(-60%); }
+        100% { transform: translateX(-80%); }
+    }
+
+    .project-header-content {
+        padding: 30px;
+    }
+
+    .project-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 10px;
+        line-height: 1.2;
+    }
+
+    .project-category {
+        display: inline-block;
+        background: #3b82f6;
+        color: white;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    .project-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .meta-item svg {
+        width: 16px;
+        height: 16px;
+        margin-right: 6px;
+    }
+
+    .project-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+    }
+
+    .project-main {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+
+    .project-sidebar {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        height: fit-content;
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .project-description {
+        color: #475569;
+        line-height: 1.7;
+        font-size: 16px;
+        margin-bottom: 30px;
+    }
+
+    .info-grid {
+        display: grid;
+        gap: 20px;
+    }
+
+    .info-item {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 12px;
+        border-left: 4px solid #3b82f6;
+    }
+
+    .info-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .info-value {
+        font-size: 16px;
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 20px;
+        background: #f1f5f9;
+        color: #64748b;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-bottom: 20px;
+    }
+
+    .back-button:hover {
+        background: #e2e8f0;
+        color: #475569;
+        text-decoration: none;
+    }
+
+    .back-button svg {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+    }
+
+    .document-link {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 24px;
+        background: #3b82f6;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-top: 20px;
+    }
+
+    .document-link:hover {
+        background: #2563eb;
+        color: white;
+        text-decoration: none;
+    }
+
+    .document-link svg {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+    }
+
+    .download-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 24px;
+        background: #10b981;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-top: 20px;
+    }
+
+    .download-btn:hover {
+        background: #059669;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    .download-all-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 24px;
+        background: #dc2626;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-top: 20px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .download-all-btn:hover {
+        background: #b91c1c;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+
+    .file-list {
+        margin-top: 15px;
+        padding: 15px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border-left: 4px solid #3b82f6;
+    }
+
+    .file-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .file-item:last-child {
+        border-bottom: none;
+    }
+
+    .file-name {
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .file-size {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .individual-download {
+        padding: 4px 12px;
+        background: #10b981;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 12px;
+        transition: all 0.2s ease;
+    }
+
+    .individual-download:hover {
+        background: #059669;
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Progress Bar Styles */
+    .progress-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .progress-bar-bg {
+        flex: 1;
+        background: #f1f5f9;
+        border-radius: 10px;
+        height: 8px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+
+    .progress-bar.progress-red {
+        background: #dc2626;
+    }
+
+    .progress-bar.progress-yellow {
+        background: #eab308;
+    }
+
+    .progress-bar.progress-orange {
+        background: #d97706;
+    }
+
+    .progress-bar.progress-green {
+        background: #059669;
+    }
+
+    .progress-text {
+        font-weight: 600;
+        min-width: 35px;
+    }
+
+    .progress-text.progress-red {
+        color: #dc2626;
+    }
+
+    .progress-text.progress-yellow {
+        color: #eab308;
+    }
+
+    .progress-text.progress-orange {
+        color: #d97706;
+    }
+
+    .progress-text.progress-green {
+        color: #059669;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .project-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .project-title {
+            font-size: 24px;
+        }
+        
+        .project-hero-image {
+            height: 250px;
+        }
+        
+        .project-header-content,
+        .project-main,
+        .project-sidebar {
+            padding: 20px;
+        }
+    }
+</style>
+
+<div class="project-detail-container">
+    <a href="/du_an" class="back-button">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        Quay lại danh sách dự án
+    </a>
+
+    <div class="project-header">
+        @if (project.images != null && project.images.Length > 1)
+        {
+            <div class="image-slider">
+                <div class="slider-container">
+                    @for (int i = 0; i < Math.Min(project.images.Length, 5); i++)
+                    {
+                        <div class="slide">
+                            <img src="@project.images[i]" alt="@project.title - Ảnh @(i+1)" 
+                                 onerror="this.src='/Content/uploads/projects/images/nen_du_an.jpg'; console.log('Image failed to load: @project.images[i]');">
+                        </div>
+                    }
+                </div>
+                <div class="slider-dots">
+                    @for (int i = 0; i < Math.Min(project.images.Length, 5); i++)
+                    {
+                        <div class="dot @(i == 0 ? "active" : "")"></div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="image-slider">
+                <div class="slider-container single-image">
+                    <div class="slide single">
+                        <img src="@project.imageUrl" alt="@project.title" class="project-hero-image"
+                             onerror="this.src='/Content/uploads/projects/images/nen_du_an.jpg'; console.log('Single image failed to load: @project.imageUrl');">
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="project-header-content">
+            <h1 class="project-title">@project.title</h1>
+            <span class="project-category">@project.category</span>
+            
+            <div class="project-meta">
+                @if (!string.IsNullOrEmpty(project.location))
+                {
+                    <div class="meta-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                        </svg>
+                        @project.location
+                    </div>
+                }
+                <div class="meta-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    @project.status
+                </div>
+                @if (!string.IsNullOrEmpty(project.createdDate))
+                {
+                    <div class="meta-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5a2.25 2.25 0 002.25-2.25m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5a2.25 2.25 0 012.25 2.25v7.5" />
+                        </svg>
+                        Ngày tạo: @project.createdDate
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="project-content">
+        <div class="project-main">
+            <h2 class="section-title">Mô tả dự án</h2>
+            <div class="project-description">
+                @if (!string.IsNullOrEmpty(project.description))
+                {
+                    @project.description
+                }
+                else
+                {
+                    <p>Chưa có mô tả chi tiết cho dự án này.</p>
+                }
+            </div>
+
+            @if (project.documents != null && project.documents.Length > 0)
+            {
+                <h4 style="margin-top: 30px; margin-bottom: 15px; color: #1e293b;">📁 Tài liệu dự án</h4>
+                
+                if (project.documents.Length > 1)
+                {
+                    <button onclick="downloadAllFiles()" class="download-all-btn">
+                        📦 Tải tất cả (@project.documents.Length files)
+                    </button>
+                }
+
+                <div class="file-list">
+                    @for (int i = 0; i < project.documents.Length; i++)
+                    {
+                        string fileName = System.IO.Path.GetFileName(project.documents[i]);
+                        if (string.IsNullOrEmpty(fileName)) 
+                        { 
+                            fileName = "Document " + (i + 1); 
+                        }
+                        
+                        <div class="file-item">
+                            <div>
+                                <div class="file-name">📄 @fileName</div>
+                                <div class="file-size">File @(i + 1)</div>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <a href="@project.documents[i]" target="_blank" class="document-link" style="margin: 0; padding: 6px 12px; font-size: 12px;">
+                                    👁️ Xem
+                                </a>
+                                <a href="@project.documents[i]" download class="individual-download">
+                                    ⬇️ Tải
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="project-sidebar">
+            <h3 class="section-title">Thông tin dự án</h3>
+            <div class="info-grid">
+                @if (!string.IsNullOrEmpty(project.client))
+                {
+                    <div class="info-item">
+                        <div class="info-label">Chủ đầu tư</div>
+                        <div class="info-value">@project.client</div>
+                    </div>
+                }
+                
+                @if (!string.IsNullOrEmpty(project.contractor))
+                {
+                    <div class="info-item">
+                        <div class="info-label">Nhà thầu</div>
+                        <div class="info-value">@project.contractor</div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(project.projectValue) && !string.IsNullOrEmpty(project.currency))
+                {
+                    // Format currency value
+                    string formattedValue = project.projectValue;
+                    string currency = project.currency.ToUpper();
+                    
+                    try {
+                        decimal value = Convert.ToDecimal(project.projectValue);
+                        
+                        if (currency == "VND" || currency == "VNĐ") 
+                        {
+                            if (value >= 1000000000) 
+                            {
+                                formattedValue = (value / 1000000000).ToString("0.##") + " tỷ";
+                            } 
+                            else if (value >= 1000000) 
+                            {
+                                formattedValue = (value / 1000000).ToString("0.##") + " triệu";
+                            } 
+                            else if (value >= 1000) 
+                            {
+                                formattedValue = (value / 1000).ToString("0.##") + " nghìn";
+                            } 
+                            else 
+                            {
+                                formattedValue = value.ToString("#,##0");
+                            }
+                            formattedValue += " VNĐ";
+                        } 
+                        else if (currency == "USD") 
+                        {
+                            if (value >= 1000000) 
+                            {
+                                formattedValue = "$" + (value / 1000000).ToString("0.##") + "M";
+                            } 
+                            else if (value >= 1000) 
+                            {
+                                formattedValue = "$" + (value / 1000).ToString("0.##") + "K";
+                            } 
+                            else 
+                            {
+                                formattedValue = "$" + value.ToString("#,##0");
+                            }
+                        } 
+                        else 
+                        {
+                            formattedValue = value.ToString("#,##0") + " " + currency;
+                        }
+                    } 
+                    catch 
+                    {
+                        formattedValue = project.projectValue + " " + project.currency;
+                    }
+                    
+                    <div class="info-item">
+                        <div class="info-label">Giá trị dự án</div>
+                        <div class="info-value" style="font-weight: 600; color: #059669; font-size: 18px;">@formattedValue</div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(project.progress))
+                {
+                    int progressValue = 0;
+                    int.TryParse(project.progress, out progressValue);
+                    string progressColor = "#dc2626"; // Red
+                    string progressClass = "progress-red";
+                    if (progressValue >= 75) 
+                    {
+                        progressColor = "#059669"; // Green
+                        progressClass = "progress-green";
+                    }
+                    else if (progressValue >= 50) 
+                    {
+                        progressColor = "#d97706"; // Orange
+                        progressClass = "progress-orange";
+                    }
+                    else if (progressValue >= 25) 
+                    {
+                        progressColor = "#eab308"; // Yellow
+                        progressClass = "progress-yellow";
+                    }
+                    string uniqueId = "progress-" + project.id;
+                    
+                    <div class="info-item">
+                        <div class="info-label">Tiến độ</div>
+                        <div class="info-value">
+                            <div class="progress-container">
+                                <div class="progress-bar-bg">
+                                    <div id="@uniqueId" class="progress-bar @progressClass"></div>
+                                </div>
+                                <span class="progress-text @progressClass">@project.progress%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        document.getElementById('@uniqueId').style.width = '@progressValue%';
+                    </script>
+                }
+
+                @if (!string.IsNullOrEmpty(project.startDate))
+                {
+                    <div class="info-item">
+                        <div class="info-label">Ngày bắt đầu</div>
+                        <div class="info-value" style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #3b82f6;">📅</span>
+                            <span>@project.startDate</span>
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(project.endDate))
+                {
+                    <div class="info-item">
+                        <div class="info-label">Ngày kết thúc</div>
+                        <div class="info-value" style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #dc2626;">🏁</span>
+                            <span>@project.endDate</span>
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(project.completionDate))
+                {
+                    <div class="info-item">
+                        <div class="info-label">Ngày hoàn thành</div>
+                        <div class="info-value" style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #059669;">✅</span>
+                            <span style="font-weight: 600; color: #059669;">@project.completionDate</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    // Tạo JavaScript array cho documents
+    string documentsJson = "[]";
+    if (project.documents != null && project.documents.Length > 0)
+    {
+        var docList = new List<string>();
+        for (int i = 0; i < project.documents.Length; i++)
+        {
+            string fileName = System.IO.Path.GetFileName(project.documents[i]);
+            if (string.IsNullOrEmpty(fileName)) 
+            { 
+                fileName = "Document_" + (i + 1);
+            }
+            
+            docList.Add(string.Format("{{\"url\": \"{0}\", \"name\": \"{1}\"}}", 
+                project.documents[i].Replace("\"", "\\\"").Replace("\\", "\\\\"), 
+                fileName.Replace("\"", "\\\"").Replace("\\", "\\\\")));
+        }
+        documentsJson = "[" + string.Join(",", docList.ToArray()) + "]";
+    }
+}
+
+<!-- Hidden input to pass documents data -->
+<input type="hidden" id="documentsData" value="@Html.Raw(Server.HtmlEncode(documentsJson))" />
+
+<script type="text/javascript">
+    // Project documents data
+    var projectDocuments = [];
+    
+    // Initialize documents array from hidden input
+    function initDocuments() {
+        try {
+            var hiddenInput = document.getElementById('documentsData');
+            if (hiddenInput && hiddenInput.value) {
+                projectDocuments = JSON.parse(hiddenInput.value);
+            } else {
+                projectDocuments = [];
+            }
+        } catch(e) {
+            console.error('Error parsing documents data:', e);
+            projectDocuments = [];
+        }
+    }
+    
+    // Call initialization when DOM is ready
+    document.addEventListener('DOMContentLoaded', initDocuments);
+
+    // Download all files function
+    function downloadAllFiles() {
+        if (projectDocuments.length === 0) {
+            alert('Không có tài liệu để tải xuống!');
+            return;
+        }
+
+        // Show loading message
+        const btn = document.querySelector('.download-all-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '⏳ Đang tải...';
+        btn.disabled = true;
+
+        // Download each file with delay to avoid browser blocking
+        projectDocuments.forEach((doc, index) => {
+            setTimeout(() => {
+                const link = document.createElement('a');
+                link.href = doc.url;
+                link.download = doc.name;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Reset button after last download
+                if (index === projectDocuments.length - 1) {
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }, 1000);
+                }
+            }, index * 500); // 500ms delay between downloads
+        });
+    }
+
+    // Optional: Add click functionality to slider dots
+    document.addEventListener('DOMContentLoaded', function() {
+        const dots = document.querySelectorAll('.dot');
+        const sliderContainer = document.querySelector('.slider-container');
+        
+        if (dots.length > 1 && sliderContainer) {
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', function() {
+                    // Remove active class from all dots
+                    dots.forEach(d => d.classList.remove('active'));
+                    // Add active class to clicked dot
+                    this.classList.add('active');
+                    
+                    // Move slider to corresponding position
+                    const translateX = -index * 20; // 20% per slide
+                    sliderContainer.style.transform = `translateX(${translateX}%)`;
+                    
+                    // Pause animation temporarily
+                    sliderContainer.style.animationPlayState = 'paused';
+                    setTimeout(() => {
+                        sliderContainer.style.animationPlayState = 'running';
+                    }, 3000);
+                });
+            });
+        }
+    });
+</script>

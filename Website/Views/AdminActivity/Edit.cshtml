@@ -1,0 +1,403 @@
+@model Cubetech.Website.Models.Activity
+@{
+    ViewBag.Title = "Chỉnh sửa hoạt động";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; line-height: 1.6; font-size: 16px; }
+        .admin-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .admin-header { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .header-content h1 { font-size: 2rem; font-weight: 600; display: flex; align-items: center; gap: 12px; }
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-size: 16px; }
+        .btn-secondary { background: #6b7280; color: white; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn:hover { transform: translateY(-2px); }
+        .form-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 24px; overflow: hidden; }
+        .card-header { background: #f8fafc; padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 12px; }
+        .card-header h4 { margin: 0; font-size: 1.125rem; font-weight: 600; color: #1e293b; }
+        .card-content { padding: 24px; }
+        .form-group { margin-bottom: 24px; }
+        .form-label { display: block; margin-bottom: 10px; font-weight: 600; color: #1e293b; font-size: 15px; line-height: 1.5; }
+        .form-label i { margin-right: 6px; color: #3b82f6; font-size: 14px; }
+        .required { color: #ef4444; margin-left: 4px; }
+        .form-control { width: 100%; padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 15px; transition: border-color 0.2s ease; min-height: 48px; }
+        .form-control:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @@media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
+        .form-actions { display: flex; gap: 12px; justify-content: flex-end; padding: 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; }
+        .alert { padding: 16px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .text-danger { color: #ef4444; font-size: 12px; margin-top: 4px; }
+        .activity-info { background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+        .activity-info h5 { color: #0369a1; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 14px; }
+        .info-item { display: flex; justify-content: space-between; }
+        .info-label { font-weight: 500; color: #374151; }
+        .info-value { color: #64748b; }
+        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .setting-item { padding: 20px; background: #f8fafc; border-radius: 8px; border: 2px solid #e2e8f0; transition: all 0.3s; }
+        .setting-item:hover { border-color: #3b82f6; background: #f0f9ff; }
+        .checkbox-wrapper { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
+        .checkbox-wrapper input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; margin-top: 2px; accent-color: #3b82f6; }
+        .checkbox-label { flex: 1; }
+        .checkbox-label h5 { margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: #1e293b; }
+        .checkbox-label p { margin: 0; font-size: 13px; color: #64748b; line-height: 1.4; }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="header-content">
+                <h1><i class="fas fa-edit"></i> Chỉnh sửa hoạt động</h1>
+                <div class="header-actions">
+                    <a href="/admin/activities" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        @if (Model != null)
+        {
+            <div class="activity-info">
+                <h5><i class="fas fa-info-circle"></i> Thông tin hoạt động</h5>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">ID:</span>
+                        <span class="info-value">@Model.ActivityID</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Ngày tạo:</span>
+                        <span class="info-value">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Cập nhật:</span>
+                        <span class="info-value">@Model.UpdatedDate.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Lượt xem:</span>
+                        <span class="info-value">@Model.ViewCount</span>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                @ViewBag.ErrorMessage
+            </div>
+        }
+
+        <form method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.ActivityID)
+            @Html.HiddenFor(m => m.CreatedDate)
+            @Html.HiddenFor(m => m.ViewCount)
+            
+            <div class="form-card">
+                <div class="card-header">
+                    <i class="fas fa-info-circle"></i>
+                    <h4>Thông tin cơ bản</h4>
+                </div>
+                <div class="card-content">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-heading"></i>
+                            Tiêu đề hoạt động
+                            <span class="required">*</span>
+                        </label>
+                        @Html.TextBoxFor(m => m.Title, new { @class = "form-control", placeholder = "Nhập tiêu đề hoạt động...", required = "required" })
+                        @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-danger" })
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-align-left"></i>
+                            Mô tả chi tiết
+                        </label>
+                        @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = "4", placeholder = "Mô tả chi tiết về hoạt động..." })
+                        @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-card">
+                <div class="card-header">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h4>Lịch trình & Phân loại</h4>
+                </div>
+                <div class="card-content">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-tag"></i>
+                                Loại hoạt động
+                                <span class="required">*</span>
+                            </label>
+                            @Html.DropDownListFor(m => m.ActivityType, ViewBag.ActivityTypes as IEnumerable<SelectListItem>, "-- Chọn loại hoạt động --", new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessageFor(m => m.ActivityType, "", new { @class = "text-danger" })
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-clock"></i>
+                                Thời gian bắt đầu
+                            </label>
+                            @Html.TextBoxFor(m => m.StartDate, new { @class = "form-control", @type = "datetime-local" })
+                            @Html.ValidationMessageFor(m => m.StartDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-location-dot"></i>
+                                Địa điểm tổ chức
+                            </label>
+                            @Html.TextBoxFor(m => m.Location, new { @class = "form-control", placeholder = "Nhập địa điểm tổ chức..." })
+                            @Html.ValidationMessageFor(m => m.Location, "", new { @class = "text-danger" })
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-users"></i>
+                                Số người tham gia
+                            </label>
+                            @Html.TextBoxFor(m => m.Participants, new { @class = "form-control", @type = "number", placeholder = "Số lượng dự kiến..." })
+                            @Html.ValidationMessageFor(m => m.Participants, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-card">
+                <div class="card-header">
+                    <i class="fas fa-image"></i>
+                    <h4>Hình ảnh & Tài liệu</h4>
+                </div>
+                <div class="card-content">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl) || !string.IsNullOrEmpty(Model.DocumentUrl))
+                    {
+                        <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                            <strong style="color: #0369a1;"><i class="fas fa-info-circle"></i> File hiện tại:</strong>
+                            
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                var images = Model.ImageUrl.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                                <div style="margin-top: 8px;">
+                                    <strong style="color: #0369a1;"><i class="fas fa-images"></i> Hình ảnh (@images.Length):</strong>
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 8px;">
+                                        @for (int i = 0; i < images.Length; i++)
+                                        {
+                                            var img = images[i].Trim();
+                                            <div style="border: 2px solid #e2e8f0; border-radius: 8px; padding: 8px; background: white;">
+                                                <img src="@img" style="width: 100%; height: 100px; object-fit: cover; border-radius: 4px; margin-bottom: 6px;" alt="Ảnh @(i + 1)" />
+                                                <div style="display: flex; gap: 4px; justify-content: space-between;">
+                                                    <a href="@img" target="_blank" style="flex: 1; text-align: center; padding: 4px 8px; background: #3b82f6; color: white; border-radius: 4px; text-decoration: none; font-size: 12px;">
+                                                        <i class="fas fa-eye"></i> Xem
+                                                    </a>
+                                                    <button type="button" onclick="deleteFile('image', @Model.ActivityID)" style="flex: 1; padding: 4px 8px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                                                        <i class="fas fa-trash"></i> Xóa
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            
+                            @if (!string.IsNullOrEmpty(Model.DocumentUrl))
+                            {
+                                var documents = Model.DocumentUrl.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                                <div style="margin-top: 12px;">
+                                    <strong style="color: #0369a1;"><i class="fas fa-file-alt"></i> Tài liệu (@documents.Length):</strong>
+                                    <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+                                        @for (int i = 0; i < documents.Length; i++)
+                                        {
+                                            var doc = documents[i].Trim();
+                                            var fileName = System.IO.Path.GetFileName(doc);
+                                            <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border: 1px solid #e2e8f0; border-radius: 6px;">
+                                                <i class="fas fa-file-alt" style="color: #3b82f6; font-size: 1.2rem;"></i>
+                                                <span style="flex: 1; font-size: 13px;">@fileName</span>
+                                                <a href="@doc" target="_blank" style="padding: 4px 12px; background: #10b981; color: white; border-radius: 4px; text-decoration: none; font-size: 12px;">
+                                                    <i class="fas fa-download"></i> Tải
+                                                </a>
+                                                <button type="button" onclick="deleteFile('document', @Model.ActivityID)" style="padding: 4px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                                                    <i class="fas fa-trash"></i> Xóa
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-images"></i>
+                            Upload Hình ảnh (1-5 ảnh)
+                        </label>
+                        <input type="file" name="ImageFiles" class="form-control" accept="image/*" multiple id="imageFiles" />
+                        <small style="color: #64748b; font-size: 13px; margin-top: 4px; display: block;">
+                            Chấp nhận: JPG, PNG, GIF (Tối đa 5MB mỗi ảnh, tối đa 5 ảnh)
+                        </small>
+                        <div id="imagePreview" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px;"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-file-alt"></i>
+                            Upload Tài liệu (1-3 file)
+                        </label>
+                        <input type="file" name="DocumentFiles" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" multiple id="documentFiles" />
+                        <small style="color: #64748b; font-size: 13px; margin-top: 4px; display: block;">
+                            Chấp nhận: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX (Tối đa 10MB mỗi file, tối đa 3 file)
+                        </small>
+                        <div id="documentPreview" style="margin-top: 10px;"></div>
+                    </div>
+                    
+                    <input type="hidden" name="DeleteImage" id="deleteImage" value="false" />
+                    <input type="hidden" name="DeleteDocument" id="deleteDocument" value="false" />
+                </div>
+            </div>
+            
+            <div class="form-card">
+                <div class="card-header">
+                    <i class="fas fa-cog"></i>
+                    <h4>Cài đặt hoạt động</h4>
+                </div>
+                <div class="card-content">
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" name="IsPublished" value="true" @(Model.IsPublished ? "checked" : "") />
+                                <div class="checkbox-label">
+                                    <h5>✓ Xuất bản</h5>
+                                    <p>Hoạt động sẽ hiển thị công khai</p>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" name="IsFeatured" value="true" @(Model.IsFeatured ? "checked" : "") />
+                                <div class="checkbox-label">
+                                    <h5>★ Nổi bật</h5>
+                                    <p>Hiển thị ưu tiên trong danh sách</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <a href="/admin/activities" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Cập nhật hoạt động
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        // Delete file function
+        function deleteFile(type, activityId) {
+            if (confirm('Bạn có chắc muốn xóa ' + (type === 'image' ? 'hình ảnh' : 'tài liệu') + ' này?')) {
+                if (type === 'image') {
+                    document.getElementById('deleteImage').value = 'true';
+                } else {
+                    document.getElementById('deleteDocument').value = 'true';
+                }
+                alert('File sẽ được xóa khi bạn lưu thay đổi');
+            }
+        }
+        
+        // Image files preview and validation
+        document.getElementById('imageFiles').addEventListener('change', function(e) {
+            var files = e.target.files;
+            var preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            
+            if (files.length > 5) {
+                alert('Chỉ được chọn tối đa 5 ảnh!');
+                e.target.value = '';
+                return;
+            }
+            
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                
+                // Validate size
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File ' + file.name + ' quá lớn! Tối đa 5MB');
+                    e.target.value = '';
+                    preview.innerHTML = '';
+                    return;
+                }
+                
+                // Create preview
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    var div = document.createElement('div');
+                    div.style.cssText = 'position: relative; border: 2px solid #e2e8f0; border-radius: 8px; overflow: hidden;';
+                    div.innerHTML = '<img src="' + event.target.result + '" style="width: 100%; height: 100px; object-fit: cover;" />';
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Document files preview and validation
+        document.getElementById('documentFiles').addEventListener('change', function(e) {
+            var files = e.target.files;
+            var preview = document.getElementById('documentPreview');
+            preview.innerHTML = '';
+            
+            if (files.length > 3) {
+                alert('Chỉ được chọn tối đa 3 file!');
+                e.target.value = '';
+                return;
+            }
+            
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                
+                // Validate size
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File ' + file.name + ' quá lớn! Tối đa 10MB');
+                    e.target.value = '';
+                    preview.innerHTML = '';
+                    return;
+                }
+                
+                // Create preview
+                var div = document.createElement('div');
+                div.style.cssText = 'padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;';
+                div.innerHTML = '<i class="fas fa-file-alt" style="color: #3b82f6;"></i><span>' + file.name + ' (' + (file.size / 1024).toFixed(2) + ' KB)</span>';
+                preview.appendChild(div);
+            }
+        });
+    </script>
+</body>
+</html>

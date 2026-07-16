@@ -1,0 +1,1671 @@
+@{
+    ViewBag.Title = "Liên hệ - CÔNG TY CỔ PHẦN XÂY LẮP BƯU ĐIỆN MIỀN TRUNG";
+    ViewBag.Description = "Kết nối cùng CTC: tư vấn, báo giá, hỗ trợ dự án & kỹ thuật. Hotline kinh doanh, kỹ thuật, email và địa chỉ đầy đủ.";
+    ViewBag.Robots = "index,follow";
+}
+
+<style type="text/css">
+/* ================================
+   MODERN CONTACT PAGE 2025 - CTC
+   Clean minimalist design
+   ================================ */
+
+@@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+    /* Modern 2025 Color Palette */
+    --primary-color: #1a1a1a;
+    --secondary-color: #4a5568;
+    --accent-color: #2563eb;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    
+    /* Neutral Colors */
+    --white: #ffffff;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    
+    /* Typography */
+    --text-primary: var(--primary-color);
+    --text-secondary: var(--secondary-color);
+    --text-muted: var(--gray-500);
+    --text-light: var(--gray-400);
+    
+    /* Spacing & Sizing */
+    --container-max: 1200px;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-2xl: 32px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    
+    /* Animations */
+    --transition-fast: all 0.15s ease;
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* Fonts */
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* PAGE WRAPPER */
+.contact-page {
+    min-height: 100vh;
+    background: var(--white);
+    font-family: var(--font-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    padding: 0;
+}
+
+/* CONTAINER */
+.contact-container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* ================================
+   HERO SECTION
+   ================================ */
+.hero-section {
+    padding: 5rem 0 4rem;
+    text-align: center;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.hero-title {
+    font-size: clamp(3rem, 6vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    animation: fadeInUp 1s ease-out;
+}
+
+.hero-subtitle {
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-width: 700px;
+    margin: 0 auto;
+    font-weight: 400;
+    animation: fadeInUp 1s ease-out 0.3s both;
+}
+
+/* ================================
+   MAIN CONTENT
+   ================================ */
+.main-content {
+    padding: 4rem 0;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    margin-bottom: 4rem;
+}
+
+.contact-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* ================================
+   RESPONSIVE DESIGN
+   ================================ */
+
+/* Large Desktop (1200px+) */
+@@media (min-width: 1200px) {
+    .contact-container {
+        max-width: 1400px;
+    }
+    
+    .hero-title {
+        font-size: 4.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.5rem;
+    }
+}
+
+/* Desktop (992px - 1199px) */
+@@media (max-width: 1199px) {
+    .contact-container {
+        padding: 0 2rem;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+    }
+    
+    .content-grid {
+        gap: 3rem;
+    }
+}
+
+/* Tablet (768px - 991px) */
+@@media (max-width: 991px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+    
+    .hero-title {
+        font-size: 3rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.25rem;
+    }
+    
+    .contact-form {
+        padding: 2rem;
+    }
+    
+    .form-content-wrapper {
+        padding: 1.5rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .description-features {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Mobile Large (576px - 767px) */
+@@media (max-width: 767px) {
+    .contact-container {
+        padding: 0 1rem;
+    }
+    
+    .hero-section {
+        padding: 3rem 0;
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+        line-height: 1.2;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.125rem;
+    }
+    
+    .contact-card {
+        padding: 1.5rem;
+    }
+    
+    .card-title {
+        font-size: 1.25rem;
+    }
+    
+    .contact-form {
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .form-content-wrapper {
+        padding: 1rem;
+    }
+    
+    .form-title {
+        font-size: 1.75rem;
+    }
+    
+    .form-description {
+        font-size: 1.25rem;
+        padding: 1rem 1.5rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .feature-item {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .form-input,
+    .form-select,
+    .form-textarea {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+    
+    .btn {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        min-width: auto;
+    }
+    
+    .map-wrapper iframe {
+        height: 250px;
+    }
+}
+
+/* Mobile Small (480px - 575px) */
+@@media (max-width: 575px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .contact-card {
+        padding: 1rem;
+    }
+    
+    .card-title {
+        font-size: 1.125rem;
+    }
+    
+    .contact-item {
+        padding: 1rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .contact-item-label {
+        font-size: 0.875rem;
+    }
+    
+    .contact-item-value {
+        font-size: 1rem;
+    }
+    
+    .form-title {
+        font-size: 1.5rem;
+    }
+    
+    .form-description {
+        font-size: 1.125rem;
+        padding: 0.75rem 1rem;
+    }
+    
+    .description-features {
+        gap: 0.75rem;
+    }
+    
+    .feature-item {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .btn {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Mobile Extra Small (320px - 479px) */
+@@media (max-width: 479px) {
+    .contact-container {
+        padding: 0 0.75rem;
+    }
+    
+    .hero-title {
+        font-size: 1.75rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.95rem;
+    }
+    
+    .contact-card {
+        padding: 0.75rem;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+    }
+    
+    .card-subtitle {
+        font-size: 0.8rem;
+    }
+    
+    .card-description {
+        font-size: 0.95rem;
+    }
+    
+    .contact-form {
+        padding: 1rem;
+    }
+    
+    .form-content-wrapper {
+        padding: 0.75rem;
+    }
+    
+    .form-title {
+        font-size: 1.25rem;
+    }
+    
+    .form-description {
+        font-size: 1rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .form-input,
+    .form-select,
+    .form-textarea {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+        gap: 0.5rem;
+    }
+    
+    .btn-icon {
+        font-size: 1rem;
+    }
+    
+    .map-wrapper iframe {
+        height: 200px;
+    }
+}
+
+/* ================================
+   TOUCH & ACCESSIBILITY
+   ================================ */
+
+/* Touch-friendly improvements */
+@@media (hover: none) and (pointer: coarse) {
+    .btn {
+        min-height: 44px;
+        padding: 1rem 1.5rem;
+    }
+    
+    .contact-item {
+        min-height: 44px;
+        padding: 1rem;
+    }
+    
+    .form-input,
+    .form-select,
+    .form-textarea {
+        min-height: 44px;
+        padding: 1rem;
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+}
+
+/* High DPI displays */
+@@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .contact-card {
+        border-width: 0.5px;
+    }
+    
+    .form-content-wrapper {
+        border-width: 1px;
+    }
+}
+
+/* Landscape orientation on mobile */
+@@media (max-width: 767px) and (orientation: landscape) {
+    .hero-section {
+        padding: 2rem 0;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .contact-form {
+        margin-top: 1.5rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .form-field:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Print styles */
+@@media print {
+    .contact-page {
+        background: white !important;
+    }
+    
+    .hero-section,
+    .contact-form,
+    .action-buttons {
+        display: none !important;
+    }
+    
+    .contact-card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+    }
+    
+    .map-wrapper {
+        display: none !important;
+    }
+}
+
+/* Reduced motion preferences */
+@@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .btn:hover,
+    .contact-card:hover,
+    .contact-item:hover {
+        transform: none !important;
+    }
+}
+
+/* ================================
+   CONTACT SECTIONS
+   ================================ */
+
+.section-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.01em;
+}
+
+.contact-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    transition: var(--transition-smooth);
+    box-shadow: var(--shadow-sm);
+    animation: fadeInUp 0.8s ease-out;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.contact-card:hover {
+    border-color: var(--gray-300);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-4px) scale(1.02);
+}
+
+.card-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+    animation: slideInLeft 0.6s ease-out 0.2s both;
+}
+
+.card-subtitle {
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    animation: slideInLeft 0.6s ease-out 0.4s both;
+}
+
+.card-description {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.8s ease-out 0.6s both;
+}
+
+/* ================================
+   CONTACT LIST
+   ================================ */
+.contact-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex-grow: 1;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    transition: var(--transition-smooth);
+    border: 1px solid var(--gray-100);
+    animation: slideInRight 0.6s ease-out;
+}
+
+.contact-item:nth-child(1) { animation-delay: 0.1s; }
+.contact-item:nth-child(2) { animation-delay: 0.2s; }
+.contact-item:nth-child(3) { animation-delay: 0.3s; }
+.contact-item:nth-child(4) { animation-delay: 0.4s; }
+
+.contact-item:hover {
+    background: var(--gray-100);
+    border-color: var(--gray-200);
+    transform: translateX(8px) scale(1.02);
+    box-shadow: var(--shadow-md);
+}
+
+.contact-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.contact-item-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.contact-item-value {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.125rem;
+    transition: var(--transition-smooth);
+    display: block;
+}
+
+.contact-item-value:hover {
+    color: var(--accent-color);
+    text-decoration: none;
+    transform: scale(1.05);
+}
+
+/* ================================
+   MAP SECTION
+   ================================ */
+.map-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gray-100);
+}
+
+.map-wrapper {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.map-wrapper iframe {
+    width: 100%;
+    height: 250px;
+    border: 0;
+    border-radius: var(--radius-md);
+}
+
+.map-label {
+    text-align: center;
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ================================
+   ACTION BUTTONS
+   ================================ */
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.25rem 2.5rem;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 1.125rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+    animation: bounceIn 0.8s ease-out;
+    position: relative;
+    overflow: hidden;
+    min-width: 180px;
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-icon {
+    font-size: 1.25rem;
+    transition: var(--transition-smooth);
+    animation: iconFloat 2s ease-in-out infinite;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-primary {
+    background: var(--accent-color);
+    color: var(--white);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px) scale(1.08);
+    color: var(--white);
+    text-decoration: none;
+}
+
+.btn-primary:hover .btn-icon {
+    animation: iconBounce 0.6s ease-in-out;
+    transform: scale(1.2);
+}
+
+.btn-secondary {
+    background: var(--white);
+    color: var(--text-primary);
+    border: 1px solid var(--gray-300);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+    transform: translateY(-4px) scale(1.08);
+    color: var(--text-primary);
+    text-decoration: none;
+    box-shadow: var(--shadow-xl);
+}
+
+.btn-secondary:hover .btn-icon {
+    animation: iconBounce 0.6s ease-in-out;
+    transform: scale(1.2);
+}
+}
+
+.map-wrapper iframe:hover {
+    transform: scale(1.02);
+}
+
+.map-label {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ================================
+   CONTACT FORM
+   ================================ */
+.contact-form {
+    background: var(--white);
+    border: 3px solid var(--gray-400);
+    border-radius: var(--radius-xl);
+    padding: 3rem;
+    box-shadow: var(--shadow-lg);
+    margin-top: 4rem;
+    position: relative;
+}
+
+.contact-form.full-width {
+    width: 100%;
+    max-width: none;
+}
+
+.contact-form::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, var(--gray-400), var(--gray-500), var(--gray-600), var(--gray-400));
+    border-radius: var(--radius-xl);
+    z-index: -1;
+    animation: borderGlow 3s ease-in-out infinite;
+}
+
+.form-content-wrapper {
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    background: var(--white);
+    position: relative;
+    overflow: hidden;
+}
+
+.form-content-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    pointer-events: none;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.form-icon-wrapper {
+    margin-bottom: 1.5rem;
+    animation: bounceIn 1s ease-out;
+}
+
+.form-main-icon {
+    font-size: 3rem;
+    display: inline-block;
+    animation: iconFloat 3s ease-in-out infinite;
+    background: linear-gradient(135deg, var(--accent-color), #1d4ed8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.form-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+    animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+.form-description-wrapper {
+    animation: fadeInUp 1s ease-out 0.4s both;
+}
+
+.form-description {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--gray-50);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 2rem;
+    box-shadow: var(--shadow-md);
+}
+
+.description-icon {
+    font-size: 1.5rem;
+    animation: sparkle 2s ease-in-out infinite;
+    color: var(--accent-color);
+}
+
+.description-features {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    animation: slideInUp 0.8s ease-out;
+    background: var(--white);
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-smooth);
+}
+
+.feature-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-color);
+}
+
+.feature-item:nth-child(1) { animation-delay: 0.6s; }
+.feature-item:nth-child(2) { animation-delay: 0.8s; }
+.feature-item:nth-child(3) { animation-delay: 1s; }
+
+.feature-icon {
+    font-size: 1.25rem;
+    animation: iconPulse 2s ease-in-out infinite;
+    color: var(--accent-color);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-field {
+    position: relative;
+    animation: slideInUp 0.6s ease-out;
+}
+
+.form-field:nth-child(1) { animation-delay: 0.1s; }
+.form-field:nth-child(2) { animation-delay: 0.2s; }
+.form-field:nth-child(3) { animation-delay: 0.3s; }
+.form-field:nth-child(4) { animation-delay: 0.4s; }
+
+.select-field {
+    position: relative;
+}
+
+.select-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    pointer-events: none;
+    z-index: 2;
+    animation: iconFloat 2s ease-in-out infinite;
+}
+
+.select-field .form-select {
+    padding-left: 3rem;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 1rem center;
+    background-repeat: no-repeat;
+    background-size: 1rem;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 1.25rem;
+    border: 3px solid var(--gray-600);
+    border-radius: var(--radius-lg);
+    background: var(--white);
+    color: var(--text-primary);
+    font-size: 1.125rem;
+    font-family: var(--font-primary);
+    transition: var(--transition-smooth);
+    outline: none;
+    box-shadow: var(--shadow-md);
+}
+
+.form-input:hover,
+.form-select:hover,
+.form-textarea:hover {
+    border-color: var(--gray-700);
+    box-shadow: var(--shadow-lg);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    border-color: var(--accent-color);
+    border-width: 4px;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2), var(--shadow-lg);
+    transform: scale(1.02);
+}
+
+.form-textarea {
+    min-height: 140px;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gray-100);
+}
+
+.success-message {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: var(--white);
+    padding: 1.5rem 2rem;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    box-shadow: var(--shadow-lg);
+    animation: slideInUp 0.5s ease-out;
+}
+
+/* ================================
+   CONTACT FORM
+   ================================ */
+.contact-form {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-backdrop);
+    -webkit-backdrop-filter: var(--glass-backdrop);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--glass-shadow);
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+    margin-top: 2rem;
+}
+
+.contact-form::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--secondary-gradient);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.form-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    background: var(--secondary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.form-description {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-field {
+    position: relative;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-family: var(--font-primary);
+    transition: var(--transition-smooth);
+    outline: none;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    border-color: rgba(102, 126, 234, 0.5);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.form-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+@@media (max-width: 768px) {
+    .contact-form {
+        padding: 2rem 1.5rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ================================
+   RESPONSIVE DESIGN
+   ================================ */
+@@media (max-width: 768px) {
+    .hero-section {
+        padding: 3rem 0 2rem;
+    }
+    
+    .main-content {
+        padding: 2rem 0;
+    }
+    
+    .contact-form {
+        padding: 2rem 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn {
+        justify-content: center;
+    }
+}
+
+/* ================================
+   RESPONSIVE DESIGN
+   ================================ */
+@@media (max-width: 1024px) {
+    .cards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+}
+
+@@media (max-width: 768px) {
+    .contact-page {
+        padding: 1.5rem 0.75rem;
+    }
+    
+    .hero-section {
+        margin-bottom: 3rem;
+    }
+    
+    .cards-grid {
+        margin-bottom: 3rem;
+    }
+    
+    .glass-card {
+        padding: 1.5rem;
+    }
+}
+
+@@media (max-width: 480px) {
+    .contact-page {
+        padding: 1rem 0.5rem;
+    }
+    
+    .hero-section {
+        margin-bottom: 2rem;
+    }
+    
+    .cards-grid {
+        margin-bottom: 2rem;
+        gap: 1rem;
+    }
+    
+    .glass-card {
+        padding: 1.25rem;
+    }
+    
+    .contact-form {
+        padding: 1.5rem 1rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn {
+        justify-content: center;
+    }
+}
+
+/* ================================
+   KEYFRAME ANIMATIONS
+   ================================ */
+@@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@@keyframes iconFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+@@keyframes iconBounce {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+    }
+}
+
+@@keyframes sparkle {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+@@keyframes iconPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+@@keyframes borderGlow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(156, 163, 175, 0.3);
+        background: linear-gradient(45deg, var(--gray-400), var(--gray-500), var(--gray-600), var(--gray-400));
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(156, 163, 175, 0.6);
+        background: linear-gradient(45deg, var(--gray-500), var(--gray-400), var(--gray-500), var(--gray-600));
+    }
+}
+
+/* End of CSS */
+</style>
+
+<div class="contact-page">
+    <div class="contact-container">
+
+        <!-- HERO SECTION -->
+        <section class="hero-section">
+            <h1 class="hero-title">Kết Nối Cùng Chúng Tôi</h1>
+            <p class="hero-subtitle">
+                Bạn cần tư vấn hay có một dự án muốn triển khai? 
+                Đội ngũ CTC luôn sẵn sàng hỗ trợ — từ báo giá thương mại đến tư vấn kỹ thuật triển khai thực tế.
+            </p>
+        </section>
+
+        <!-- MAIN CONTENT -->
+        <section class="main-content">
+            <div class="content-grid">
+                <!-- LEFT COLUMN -->
+                <div class="contact-section">
+                    <div class="contact-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Sản phẩm & Dịch vụ</h3>
+                            <p class="card-subtitle">Kinh doanh</p>
+                        </div>
+                        <p class="card-description">
+                            Quan tâm đến sản phẩm, giải pháp, báo giá? 
+                            Đội ngũ kinh doanh sẽ hỗ trợ nhanh chóng.
+                        </p>
+
+                        <ul class="contact-list">
+                            <li class="contact-item">
+                                <div class="contact-item-content">
+                                    <div class="contact-item-label">Mr. Đạt</div>
+                                    <a class="contact-item-value" href="tel:0915059666">0915.059.666</a>
+                                </div>
+                            </li>
+                            <li class="contact-item">
+                                <div class="contact-item-content">
+                                    <div class="contact-item-label">Mr. Huy</div>
+                                    <a class="contact-item-value" href="tel:0945207781">0945.207.781</a>
+                                </div>
+                            </li>
+                            <li class="contact-item">
+                                <div class="contact-item-content">
+                                    <div class="contact-item-label">Email</div>
+                                    <a class="contact-item-value" href="mailto:sales@ctcdn.vn">sales@ctcdn.vn</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="contact-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Dự án & Kỹ thuật</h3>
+                            <p class="card-subtitle">Hỗ trợ kỹ thuật</p>
+                        </div>
+                        <p class="card-description">
+                            Cần trao đổi về giải pháp kỹ thuật, triển khai hiện trường, 
+                            hồ sơ thiết kế, bản vẽ...?
+                        </p>
+
+                        <ul class="contact-list">
+                            <li class="contact-item">
+                                <div class="contact-item-content">
+                                    <div class="contact-item-label">Mr. Xuyên</div>
+                                    <a class="contact-item-value" href="tel:0913443334">0913.443.334</a>
+                                </div>
+                            </li>
+                            <li class="contact-item">
+                                <div class="contact-item-content">
+                                    <div class="contact-item-label">Mr. Toàn</div>
+                                    <a class="contact-item-value" href="tel:0905167892">0905.167.892</a>
+                                </div>
+                            </li>
+                            <li class="contact-item">
+                                <div class="contact-item-content">
+                                    <div class="contact-item-label">Email kỹ thuật</div>
+                                    <a class="contact-item-value" href="mailto:technical@ctcdn.vn">technical@ctcdn.vn</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="contact-section">
+                    <div class="contact-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Thông tin Công ty</h3>
+                            <p class="card-subtitle">CÔNG TY CỔ PHẦN XÂY LẮP BƯU ĐIỆN MIỀN TRUNG</p>
+                        </div>
+
+                        <ul class="contact-list">
+                            <li class="contact-item">
+                                <div class="contact-item-content">
+                                    <div class="contact-item-label">Mã số thuế</div>
+                                    <div class="contact-item-value">0400458940</div>
+                                </div>
+                            </li>
+                            <li class="contact-item">
+                                <div class="contact-item-content">
+                                    <div class="contact-item-label">Địa chỉ</div>
+                                    <div class="contact-item-value">50B Nguyễn Du, Phường Thạch Thang, Quận Hải Châu, Thành phố Đà Nẵng, Việt Nam</div>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <div class="action-buttons">
+                            <a class="btn btn-primary" href="tel:0915059666">
+                                <span class="btn-icon">📞</span>
+                                <span>Gọi ngay</span>
+                            </a>
+                            <a class="btn btn-secondary" href="mailto:sales@ctcdn.vn">
+                                <span class="btn-icon">📧</span>
+                                <span>Gửi email</span>
+                            </a>
+                        </div>
+
+                        <div class="map-section">
+                            <h4 class="section-title">Bản đồ</h4>
+                            <div class="map-wrapper">
+                                <iframe
+                                    title="Bản đồ trụ sở CTC"
+                                    loading="lazy"
+                                    allowfullscreen
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    src="https://www.google.com/maps?q=50B%20Nguy%E1%BB%85n%20Du%2C%20H%E1%BA%A3i%20Ch%C3%A2u%2C%20%C4%90%C3%A0%20N%E1%BA%B5ng&output=embed">
+                                </iframe>
+                                <div class="map-label">
+                                    Nhấp để mở chỉ đường trên Google Maps.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT FORM -->
+        <div class="contact-container">
+            <section class="contact-form full-width">
+            <div class="form-content-wrapper">
+                <div class="form-header">
+                    <div class="form-icon-wrapper">
+                        <span class="form-main-icon">💬</span>
+                    </div>
+                    <h2 class="form-title">Gửi yêu cầu nhanh</h2>
+                    <div class="form-description-wrapper">
+                        <p class="form-description">
+                            <span class="description-icon"></span>
+                            Điền thông tin, chúng tôi sẽ liên hệ lại trong thời gian sớm nhất
+                            <span class="description-icon"></span>
+                        </p>
+                        <div class="description-features">
+                            <div class="feature-item">
+                                <span class="feature-icon">⚡</span>
+                                <span>Phản hồi nhanh chóng</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">🎯</span>
+                                <span>Tư vấn chuyên nghiệp</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">🤝</span>
+                                <span>Hỗ trợ tận tình</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            @using (Html.BeginForm("Send", "Contact", FormMethod.Post, new { @class = "contact-form-inner", @id = "contactForm" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-grid">
+                    <div class="form-field">
+                        <input type="text"
+                               name="ho_ten"
+                               class="form-input"
+                               placeholder="Họ và tên *"
+                               required />
+                    </div>
+
+                    <div class="form-field">
+                        <input type="email"
+                               name="email"
+                               class="form-input"
+                               placeholder="Email *"
+                               required />
+                    </div>
+
+                    <div class="form-field">
+                        <input type="text"
+                               name="dia_chi"
+                               class="form-input"
+                               placeholder="Địa chỉ" />
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <textarea name="noi_dung"
+                              class="form-textarea"
+                              rows="4"
+                              placeholder="Nội dung yêu cầu *"
+                              required></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span class="btn-icon">📤</span>
+                        <span id="submitText">Gửi yêu cầu</span>
+                    </button>
+                    <a class="btn btn-secondary" href="mailto:sales@ctcdn.vn">
+                        <span class="btn-icon">📧</span>
+                        <span>Hoặc gửi email</span>
+                    </a>
+                </div>
+            }
+            
+            <!-- Success Message -->
+            <div id="successMsg" class="success-message" style="display: none;">
+                🎉 Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ lại với bạn sớm nhất.
+            </div>
+            </div>
+        </section>
+        </div>
+
+        <!-- STRUCTURED DATA (SEO JSON-LD) -->
+        <script type="application/ld+json">
+        {
+          "@@context": "https://schema.org",
+          "@@type": "Organization",
+          "name": "CÔNG TY CỔ PHẦN XÂY LẮP BƯU ĐIỆN MIỀN TRUNG",
+          "taxID": "0400458940",
+          "address": {
+            "@@type": "PostalAddress",
+            "streetAddress": "50B Nguyễn Du, Phường Thạch Thang, Quận Hải Châu",
+            "addressLocality": "Đà Nẵng",
+            "addressCountry": "VN"
+          },
+          "contactPoint": [
+            { "@@type": "ContactPoint", "telephone": "+84-915-059-666", "contactType": "sales", "name": "Mr. Đạt" },
+            { "@@type": "ContactPoint", "telephone": "+84-945-207-781", "contactType": "sales", "name": "Mr. Huy" },
+            { "@@type": "ContactPoint", "telephone": "+84-913-443-334", "contactType": "technical support", "name": "Mr. Xuyên" },
+            { "@@type": "ContactPoint", "telephone": "+84-905-167-892", "contactType": "technical support", "name": "Mr. Toàn" }
+          ],
+          "email": "sales@ctcdn.vn",
+          "url": "@Url.Action("Index","Home", null, Request.Url.Scheme)"
+        }
+        </script>
+    </div>
+</div>
+
+@{
+    string emailJsScript = @"
+    <script type=""text/javascript"" src=""https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js""></script>
+    <script>
+        (function(){
+            emailjs.init(""BYnxJ0Wja0K4oeHNA"");
+        })();
+
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            
+            submitBtn.disabled = true;
+            submitText.innerText = 'Đang gửi...';
+
+            const formData = {
+                ho_ten: this.ho_ten.value,
+                email: this.email.value,
+                dia_chi: this.dia_chi.value,
+                noi_dung: this.noi_dung.value,
+                to_email: 'pxmanhctc@gmail.com'
+            };
+
+            emailjs.send('service_utptd8j', 'template_etonz8o', formData)
+            .then(function(response) {
+                console.log('SUCCESS!', response.status, response.text);
+                
+                submitBtn.disabled = false;
+                submitText.innerText = 'Gửi yêu cầu';
+                
+                document.getElementById('contactForm').reset();
+                document.getElementById('successMsg').style.display = 'block';
+                
+                setTimeout(() => {
+                    document.getElementById('successMsg').style.display = 'none';
+                }, 5000);
+                
+            }, function(error) {
+                console.log('FAILED...', error);
+                alert('Lỗi gửi email: ' + JSON.stringify(error));
+                
+                submitBtn.disabled = false;
+                submitText.innerText = 'Gửi yêu cầu';
+            });
+        });
+    </script>";
+}
+
+@Html.Raw(emailJsScript)

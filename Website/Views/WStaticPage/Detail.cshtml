@@ -1,0 +1,16 @@
+﻿@{
+    Cubetech.Website.Models.StaticPage stpage = ViewData["StaticPage"] as Cubetech.Website.Models.StaticPage;
+    ViewBag.Title = stpage.Name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="static_page_container">
+        <div class="static_page_title">
+            <h2>@stpage.Name</h2>
+        </div>
+        <div class="static_page_content">
+            @Html.Raw(stpage.Content)
+            </div>
+        </div>
+    </div>

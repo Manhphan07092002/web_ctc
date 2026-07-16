@@ -1,0 +1,50 @@
+/* --- Content/css/footer-style.css --- */
+
+.footer_info {
+    color: #58595b;
+    /* Áp dụng font Roboto (hoặc font bạn chọn) cho toàn bộ thông tin */
+    font-family: 'Roboto', sans-serif; 
+    font-size: 14px; 
+    line-height: 1.6; 
+}
+
+.footer_info p {
+    margin-bottom: 8px; 
+}
+
+.footer_info .company-name {
+    font-weight: 800; 
+    font-size: 15px; 
+}
+
+.footer_info .address {
+    /* CSS riêng cho địa chỉ nếu cần */
+}
+
+.footer_info .contact-item a {
+    color: #007bff; /* Màu link (ví dụ) */
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.footer_info .contact-item a:hover {
+    text-decoration: underline;
+}
+
+.footer_info .sub-company-title {
+    font-weight: 700;
+    margin-top: 20px; 
+    text-transform: uppercase; 
+    font-size: 15px;
+}
+
+.footer_img .develop_by {
+    margin-bottom: 15px;
+    text-align: center; 
+}
+
+.footer_img .develop_by img {
+    max-width: 150px; 
+}
+
+/* Thêm các style khác cho footer nếu bạn muốn */

@@ -1,0 +1,99 @@
+﻿@{
+    Layout = "~/Views/Shared/_BlankLayout.cshtml";
+    ViewBag.Title = "Đăng Nhập";
+}
+<script src="https://www.google.com/recaptcha/api.js?render=6Le7VJEfAAAAABPsdXfv2c_-IuyQ_c7Qpfo8nFKN"></script>
+<script>
+
+    $(document).ready(function () {
+        $('#LoginForm').submit(function () {
+            showSpinLoading();
+            // we stoped it
+            event.preventDefault();
+            var username = $('#username').val();
+            var password = $("#password").val();
+            debugger;
+            // needs for recaptacha ready
+            grecaptcha.ready(function () {
+                // do request for recaptcha token
+                // response is promise with passed token
+                grecaptcha.execute('6Le7VJEfAAAAABPsdXfv2c_-IuyQ_c7Qpfo8nFKN', { action: 'login' }).then(function (token) {
+                    // add token to form
+                    //$('#loginform').prepend('<input type="hidden" name="g-recaptcha-response" value="' + token + '">');
+                    $.post("/Login/Login", { username: username, password: password, token: token }, function (data) {
+
+                        if (data.Code == 1) {
+                            if (data.Role == "admin") {
+                                if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(data.Device)) {
+                                    window.location = '/Admin/Dashboard';
+                                }
+                                else {
+                                    window.location = '/Admin/Dashboard';
+                                }
+                            }
+                            else {
+                                window.location = '/Admin/Dashboard';
+                            }
+                        } else {
+                            hideSpinLoading();
+                            showError("Thông Báo", data.Message);
+                            console.log(data.result_capcha);
+                        }
+                    });
+                });;
+            });
+        });
+    });
+
+    function OnSuccessLogin(data) {
+        if (data.Code == 1) {
+            if (data.Role == "admin") {
+                if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(data.Device)) {
+                    window.location = '/Admin/Dashboard';
+                }
+                else {
+                    window.location = '/Admin/Dashboard';
+                }
+            }
+            else {
+                window.location = '/Admin/Dashboard';
+            }
+        } else {
+            hideSpinLoading();
+            showError("Thông Báo", data.Message);
+        }
+    }
+
+
+</script>
+
+<link href="~/Content/css/login3.css" rel="stylesheet" />
+<div class="body_container">
+    <div class="login_container">
+        <div class="col-sm-12">
+            <form id="LoginForm" method="post"
+                  data-toggle="validator">
+                <div class="login_content">
+                    <div class="login_img_top">
+                        <img src="~/Image/logo_rm_bgr.png" />
+                    </div>
+                    <div class="form-group">
+                        <div class="inner-addon left-addon">
+                            <i class="glyphicon glyphicon-user"></i>
+                            <input type="text" class="form-control input" name="username"  id="username" required placeholder="Tên đăng nhập" value="" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="inner-addon left-addon">
+                            <i class="glyphicon glyphicon-lock"></i>
+                            <input type="password" class="form-control input" required name="password" id="password" placeholder="Mật khẩu" value="" />
+                        </div>
+                    </div>
+                    <button class="btn btn-flat btnlogin btn-block" >Đăng nhập</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>

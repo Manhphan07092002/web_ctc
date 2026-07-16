@@ -1,0 +1,35 @@
+﻿
+@{
+    Layout = null;
+    var ps = ViewData["obj"] as Cubetech.Website.Models.ProductStandard;
+}
+
+
+<div class="modal" id="ModalProductStandard" role="dialog" data-easein="bounceIn">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="glyphicon glyphicon-remove"></i></button>
+                <h4 class="modal-title">@ViewData["Title"] </h4>
+            </div>
+            <form  id="ProductStandardForm" >
+                <input type="hidden" name="ID" id="ID" value="@ps.ID"/>
+                <input type="hidden" name="mode" value="@ViewData["Mode"]"/>
+                <div class="modal-body">
+                    <div class="form-group" id="divname">
+                        <label for="Name">Tên Tiêu Chuẩn</label>
+                        <input type="text" class="form-control" id="Name" name="Name" placeholder="Tên Tiêu Chuẩn" tabindex="1" value="@ps.Name" autofocus>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-dark" data-dismiss="modal" aria-hidden="true">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hủy
+                    </button>
+                    <button id="save" type="button" onclick="saveStandard()" class="btn btn-danger"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/common.js"></script>
